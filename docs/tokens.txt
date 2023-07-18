@@ -1,0 +1,21 @@
+Tokens:
+'<'    -- TOK_LANGLE
+'>'    -- TOK_RANGLE
+'='    -- TOK_EQUAL
+'+'    -- TOK_PLUS
+'-'    -- TOK_MINUS
+'/'    -- TOK_DIVIDE
+'*'    -- TOK_MULT
+'%'    -- TOK_MOD
+'('    -- TOK_LPAREN
+')'    -- TOK_RPAREN
+'{'    -- TOK_LBRACE
+'}'    -- TOK_RBRACE
+'['    -- TOK_LBRACKET
+']'    -- TOK_RBRACKET
+
+'!='   -- TOK_NEQUAL
+'<='   -- TOK_LEQUAL
+'>='   -- TOK_REQUAL
+
+'$$"   -- TOK_COMMENT

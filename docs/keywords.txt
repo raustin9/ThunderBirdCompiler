@@ -1,0 +1,8 @@
+Keywords:
+function -- declares a function
+return   -- function return statement
+let      -- declares a variable
+int      -- 64bit integer data type
+float    -- 64bit float data type
+string   -- string data type
+void     -- void data type (for functions that return nothing)

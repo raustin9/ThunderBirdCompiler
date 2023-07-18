@@ -1,0 +1,4 @@
+-g
+-Wall
+-Isrc/lib
+

@@ -1,2 +1,2 @@
-# HeroLang
+# ThunderBird
 A toy programming language

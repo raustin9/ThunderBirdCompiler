@@ -1,0 +1,10 @@
+function <int> ExampleFunction(arg1<int>, arg2<int>) {
+  let <int> res;
+
+  res = arg1 + arg2;
+  return res;
+}
+
+function <void> Main() {
+  let foo = ExampleFunction(2, 4);
+}
