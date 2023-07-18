@@ -1,2 +1,2 @@
 # ThunderBird
-A toy programming language
+A programming language to learn compiler development
