@@ -22,8 +22,8 @@ class Lexer {
     token_t next_token();
     void read_char();
     std::string read_identifier();
-    // std::string read_number();
     token_t read_number();
+    char peek_char();
     TokenType lookup_identifier(std::string ident);
     void skip_whitespace();
 };

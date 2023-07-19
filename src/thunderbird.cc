@@ -73,10 +73,42 @@ main(void) {
   };
 
 
-  std::vector<TokenType> expected = expected3;
-  std::vector<std::string> expectedlits = expected3lits;
+  std::string input4 = 
+    "if (5 <= 4) {\n"
+    "  return true;\n"
+    "}\n"
+    "else {\n"
+    "  return false;\n"
+    "}\n"
+    "!-/*5;\n"
+    "";
 
-  std::string input = input3;
+  std::vector<TokenType> expected4 = {
+    TOK_IF, TOK_LPAREN, TOK_INT, TOK_LTEQUALTO, TOK_INT, TOK_RPAREN, TOK_LBRACE,
+    TOK_RETURN, TOK_TRUE, TOK_SEMICOLON,
+    TOK_RBRACE,
+    TOK_ELSE,TOK_LBRACE,
+    TOK_RETURN, TOK_FALSE, TOK_SEMICOLON,
+    TOK_RBRACE,
+    TOK_BANG, TOK_MINUS, TOK_SLASH, TOK_ASTERISK, TOK_INT, TOK_SEMICOLON,
+    TOK_EOF
+  };
+
+  std::vector<std::string> expected4lits = {
+    "if", "(", "5", "<=", "4", ")", "{",
+    "return", "true", ";",
+    "}",
+    "else", "{",
+    "return", "false", ";",
+      "}",
+    "!", "-", "/", "*", "5", ";",
+    ""
+  };
+
+  std::vector<TokenType> expected = expected4;
+  std::vector<std::string> expectedlits = expected4lits;
+
+  std::string input = input4;
 
   Lexer *lex = new Lexer(input);
 

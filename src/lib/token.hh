@@ -32,11 +32,16 @@ enum TokenType {
   
   TOK_IDENT,      // identifiers
   TOK_INT,        // "10" or "243"
-  TOK_TYPEINT,    // "int"
+  TOK_TYPEINT,    // "int" actual integer type
   TOK_FLOAT,      // "3.14" or "200.5"
-  TOK_TYPEFLOAT,  // "float"
-  TOK_STRING,     // "string"
+  TOK_TYPEFLOAT,  // "float" actual float type
+  TOK_STRING,     // "string" actual string type
   TOK_VOID,       // "void"
+
+  TOK_TRUE,       // "true" keyword
+  TOK_FALSE,      // "false" keyword
+  TOK_IF,         // "if" keyword
+  TOK_ELSE,       // "else" keyword
 
   TOK_EQUALS,     // "="
   TOK_PLUS,       // "+"
@@ -49,6 +54,8 @@ enum TokenType {
   TOK_LT,         // ">"
   TOK_EQUALTO,    // "=="
   TOK_NOTEQUALTO, // "!="
+  TOK_GTEQUALTO,  // ">="
+  TOK_LTEQUALTO,  // "<="
   
   TOK_COMMA,      // ","
   TOK_SEMICOLON,  // ";"

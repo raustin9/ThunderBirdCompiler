@@ -14,6 +14,10 @@ Lexer::Lexer(std::string input) {
   this->keywords["float"] = TOK_TYPEFLOAT;
   this->keywords["void"] = TOK_VOID;
   this->keywords["string"] = TOK_STRING;
+  this->keywords["if"] = TOK_IF;
+  this->keywords["else"] = TOK_ELSE;
+  this->keywords["true"] = TOK_TRUE;
+  this->keywords["false"] = TOK_FALSE;
 }
 
 // get the next token
@@ -24,8 +28,14 @@ Lexer::next_token() {
   this->skip_whitespace();
   switch (this->cur_char) {
     case '=':
-      tok.type = TOK_EQUALS;
-      tok.literal = std::string(1, this->cur_char);
+      if (this->peek_char() == '=') {
+        this->read_char();
+        tok.type = TOK_EQUALTO;
+        tok.literal = "==";
+      } else {
+        tok.type = TOK_EQUALS;
+        tok.literal = std::string(1, this->cur_char);
+      }
       break;
     case ';':
       tok.type = TOK_SEMICOLON;
@@ -65,12 +75,46 @@ Lexer::next_token() {
       break;
     case '<':
       // future: account for '<<' for bitshifting
-      tok.type = TOK_LT;
-      tok.literal = std::string(1, this->cur_char);
+      if (this->peek_char() == '=') {
+        this->read_char();
+        tok.type = TOK_LTEQUALTO;
+        tok.literal = "<=";
+      } else {
+        tok.type = TOK_LT;
+        tok.literal = std::string(1, this->cur_char);
+      }
       break;
     case '>':
       // future: account for '>>' for bitshifting
-      tok.type = TOK_GT;
+      if (this->peek_char() == '=') {
+        this->read_char();
+        tok.type = TOK_GTEQUALTO;
+        tok.literal = ">=";
+      } else {
+        tok.type = TOK_GT;
+        tok.literal = std::string(1, this->cur_char);
+      }
+      break;
+    case '!':
+      if (this->peek_char() == '=') {
+        this->read_char();
+        tok.type = TOK_NOTEQUALTO;
+        tok.literal = "!=";
+      } else {
+        tok.type = TOK_BANG;
+        tok.literal = std::string(1, this->cur_char);
+      }
+      break;
+    case '*':
+      tok.type = TOK_ASTERISK;
+      tok.literal = std::string(1, this->cur_char);
+      break;
+    case '/':
+      tok.type = TOK_SLASH;
+      tok.literal = std::string(1, this->cur_char);
+      break;
+    case '-':
+      tok.type = TOK_MINUS;
       tok.literal = std::string(1, this->cur_char);
       break;
     case 0:
@@ -95,6 +139,15 @@ Lexer::next_token() {
 
   this->read_char();
   return tok;
+}
+
+char
+Lexer::peek_char() {
+  if ((size_t)this->read_position >= this->input.length()) {
+    return 0;
+  } else {
+    return this->input[this->read_position];
+  }
 }
 
 //std::string
