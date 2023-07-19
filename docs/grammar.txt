@@ -4,9 +4,20 @@ declaration :: function_decl | variable_decl
 variable_decl :: "let" IDENTIFIER "<" DATA_TYPE ">" ";"
 function_decl :: "function" IDENTIFIER "<" DATA_TYPE ">" "(" FUNC_ARG ("," FUNC_ARG)* ")" ";"
 
-function_definition :: "function" IDENTIFIER "<" DATA_TYPE ">" "(" FUNC_ARG ("," FUNC_ARG)* ")" "{" FUNC_LINES* "}"
+function_definition :: "function" IDENTIFIER "<" DATA_TYPE ">" "(" FUNC_ARG ("," FUNC_ARG)* ")" code_block
+
+code_block :: "{" line* "}"
+
+line :: statment | expression // FINISH THIS OFF
 
 
-DATA_TYPE :: "int" 
+
+FUNC_ARG :: IDENT "<" DATA_TYPE ">"
+
+IDENTIFIER :: [a-zA-Z]+[a-zA-Z0-9_]*
+NUMBER_INT :: [0-9]+
+NUMBER_FLOAT :: [0-9]+ ("." [0-9]+)?
+DATA_TYPE ::   "int" 
              | "float"
              | "string"
+             | "void"
