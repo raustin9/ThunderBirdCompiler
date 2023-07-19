@@ -9,6 +9,8 @@
 #ifndef TOKEN_
 #define TOKEN_
 
+#include <string>
+
 /* KEYWORDS */
 /*
 function -- declares a function
@@ -24,7 +26,7 @@ class
 */
 
 /* The tokens for ThunderBird */
-enum Tokens {
+enum TokenType {
   ILLEGAL,        // illegal
   TOK_EOF,        // end of file
   
@@ -60,5 +62,10 @@ enum Tokens {
   TOK_LET,        // "let"
 
 };
+
+typedef struct Token {
+  TokenType type;
+  std::string literal;
+} token_t;
 
 #endif /* TOKEN_ */
