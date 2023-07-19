@@ -185,7 +185,7 @@ Lexer::read_number() {
 std::string
 Lexer::read_identifier() {
   int pos = this->position;
-  while (isalpha(this->cur_char) != 0) {
+  while (isalpha(this->cur_char) != 0 || this->cur_char == '_' || isdigit(this->cur_char) != 0) {
     this->read_char();
   }
 
