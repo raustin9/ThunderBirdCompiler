@@ -31,8 +31,10 @@ enum TokenType {
   TOK_EOF,        // end of file
   
   TOK_IDENT,      // identifiers
-  TOK_INT,        // "int"
-  TOK_FLOAT,      // "float"
+  TOK_INT,        // "10" or "243"
+  TOK_TYPEINT,    // "int"
+  TOK_FLOAT,      // "3.14" or "200.5"
+  TOK_TYPEFLOAT,  // "float"
   TOK_STRING,     // "string"
   TOK_VOID,       // "void"
 

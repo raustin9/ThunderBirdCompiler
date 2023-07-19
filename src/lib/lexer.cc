@@ -10,8 +10,8 @@ Lexer::Lexer(std::string input) {
   this->keywords["function"] = TOK_FUNCTION;
   this->keywords["return"] = TOK_RETURN;
   this->keywords["let"] = TOK_LET;
-  this->keywords["int"] = TOK_INT;
-  this->keywords["float"] = TOK_FLOAT;
+  this->keywords["int"] = TOK_TYPEINT;
+  this->keywords["float"] = TOK_TYPEFLOAT;
   this->keywords["void"] = TOK_VOID;
   this->keywords["string"] = TOK_STRING;
 }
@@ -61,6 +61,14 @@ Lexer::next_token() {
       break;
     case '+':
       tok.type = TOK_PLUS;
+      tok.literal = std::string(1, this->cur_char);
+      break;
+    case '<':
+      tok.type = TOK_LT;
+      tok.literal = std::string(1, this->cur_char);
+      break;
+    case '>':
+      tok.type = TOK_GT;
       tok.literal = std::string(1, this->cur_char);
       break;
     case 0:
