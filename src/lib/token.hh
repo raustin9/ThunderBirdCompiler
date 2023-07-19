@@ -27,13 +27,14 @@ class
 
 /* The tokens for ThunderBird */
 enum TokenType {
-  ILLEGAL,        // illegal
+  TOK_ILLEGAL,        // illegal
   TOK_EOF,        // end of file
   
   TOK_IDENT,      // identifiers
   TOK_INT,        // "int"
   TOK_FLOAT,      // "float"
   TOK_STRING,     // "string"
+  TOK_VOID,       // "void"
 
   TOK_EQUALS,     // "="
   TOK_PLUS,       // "+"
