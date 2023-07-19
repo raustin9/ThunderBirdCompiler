@@ -1,0 +1,12 @@
+program :: (declaration | function_definition)*
+
+declaration :: function_decl | variable_decl
+variable_decl :: "let" IDENTIFIER "<" DATA_TYPE ">" ";"
+function_decl :: "function" IDENTIFIER "<" DATA_TYPE ">" "(" FUNC_ARG ("," FUNC_ARG)* ")" ";"
+
+function_definition :: "function" IDENTIFIER "<" DATA_TYPE ">" "(" FUNC_ARG ("," FUNC_ARG)* ")" "{" FUNC_LINES* "}"
+
+
+DATA_TYPE :: "int" 
+             | "float"
+             | "string"
