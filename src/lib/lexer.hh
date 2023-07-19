@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 
+#include "token.hh"
+
 class Lexer {
   private:
 

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdio>
 #include "lexer.hh"
+
 int
 main(void) {
   std::cout << "Hello world\n";
