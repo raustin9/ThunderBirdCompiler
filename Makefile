@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-g -Wall -Isrc/lib
-EXECS=bin/thunderbird
+EXECS=bin/thunder
 LIB=lib/lexer.a
 
 all: $(EXECS)
@@ -9,10 +9,10 @@ clean:
 	rm -f bin/* obj/* lib/*
 
 run: $(EXECS)
-	./bin/thunderbird
+	./bin/thunder
 
 
-$(EXECS): src/thunderbird.cpp $(LIB)
+$(EXECS): src/thunderbird.cc $(LIB)
 	$(CC) $(CFLAGS) $< -o $@ $(LIB)
 
 lib/lexer.a: obj/lexer.o

@@ -64,10 +64,12 @@ Lexer::next_token() {
       tok.literal = std::string(1, this->cur_char);
       break;
     case '<':
+      // future: account for '<<' for bitshifting
       tok.type = TOK_LT;
       tok.literal = std::string(1, this->cur_char);
       break;
     case '>':
+      // future: account for '>>' for bitshifting
       tok.type = TOK_GT;
       tok.literal = std::string(1, this->cur_char);
       break;
