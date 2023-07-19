@@ -82,8 +82,8 @@ Lexer::next_token() {
         return tok; // we return early here because read_identifier() advances this->cur_char repeatedly
       } else if (isdigit(this->cur_char) != 0) {
         // for now assume all number are ints
-        tok.type = TOK_INT;
-        tok.literal = this->read_number();
+        // tok.type = TOK_INT;
+        tok = this->read_number();
         return tok;
       } else {
         tok.type = TOK_ILLEGAL;
@@ -95,14 +95,35 @@ Lexer::next_token() {
   return tok;
 }
 
-std::string
+//std::string
+token_t
 Lexer::read_number() {
+  token_t tok;
   int pos = this->position;
-  while (isdigit(this->cur_char) != 0) {
+  bool read_decimal = false;
+  bool is_legal = true;
+
+  while (isdigit(this->cur_char) != 0 || this->cur_char == '.') {
+    if (this->cur_char == '.' && read_decimal == true) {
+      // 2 decimal points in one number
+      is_legal = false;
+    }
+
+    if (this->cur_char == '.') read_decimal = true;
     this->read_char();
   }
 
-  return this->input.substr(pos, this->position-pos);
+  if (is_legal == false) {
+    tok.type = TOK_ILLEGAL;
+  } else if (read_decimal == true) {
+    tok.type = TOK_FLOAT;
+  } else {
+    tok.type = TOK_INT;
+  }
+
+  tok.literal = this->input.substr(pos, this->position-pos);
+
+  return tok;
 }
 
 // Read an identifier string 

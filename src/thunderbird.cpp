@@ -52,20 +52,20 @@ main(void) {
   };
 
   std::string input3 = 
-    "let ten<int> = 10;\n"
+    "let ten<float> = 1.0.0;\n"
     "function <int> add (x<int>, y<int>) {\n"
     "  return x + y;\n"
     "}\n"
     "";
   std::vector<TokenType> expected3 = {
-    TOK_LET, TOK_IDENT, TOK_LT, TOK_TYPEINT, TOK_GT, TOK_EQUALS, TOK_INT, TOK_SEMICOLON,
+    TOK_LET, TOK_IDENT, TOK_LT, TOK_TYPEFLOAT, TOK_GT, TOK_EQUALS, TOK_ILLEGAL, TOK_SEMICOLON,
     TOK_FUNCTION, TOK_LT, TOK_TYPEINT, TOK_GT, TOK_IDENT, TOK_LPAREN, TOK_IDENT, TOK_LT, TOK_TYPEINT, TOK_GT, TOK_COMMA, TOK_IDENT, TOK_LT, TOK_TYPEINT, TOK_GT, TOK_RPAREN, TOK_LBRACE,
     TOK_RETURN, TOK_IDENT, TOK_PLUS, TOK_IDENT, TOK_SEMICOLON,
     TOK_RBRACE,
     TOK_EOF
   };
   std::vector<std::string> expected3lits = {
-    "let", "ten", "<", "int", ">", "=", "10", ";",
+    "let", "ten", "<", "float", ">", "=", "1.0.0", ";",
     "function", "<", "int", ">", "add", "(", "x", "<", "int", ">", ",", "y", "<", "int", ">", ")", "{",
     "return", "x", "+", "y", ";",
     "}",
