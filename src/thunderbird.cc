@@ -6,6 +6,8 @@
 #include <sys/stat.h>
 #include "lexer.hh"
 #include "token.hh"
+#include "ast.hh"
+#include "parser.hh"
 
 bool test_lexer();
 std::string read_file(char *file_name);

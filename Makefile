@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-g -Wall -Isrc/lib
 EXECS=bin/thunder
-LIB=lib/lexer.a
+LIB=lib/lexer.a lib/ast.a lib/parser.a
 
 all: $(EXECS)
 
@@ -20,4 +20,18 @@ lib/lexer.a: obj/lexer.o
 	ranlib $@
 
 obj/lexer.o: src/lib/lexer.cc
+	$(CC) $(CFLAGS) -c $< -o $@
+
+lib/ast.a: obj/ast.o
+	ar ru $@ $<
+	ranlib $@
+
+obj/ast.o: src/lib/ast.cc
+	$(CC) $(CFLAGS) -c $< -o $@
+
+lib/parser.a: obj/parser.o
+	ar ru $@ $<
+	ranlib $@
+
+obj/parser.o: src/lib/parser.cc
 	$(CC) $(CFLAGS) -c $< -o $@

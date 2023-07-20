@@ -19,6 +19,7 @@ class Lexer {
     std::map<std::string, TokenType> keywords;
 
     Lexer(std::string input);
+    Lexer(Lexer &l);
     token_t next_token();
     void read_char();
     std::string read_identifier();

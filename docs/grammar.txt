@@ -18,13 +18,15 @@ $e = epsilon for empty
 <literal> ::= <int_value>
               | <float_value>
               | <string_value>
-<func_call> ::= <identifier> "(" <param_list> ")"
+<func_call> ::= <identifier> "(" <arg_list> ")"
 
 <type_spec> ::= "<" <data_type> ">"
 <data_type> ::= "int"
                 | "float"
                 | "string"
                 | "void"
+
+<arg_list> ::= (<arg> ( "," <arg> )* )| $e
 
 <mutable> ::= <identifier>
 

@@ -20,6 +20,15 @@ Lexer::Lexer(std::string input) {
   this->keywords["false"] = TOK_FALSE;
 }
 
+// Copy constructor
+Lexer::Lexer(Lexer &l) {
+  input = l.input;
+  keywords = l.keywords;
+  position = l.position;
+  read_position = l.read_position;
+  cur_char = l.cur_char;
+}
+
 // get the next token
 token_t
 Lexer::next_token() {
