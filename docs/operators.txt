@@ -1,0 +1,16 @@
++ -- addition
+- -- subtraction
+* -- multiplication
+/ -- division
+% -- modulous
+
+= -- variable assignment
+
+<  -- less than comparison
+>  -- greater than comparison
+== -- equal to comparison
+!= -- not equal to comparison
+<= -- less than or equal to comparison
+>= -- greater than or equal to comparison
+
+

@@ -1,23 +1,34 @@
-program :: (declaration | function_definition)*
+/// TODO: 
 
-declaration :: function_decl | variable_decl
-variable_decl :: "let" IDENTIFIER "<" DATA_TYPE ">" ";"
-function_decl :: "function" IDENTIFIER "<" DATA_TYPE ">" "(" FUNC_ARG ("," FUNC_ARG)* ")" ";"
+allow expressions to be used as parameters in function calls but not in function declarations
 
-function_definition :: "function" IDENTIFIER "<" DATA_TYPE ">" "(" FUNC_ARG ("," FUNC_ARG)* ")" code_block
+///
+$e = epsilon for empty
+"\" is used to escape --> "\"" is meant to specify the literal " within the outer ones
 
-code_block :: "{" line* "}"
+<statement> ::= <var_decl> | <func_decl>
 
-line :: statment | expression // FINISH THIS OFF
+<var_decl> ::= "let" <identifier> <type_spec> "=" <expression> ";"
+
+<func_decl> ::= "function" <identifier> <type_spec> "(" <param_list> ")" ";"
+<param_list> ::= <param> ("," <param>)* | $e
+<param> ::= <identifier> <type_spec>
+
+<expression> ::= <func_call> | <binary_expr>
+<literal> ::= <int_value>
+              | <float_value>
+              | <string_value>
+<func_call> ::= <identifier> "(" <param_list> ")"
+
+<type_spec> ::= "<" <data_type> ">"
+<data_type> ::= "int"
+                | "float"
+                | "string"
+                | "void"
+
+<mutable> ::= <identifier>
 
 
-
-FUNC_ARG :: IDENT "<" DATA_TYPE ">"
-
-IDENTIFIER :: [a-zA-Z]+[a-zA-Z0-9_]*
-NUMBER_INT :: [0-9]+
-NUMBER_FLOAT :: [0-9]+ ("." [0-9]+)?
-DATA_TYPE ::   "int" 
-             | "float"
-             | "string"
-             | "void"
+<int_value> ::= [0-9]+
+<float_value> ::= [0-9]+ "." [0-9]*
+<string_value> ::= "\"" .* "\""
