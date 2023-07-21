@@ -23,6 +23,7 @@ Parser::Parser(std::string input) {
   this->next_token();
 }
 
+// Advance the current token to the next one
 void
 Parser::next_token() {
   this->current_token = this->peek_token;
@@ -54,6 +55,8 @@ Parser::parse_let_statement() {
   return let_statement;
 }
 
+// Parse variable assignment expression
+// "let x = 3;"
 std::unique_ptr<Expression>
 Parser::parse_assignment(DataType data_type) {
   this->next_token(); // eat the Type Identifier
@@ -91,10 +94,14 @@ Parser::parse_assignment(DataType data_type) {
       return nullptr;
   }
 
+  variable->value = dynamic_cast<IntegerExpr*>(expr_val.get())->value;
+
   auto assignment_expr = std::make_unique<VariableAssignment>(op, std::move(variable), std::move(expr_val));
   return assignment_expr;
 }
 
+// Parse an integer expression
+// "3" "700";
 std::unique_ptr<Expression>
 Parser::parse_integer() {
   token_t tok = this->current_token;
@@ -109,6 +116,8 @@ Parser::parse_integer() {
   return std::make_unique<IntegerExpr>(val);
 }
 
+// parse the program
+// start at top level and cascade down the tree
 std::unique_ptr<Program>
 Parser::parse_program() {
   auto program = std::make_unique<Program>();
