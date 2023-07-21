@@ -16,17 +16,19 @@
 class Node {
   public:
     virtual ~Node() = default;
-    // virtual void print();
+    virtual void print() {};
 };
 
 class Expression : public Node {
   public:
     virtual ~Expression() = default;
+    void print() override;
 };
 
 class Statement : public Node {
   public:
     virtual ~Statement() = default;
+    void print() override;
 };
 
 class BinaryExpr : public Expression {
@@ -39,7 +41,7 @@ class BinaryExpr : public Expression {
         std::unique_ptr<Expression> LHS,
         std::unique_ptr<Expression> RHS
       ) : op(op), LHS(std::move(LHS)), RHS(std::move(RHS)) {}
-    // void print() override;
+    void print() override;
 };
 
 // "x = 3 + 20"
@@ -53,7 +55,7 @@ class VariableAssignment : public Expression {
       std::unique_ptr<Expression> variable,
       std::unique_ptr<Expression> RHS
     ) : op(op), variable(std::move(variable)), RHS(std::move(RHS)) {}
-  // void print() override;
+  void print() override;
 };
 
 // Node that is a integer literal like "1" or "300"
@@ -61,7 +63,7 @@ class IntegerExpr : public Expression {
   public:
     long long value;
     IntegerExpr(long long value) : value(value) {};
-    // void print() override;
+    void print() override;
 };
 
 class VariableExpr : public Expression {
@@ -71,7 +73,7 @@ class VariableExpr : public Expression {
     long long value;
 
     VariableExpr(const std::string &name, DataType data_type) : name(name), data_type(data_type) {}
-    // void print() override;
+    void print() override;
 };
 
 class LetStmt : public Statement {
@@ -84,13 +86,13 @@ class LetStmt : public Statement {
         // Expression *var_assign
         std::unique_ptr<Expression> var_assign
       ) : token(token), /*variable(std::move(variable)),*/ var_assign(std::move(var_assign)) {}
-    // void print() override;
+    void print() override;
 };
 
 class Program : public Node {
   public:
     std::vector<std::unique_ptr<Statement> > statements;
-    // void print() override;
+    void print() override;
 };
 
 

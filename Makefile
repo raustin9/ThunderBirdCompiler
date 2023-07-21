@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-g -Wall -Isrc/lib
 EXECS=bin/thunder
-LIB=lib/lexer.a lib/ast.a lib/parser.a
+LIB=lib/lexer.a lib/parser.a lib/ast.a
 
 all: $(EXECS)
 
