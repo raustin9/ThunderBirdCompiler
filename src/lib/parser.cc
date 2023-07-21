@@ -133,9 +133,12 @@ Parser::parse_program() {
   }
   // exit_loop:
 
-  LetStmt* ls = dynamic_cast<LetStmt*>(program->statements[0].get());
-  VariableAssignment* be = dynamic_cast<VariableAssignment*>(ls->var_assign.get());
-  printf("Program:\n%s ", ls->token.literal.c_str());
-  printf("%s %s %lld\n", dynamic_cast<VariableExpr*>(be->variable.get())->name.c_str(), be->op.literal.c_str(), dynamic_cast<IntegerExpr*>(be->RHS.get())->value);
+  printf(" -- Program --\n");
+  for (size_t i = 0; i < program->statements.size();  i++) {
+    LetStmt* ls = dynamic_cast<LetStmt*>(program->statements[i].get());
+    VariableAssignment* be = dynamic_cast<VariableAssignment*>(ls->var_assign.get());
+    printf("%s ", ls->token.literal.c_str());
+    printf("%s %s %lld\n", dynamic_cast<VariableExpr*>(be->variable.get())->name.c_str(), be->op.literal.c_str(), dynamic_cast<IntegerExpr*>(be->RHS.get())->value);
+  }
   return program;
 }
