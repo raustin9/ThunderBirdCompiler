@@ -16,16 +16,44 @@
 class Node {
   public:
     virtual ~Node() = default;
+    // virtual void print();
 };
 
 class Expression : public Node {
   public:
-
+    virtual ~Expression() = default;
 };
 
 class Statement : public Node {
   public:
+    virtual ~Statement() = default;
+};
 
+class BinaryExpr : public Expression {
+  public:
+    token_t op;
+    std::unique_ptr<Expression> LHS;
+    std::unique_ptr<Expression> RHS;
+    BinaryExpr(
+        token_t op,
+        std::unique_ptr<Expression> LHS,
+        std::unique_ptr<Expression> RHS
+      ) : op(op), LHS(std::move(LHS)), RHS(std::move(RHS)) {}
+    // void print() override;
+};
+
+// "x = 3 + 20"
+class VariableAssignment : public Expression {
+  public:
+  token_t op; // "="
+  std::unique_ptr<Expression> variable;
+  std::unique_ptr<Expression> RHS;
+  VariableAssignment(
+      token_t op,
+      std::unique_ptr<Expression> variable,
+      std::unique_ptr<Expression> RHS
+    ) : op(op), variable(std::move(variable)), RHS(std::move(RHS)) {}
+  // void print() override;
 };
 
 // Node that is a integer literal like "1" or "300"
@@ -33,6 +61,7 @@ class IntegerExpr : public Expression {
   public:
     long long value;
     IntegerExpr(long long value) : value(value) {};
+    // void print() override;
 };
 
 class VariableExpr : public Expression {
@@ -42,84 +71,27 @@ class VariableExpr : public Expression {
     long long value;
 
     VariableExpr(const std::string &name, DataType data_type) : name(name), data_type(data_type) {}
+    // void print() override;
 };
 
 class LetStmt : public Statement {
   public:
-    token_t token;
-    std::unique_ptr<VariableExpr> variable;
-    std::unique_ptr<IntegerExpr> value;
+    token_t token; // "let" token
+    // Expression *var_assign;
+    std::unique_ptr<Expression> var_assign;
     LetStmt(
         token_t token,
-        std::unique_ptr<VariableExpr> variable,
-        std::unique_ptr<IntegerExpr> value
-      ) : token(token), variable(std::move(variable)), value(std::move(value)) {}
+        // Expression *var_assign
+        std::unique_ptr<Expression> var_assign
+      ) : token(token), /*variable(std::move(variable)),*/ var_assign(std::move(var_assign)) {}
+    // void print() override;
 };
 
 class Program : public Node {
   public:
     std::vector<std::unique_ptr<Statement> > statements;
+    // void print() override;
 };
 
-//enum NodeType {
-//  EXPR,
-//  STMT,
-//  PRGM
-//};
-//
-//class Node {
-//  virtual token_t token_literal();
-//  NodeType type;
-//};
-//
-//// Holds the value of an expression
-//// Expressions can hold the value of a 64bit integer, 64 bit float (double) 
-//union Value {
-//  int int_value;
-//  double float_value;
-//};
-//
-//class Expression : public Node {
-//  public:
-//    NodeType type = EXPR;
-//    Value expr_value;
-//};
-//
-//class Identifier : public Expression {
-//  public:
-//    NodeType type = EXPR;
-//    token_t token;      // should be TOK_IDENT
-//    Value value;   // value that the identifier holds
-//    DataType data_type; // the data type of the identifier -- INT vs DOUBLE etc
-//};
-//
-//// Statement -- a line of code that does not contain a value
-//// ie let a = 1;
-////    continue;
-////    while...
-////    etc
-//class Statement : public Node{
-//  public:
-//    NodeType type = STMT;
-//    token_t token;
-//};
-//
-//// Let clause
-//// -- "let a = 2 + 8;" 
-//class LetStatement : public Statement {
-//  public:
-//    token_t token;         // should be TOK_LET
-//    Identifier var_name;   // the variable being set in the let statement
-//    Expression expr_value; // the expression that the variable is being set to
-//};
-//
-//// Top level node of the AST
-//// The actual ThunderBird programs are 
-//class Program : public Node {
-//  public:
-//    token_t token_literal() override;
-//    NodeType type = PRGM;
-//    std::vector<Statement> statements;
-//};
 
 #endif

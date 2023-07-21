@@ -33,22 +33,25 @@ Parser::next_token() {
 // "let int x = 5;"
 std::unique_ptr<Statement>
 Parser::parse_let_statement() {
+  token_t let_tok = this->current_token;
   this->next_token(); // eat the TOK_LET token
   token_t tok = this->current_token;
   
+  std::unique_ptr<Expression> assignment_expr;
   switch(tok.type) {
     case TOK_TYPEINT:
       printf("matched int\n");
-      this->parse_assignment(TYPE_INT);
+
+      assignment_expr = this->parse_assignment(TYPE_INT);
       break;
     default:
-      printf("error2 unexpected token |%s|\n", tok.literal.c_str());
+      printf("error: unexpected token |%s|\n", tok.literal.c_str());
+      return nullptr;
       break;
   }
-  
 
-
-  return nullptr;
+  auto let_statement = std::make_unique<LetStmt>(let_tok, std::move(assignment_expr));
+  return let_statement;
 }
 
 std::unique_ptr<Expression>
@@ -62,20 +65,25 @@ Parser::parse_assignment(DataType data_type) {
     return nullptr;
   }
   printf("matched identifier\n");
+  auto variable = std::make_unique<VariableExpr>(tok.literal, data_type);
   
   this->next_token(); // eat the variable
   tok = this->current_token;
 
+  token_t op;
   if (tok.type != TOK_EQUALS) {
     printf("error: unexpected token |%s|\n", tok.literal.c_str());
     return nullptr;
+  } else {
+    op = tok;
   }
 
   this->next_token(); // eat the TOK_EQUALS
+  std::unique_ptr<Expression> expr_val;
   switch (this->current_token.type) {
     case TOK_INT:
       printf("matched int\n");
-      this->parse_integer();
+      expr_val = this->parse_integer();
       break;
 
     default:
@@ -83,14 +91,8 @@ Parser::parse_assignment(DataType data_type) {
       return nullptr;
   }
 
-//  if (tok.type != TOK_INT) {
-//    printf("error: unexpected token |%s|\n", tok.literal.c_str());
-//    return nullptr;
-//  } else {
-//    printf("matched integer\n");
-//  }
-
-  return nullptr;
+  auto assignment_expr = std::make_unique<VariableAssignment>(op, std::move(variable), std::move(expr_val));
+  return assignment_expr;
 }
 
 std::unique_ptr<Expression>
@@ -104,27 +106,36 @@ Parser::parse_integer() {
   long long val = atoi(tok.literal.c_str());
   printf("matched int: val = %lld\n", val);
 
-  return nullptr;
+  return std::make_unique<IntegerExpr>(val);
 }
 
 std::unique_ptr<Program>
 Parser::parse_program() {
-  std::unique_ptr<Program> program;
+  auto program = std::make_unique<Program>();
+  // std::unique_ptr<Program> program;
 
   // main loop
-  while(true) {
+  while(this->current_token.type != TOK_EOF) {
+    std::unique_ptr<Statement> stmt;
     switch(this->current_token.type) {
       case TOK_LET:
         printf("matched let\n");
-        this->parse_let_statement();
-        goto exit_loop;
+        stmt = this->parse_let_statement();
+        program->statements.push_back(std::move(stmt));
+        this->next_token();
+        // goto exit_loop;
         break;
       default:
-        printf("did not match let\n");
+        printf("token: %s\n", this->current_token.literal.c_str());
+        this->next_token();
         break;
     }
   }
-  exit_loop:
+  // exit_loop:
 
+  LetStmt* ls = dynamic_cast<LetStmt*>(program->statements[0].get());
+  VariableAssignment* be = dynamic_cast<VariableAssignment*>(ls->var_assign.get());
+  printf("Program:\n%s ", ls->token.literal.c_str());
+  printf("%s %s %lld\n", dynamic_cast<VariableExpr*>(be->variable.get())->name.c_str(), be->op.literal.c_str(), dynamic_cast<IntegerExpr*>(be->RHS.get())->value);
   return program;
 }
