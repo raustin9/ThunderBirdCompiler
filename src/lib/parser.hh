@@ -17,7 +17,11 @@ class Parser {
 public:
   Parser(std::string input);
   void next_token();
-  Program* parse_program();
+ 
+  std::unique_ptr<Program> parse_program();
+  std::unique_ptr<Statement> parse_let_statement();
+  std::unique_ptr<Expression> parse_integer();
+  std::unique_ptr<Expression> parse_assignment(DataType data_type); 
 
   Lexer *lex;
   token_t current_token;

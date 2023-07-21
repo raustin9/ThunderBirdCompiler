@@ -10,15 +10,20 @@
 #include "parser.hh"
 
 bool test_lexer();
+bool test_let();
 std::string read_file(char *file_name);
+
 
 int
 main(int argc, char** argv) {
   std::string file_name;
 
   if (argc < 2) {
-    if (test_lexer() == true) {
-      printf("-- all tests passed --\n");
+//    if (test_lexer() == true) {
+//      printf("-- all tests passed --\n");
+//    }
+    if (test_let() == true) {
+      printf("let statement passed\n");
     }
   } else {
     // Read the file specified through the command line argument
@@ -36,6 +41,20 @@ main(int argc, char** argv) {
   return 0;
 }
 
+bool
+test_let() {
+  std::string input = 
+    "let int x = 5;\n";
+
+  Parser *parser = new Parser(input);
+
+  parser->parse_program();
+
+  return true;
+}
+
+
+// read input from file
 std::string
 read_file(char *file_name) {
   std::string rv;

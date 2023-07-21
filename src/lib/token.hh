@@ -73,9 +73,16 @@ enum TokenType {
 
 };
 
+enum DataType {
+  TYPE_INT,
+  TYPE_FLOAT,
+  TYPE_STRING
+};
+
 typedef struct Token {
   TokenType type;
   std::string literal;
 } token_t;
+
 
 #endif /* TOKEN_ */

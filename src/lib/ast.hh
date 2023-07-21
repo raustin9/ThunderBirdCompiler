@@ -11,52 +11,115 @@
 #include "token.hh"
 #include <vector>
 #include <string>
-
-
-class Statement;
-class Expression;
+#include <memory>
 
 class Node {
-public:
-  virtual std::string token_literal();
+  public:
+    virtual ~Node() = default;
 };
-
-
-// STATEMENTS //
-class Statement : public Node {
-public:
-  std::string token_literal() override;
-  virtual void statement_node();
-};
-
 
 class Expression : public Node {
   public:
-    std::string token_literal() override;
-    virtual void expression_node();
+
 };
 
-class Identifier : public Expression {
-public:
-  void expression_node() override;
-  std::string token_literal() override;
-  token_t token;
-  std::string value;
+class Statement : public Node {
+  public:
+
 };
 
-// PROGRAM //
+// Node that is a integer literal like "1" or "300"
+class IntegerExpr : public Expression {
+  public:
+    long long value;
+    IntegerExpr(long long value) : value(value) {};
+};
+
+class VariableExpr : public Expression {
+  public:
+    std::string name; // name of the variable
+    DataType data_type;
+    long long value;
+
+    VariableExpr(const std::string &name, DataType data_type) : name(name), data_type(data_type) {}
+};
+
+class LetStmt : public Statement {
+  public:
+    token_t token;
+    std::unique_ptr<VariableExpr> variable;
+    std::unique_ptr<IntegerExpr> value;
+    LetStmt(
+        token_t token,
+        std::unique_ptr<VariableExpr> variable,
+        std::unique_ptr<IntegerExpr> value
+      ) : token(token), variable(std::move(variable)), value(std::move(value)) {}
+};
+
 class Program : public Node {
-public:
-  std::string token_literal() override;
-  std::vector <Statement> statements;
+  public:
+    std::vector<std::unique_ptr<Statement> > statements;
 };
 
-class LetStatement : public Statement{
-public:
-  void statement_node() override;
-  std::string token_literal() override;
-  token_t token;
-  Identifier name;
-  Expression value;
-};
+//enum NodeType {
+//  EXPR,
+//  STMT,
+//  PRGM
+//};
+//
+//class Node {
+//  virtual token_t token_literal();
+//  NodeType type;
+//};
+//
+//// Holds the value of an expression
+//// Expressions can hold the value of a 64bit integer, 64 bit float (double) 
+//union Value {
+//  int int_value;
+//  double float_value;
+//};
+//
+//class Expression : public Node {
+//  public:
+//    NodeType type = EXPR;
+//    Value expr_value;
+//};
+//
+//class Identifier : public Expression {
+//  public:
+//    NodeType type = EXPR;
+//    token_t token;      // should be TOK_IDENT
+//    Value value;   // value that the identifier holds
+//    DataType data_type; // the data type of the identifier -- INT vs DOUBLE etc
+//};
+//
+//// Statement -- a line of code that does not contain a value
+//// ie let a = 1;
+////    continue;
+////    while...
+////    etc
+//class Statement : public Node{
+//  public:
+//    NodeType type = STMT;
+//    token_t token;
+//};
+//
+//// Let clause
+//// -- "let a = 2 + 8;" 
+//class LetStatement : public Statement {
+//  public:
+//    token_t token;         // should be TOK_LET
+//    Identifier var_name;   // the variable being set in the let statement
+//    Expression expr_value; // the expression that the variable is being set to
+//};
+//
+//// Top level node of the AST
+//// The actual ThunderBird programs are 
+//class Program : public Node {
+//  public:
+//    token_t token_literal() override;
+//    NodeType type = PRGM;
+//    std::vector<Statement> statements;
+//};
+
 #endif
