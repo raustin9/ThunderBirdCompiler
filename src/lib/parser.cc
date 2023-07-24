@@ -129,6 +129,8 @@ Parser::parse_integer() {
   return std::make_unique<IntegerExpr>(val);
 }
 
+// Parse a float expression
+// "3.0" "700.29"
 std::unique_ptr<Expression>
 Parser::parse_float() {
   token_t tok = this->current_token;
@@ -141,9 +143,31 @@ Parser::parse_float() {
   printf("matched float: val %lf\n", val);
 
   auto rv = std::make_unique<FloatExpr>(val);
-  rv->data_type = TYPE_FLOAT;
-  printf("rv dt %d\n", rv->data_type);
   return rv;
+}
+
+std::unique_ptr<Statement>
+Parser::parse_prototype() {
+  this->next_token(); // eat the "function"
+
+  // Get the type specifier
+  token_t tok = this->current_token;
+  DataType rt;
+  if (tok.type == TOK_TYPEINT) {
+    rt = TYPE_INT;
+  } else if (tok.type == TOK_TYPEFLOAT) {
+    rt = TYPE_FLOAT;
+  } else {
+    printf("error: unexpected token '%s'\n", tok.literal.c_str());
+  }
+
+  this->next_token(); // eat the type specifier
+              
+  // get the identifier
+  token_t ident = this->current_token;
+  std::string proto_name = ident.literal;
+
+
 }
 
 // parse the program
@@ -162,6 +186,10 @@ Parser::parse_program() {
         program->statements.push_back(std::move(stmt));
         this->next_token();
 
+        break;
+      case TOK_FUNCTION:
+        printf("matched function\n");
+        this->parse_prototype();
         break;
       default:
         printf("token: %s\n", this->current_token.literal.c_str());
