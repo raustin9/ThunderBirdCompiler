@@ -21,6 +21,7 @@ class Node {
 
 class Expression : public Node {
   public:
+    DataType data_type;
     virtual ~Expression() = default;
     void print() override;
 };
@@ -62,7 +63,16 @@ class VariableAssignment : public Expression {
 class IntegerExpr : public Expression {
   public:
     long long value;
+    DataType data_type = TYPE_INT;
     IntegerExpr(long long value) : value(value) {};
+    void print() override;
+};
+
+class FloatExpr : public Expression {
+  public:
+    double value;
+    DataType data_type = TYPE_FLOAT;
+    FloatExpr(double value) : value(value) {};
     void print() override;
 };
 
@@ -71,6 +81,7 @@ class VariableExpr : public Expression {
     std::string name; // name of the variable
     DataType data_type;
     long long value;
+    double dvalue;
 
     VariableExpr(const std::string &name, DataType data_type) : name(name), data_type(data_type) {}
     void print() override;

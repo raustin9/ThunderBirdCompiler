@@ -6,6 +6,7 @@
 #include <string>
 #include <cstdlib>
 #include <memory>
+#include <type_traits>
 
 // Constructor
 Parser::Parser(std::string input) {
@@ -44,6 +45,11 @@ Parser::parse_let_statement() {
       printf("matched int\n");
 
       assignment_expr = this->parse_assignment(TYPE_INT);
+      break;
+    case TOK_TYPEFLOAT:
+      printf("matched float\n");
+
+      assignment_expr = this->parse_assignment(TYPE_FLOAT);
       break;
     default:
       printf("error: unexpected token |%s|\n", tok.literal.c_str());
@@ -88,13 +94,40 @@ Parser::parse_assignment(DataType data_type) {
       printf("matched int\n");
       expr_val = this->parse_integer();
       break;
-
+    case TOK_FLOAT:
+      printf("matched float\n");
+      expr_val = this->parse_float();
+      break;
     default:
       printf("unexpected token: |%s|\n", this->current_token.literal.c_str());
       return nullptr;
   }
 
-  variable->value = dynamic_cast<IntegerExpr*>(expr_val.get())->value;
+  if (variable->data_type == TYPE_INT) {
+    auto int_expr = dynamic_cast<IntegerExpr*>(expr_val.get());
+    if (variable->data_type != int_expr->data_type) {
+      printf("error: wrong data dype. %s is type 'int' but got '%d'\n", variable->name.c_str(), int_expr->data_type);
+      return nullptr;
+    }
+    variable->value = int_expr->value;
+  } else if (variable->data_type == TYPE_FLOAT) {
+    auto float_expr = dynamic_cast<FloatExpr*>(expr_val.get());
+    if (variable->data_type != float_expr->data_type) {
+      printf("error: wrong data dype. %s is type 'float' but got '%d'\n", variable->name.c_str(), float_expr->data_type);
+      return nullptr;
+    }
+    variable->dvalue = float_expr->value;
+  } else {
+    printf("error: invalid data type '%d'\n", variable->data_type);
+    return nullptr;
+  }
+
+//  // Ensure matching data types
+//  if (variable->data_type != expr_val->data_type) {
+//    printf("WRONG DT, %d != %d\n", variable->data_type, expr_val->data_type);
+//    printf("expr val %d\n", dynamic_cast<FloatExpr*>(expr_val.get())->data_type);
+//    variable->value = dynamic_cast<IntegerExpr*>(expr_val.get())->value;
+//  }
 
   auto assignment_expr = std::make_unique<VariableAssignment>(op, std::move(variable), std::move(expr_val));
   return assignment_expr;
@@ -114,6 +147,23 @@ Parser::parse_integer() {
   printf("matched int: val = %lld\n", val);
 
   return std::make_unique<IntegerExpr>(val);
+}
+
+std::unique_ptr<Expression>
+Parser::parse_float() {
+  token_t tok = this->current_token;
+  if (tok.type != TOK_FLOAT) {
+    printf("error: unexpected token |%s|. Expected TOK_FLOAT\n", tok.literal.c_str());
+    return nullptr;
+  }
+
+  double val = atof(tok.literal.c_str());
+  printf("matched float: val %lf\n", val);
+
+  auto rv = std::make_unique<FloatExpr>(val);
+  rv->data_type = TYPE_FLOAT;
+  printf("rv dt %d\n", rv->data_type);
+  return rv;
 }
 
 // parse the program
@@ -143,12 +193,6 @@ Parser::parse_program() {
   // exit_loop:
 
   printf(" -- Program --\n");
-  for (size_t i = 0; i < program->statements.size();  i++) {
-    LetStmt* ls = dynamic_cast<LetStmt*>(program->statements[i].get());
-    ls->print();
-//    VariableAssignment* be = dynamic_cast<VariableAssignment*>(ls->var_assign.get());
-//    printf("%s ", ls->token.literal.c_str());
-//    printf("%s %s %lld\n", dynamic_cast<VariableExpr*>(be->variable.get())->name.c_str(), be->op.literal.c_str(), dynamic_cast<IntegerExpr*>(be->RHS.get())->value);
-  }
+  program->print();
   return program;
 }

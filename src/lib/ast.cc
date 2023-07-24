@@ -5,15 +5,14 @@
 #include <cstdio>
 
 void
-Program::print() {}
-
-void
-IntegerExpr::print() {
-  printf("intexpr val: %lld\n", this->value);
+Program::print() {
+  for (unsigned i = 0; i < this->statements.size(); i++) {
+    this->statements[i]->print();
+  }
 }
 
 void
-VariableExpr::print() {
+IntegerExpr::print() {
   std::string dt;
   switch (this->data_type) {
     case TYPE_INT:
@@ -30,8 +29,52 @@ VariableExpr::print() {
       break;
   }
 
-  printf("variable expr:\n\tname: %s\n\ttype: %s\n\tval: %lld\n",
-      this->name.c_str(), dt.c_str(), this->value);
+  printf("intexpr val: %lld type: %s\n", this->value, dt.c_str());
+}
+
+void
+FloatExpr::print() {
+  std::string dt;
+  switch (this->data_type) {
+    case TYPE_INT:
+      dt = "int";
+      break;
+    case TYPE_FLOAT:
+      dt = "float";
+      break;
+    case TYPE_STRING:
+      dt = "string";
+      break;
+    default:
+      dt = "invalid";
+      break;
+  }
+
+  printf("intexpr val: %lf type: %s\n", this->value, dt.c_str());
+}
+
+void
+VariableExpr::print() {
+  std::string dt;
+  switch (this->data_type) {
+    case TYPE_INT:
+      dt = "int";
+      printf("variable expr:\n\tname: %s\n\ttype: %s\n\tval: %lld\n",
+          this->name.c_str(), dt.c_str(), this->value);
+      break;
+    case TYPE_FLOAT:
+      dt = "float";
+      printf("variable expr:\n\tname: %s\n\ttype: %s\n\tval: %lf\n",
+          this->name.c_str(), dt.c_str(), this->dvalue);
+      break;
+    case TYPE_STRING:
+      dt = "string";
+      break;
+    default:
+      dt = "invalid";
+      break;
+  }
+
 }
 
 void

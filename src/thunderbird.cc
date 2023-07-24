@@ -45,7 +45,7 @@ bool
 test_let() {
   std::string input = 
     "let int testvar = 5;\n"
-    "let int var2 = 3;\n";
+    "let float var2 = 3.0;\n";
 
   Parser *parser = new Parser(input);
 
