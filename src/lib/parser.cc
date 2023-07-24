@@ -166,8 +166,33 @@ Parser::parse_prototype() {
   // get the identifier
   token_t ident = this->current_token;
   std::string proto_name = ident.literal;
+  this->next_token(); // eat the identifier
 
+  // Parse the function arguments
+  if (this->current_token.type != TOK_LPAREN) {
+    printf("error: unexpected token '%s'. Expected '('\n", this->current_token.literal.c_str());
+  }
+  this->next_token(); // eat the '('
+  std::vector<Identifier> params;
+  while(this->current_token.type != TOK_RPAREN) {
+    token_t param_type = this->current_token;
+    if (param_type.type == TOK_RPAREN) 
+      break;
 
+    this->next_token(); // eat the parameter's type spec
+    token_t param_name = this->current_token;
+    if (param_name.type != TOK_IDENT) {
+      printf("error: unexpected token '%s'. Expected IDENT\n", param_name.literal.c_str());
+      return nullptr;
+    }
+
+    Identifier identifier;
+    identifier.name = param_name.literal;
+    identifier.data_type = (param_type.type == TOK_TYPEINT) ? (TYPE_INT) : (TYPE_FLOAT);
+    params.push_back(identifier);
+  }
+
+  return std::make_unique<Prototype>(proto_name, rt, params);
 }
 
 // parse the program
@@ -189,7 +214,8 @@ Parser::parse_program() {
         break;
       case TOK_FUNCTION:
         printf("matched function\n");
-        this->parse_prototype();
+        stmt = this->parse_prototype();
+        program->statements.push_back(std::move(stmt));
         break;
       default:
         printf("token: %s\n", this->current_token.literal.c_str());

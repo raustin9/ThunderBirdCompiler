@@ -20,10 +20,10 @@ public:
  
   std::unique_ptr<Program> parse_program();
   std::unique_ptr<Statement> parse_let_statement();
+  std::unique_ptr<Statement> parse_prototype();
   std::unique_ptr<Expression> parse_integer();
   std::unique_ptr<Expression> parse_float();
   std::unique_ptr<Expression> parse_assignment(DataType data_type); 
-  std::unique_ptr<Statement> parse_prototype();
 
   Lexer *lex;
   token_t current_token;

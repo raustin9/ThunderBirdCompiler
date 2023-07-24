@@ -11,6 +11,27 @@ Program::print() {
   }
 }
 
+std::string
+get_data_type(DataType dt) {
+  switch (dt) {
+    case TYPE_INT:
+      return "int";
+    case TYPE_FLOAT:
+      return "float";
+    default:
+      return "invalid";
+  }
+}
+
+void
+Prototype::print() {
+  printf("function %s %s (", get_data_type(this->ret_type).c_str(), this->name.c_str());
+  for (size_t i = 0; i < this->args.size(); i++) {
+    printf("%s %s ", get_data_type(this->args[i].data_type).c_str(), this->args[i].name.c_str());
+  }
+  printf(")\n");
+}
+
 void
 IntegerExpr::print() {
   std::string dt;

@@ -100,21 +100,23 @@ class LetStmt : public Statement {
     void print() override;
 };
 
-class Prototype : public Statement {
-  public:
-    std::string name;
-    DataType ret_type;
-    std::vector <std::string> args;
-
-    Prototype(std::string name, DataType ret_type,  std::vector<std::string> args)
-      : name(name), ret_type(ret_type), args(std::move(args)) {}
-};
-
 class Identifier {
   public:
     std::string name;
     DataType data_type;
 };
+
+class Prototype : public Statement {
+  public:
+    std::string name;
+    DataType ret_type;
+    std::vector <Identifier> args;
+
+    Prototype(std::string name, DataType ret_type,  std::vector<Identifier> args)
+      : name(name), ret_type(ret_type), args(std::move(args)) {}
+    void print() override;
+};
+
 
 class Program : public Node {
   public:
