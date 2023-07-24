@@ -160,11 +160,17 @@ Parser::parse_prototype() {
   } else {
     printf("error: unexpected token '%s'\n", tok.literal.c_str());
   }
+  printf("matched int");
 
   this->next_token(); // eat the type specifier
               
   // get the identifier
   token_t ident = this->current_token;
+  if (ident.type != TOK_IDENT) {
+    printf("error: unexpected token '%s'. Expected IDENT\n", ident.literal.c_str());
+    return nullptr;
+  }
+
   std::string proto_name = ident.literal;
   this->next_token(); // eat the identifier
 
@@ -190,6 +196,16 @@ Parser::parse_prototype() {
     identifier.name = param_name.literal;
     identifier.data_type = (param_type.type == TOK_TYPEINT) ? (TYPE_INT) : (TYPE_FLOAT);
     params.push_back(identifier);
+
+    this->next_token(); // eat the identifier
+    if (this->current_token.type != TOK_COMMA) {
+      if (this->current_token.type == TOK_RPAREN)
+        break;
+
+      printf("error: unexpected token '%s'. Expected ','\n", this->current_token.literal.c_str());
+    } else {
+      this->next_token(); // eat the ','
+    }
   }
 
   return std::make_unique<Prototype>(proto_name, rt, params);

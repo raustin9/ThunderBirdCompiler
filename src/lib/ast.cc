@@ -27,7 +27,9 @@ void
 Prototype::print() {
   printf("function %s %s (", get_data_type(this->ret_type).c_str(), this->name.c_str());
   for (size_t i = 0; i < this->args.size(); i++) {
-    printf("%s %s ", get_data_type(this->args[i].data_type).c_str(), this->args[i].name.c_str());
+    printf("%s %s", get_data_type(this->args[i].data_type).c_str(), this->args[i].name.c_str());
+    if (i < this->args.size()-1)
+      printf(", ");
   }
   printf(")\n");
 }
