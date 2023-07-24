@@ -89,45 +89,25 @@ Parser::parse_assignment(DataType data_type) {
 
   this->next_token(); // eat the TOK_EQUALS
   std::unique_ptr<Expression> expr_val;
-  switch (this->current_token.type) {
-    case TOK_INT:
-      printf("matched int\n");
-      expr_val = this->parse_integer();
-      break;
-    case TOK_FLOAT:
-      printf("matched float\n");
-      expr_val = this->parse_float();
-      break;
-    default:
-      printf("unexpected token: |%s|\n", this->current_token.literal.c_str());
-      return nullptr;
-  }
-
-  if (variable->data_type == TYPE_INT) {
-    auto int_expr = dynamic_cast<IntegerExpr*>(expr_val.get());
-    if (variable->data_type != int_expr->data_type) {
-      printf("error: wrong data dype. %s is type 'int' but got '%d'\n", variable->name.c_str(), int_expr->data_type);
+  if (this->current_token.type == TOK_INT) {
+    if (variable->data_type != TYPE_INT) {
+      printf("error: invalid data type 'int'. Expected '%d'\n", variable->data_type);
       return nullptr;
     }
-    variable->value = int_expr->value;
-  } else if (variable->data_type == TYPE_FLOAT) {
-    auto float_expr = dynamic_cast<FloatExpr*>(expr_val.get());
-    if (variable->data_type != float_expr->data_type) {
-      printf("error: wrong data dype. %s is type 'float' but got '%d'\n", variable->name.c_str(), float_expr->data_type);
+    expr_val = this->parse_integer();
+    variable->value = dynamic_cast<IntegerExpr*>(expr_val.get())->value;
+  } else if (this->current_token.type == TOK_FLOAT) {
+    if (variable->data_type != TYPE_FLOAT) {
+      printf("error: invalid data type 'float'. Expected '%d'\n", variable->data_type);
       return nullptr;
     }
-    variable->dvalue = float_expr->value;
+    expr_val = this->parse_float();
+    variable->dvalue = dynamic_cast<FloatExpr*>(expr_val.get())->value;
   } else {
-    printf("error: invalid data type '%d'\n", variable->data_type);
+    printf("error: inavlid data type '%s'\n", this->current_token.literal.c_str());
     return nullptr;
   }
 
-//  // Ensure matching data types
-//  if (variable->data_type != expr_val->data_type) {
-//    printf("WRONG DT, %d != %d\n", variable->data_type, expr_val->data_type);
-//    printf("expr val %d\n", dynamic_cast<FloatExpr*>(expr_val.get())->data_type);
-//    variable->value = dynamic_cast<IntegerExpr*>(expr_val.get())->value;
-//  }
 
   auto assignment_expr = std::make_unique<VariableAssignment>(op, std::move(variable), std::move(expr_val));
   return assignment_expr;
@@ -171,18 +151,17 @@ Parser::parse_float() {
 std::unique_ptr<Program>
 Parser::parse_program() {
   auto program = std::make_unique<Program>();
-  // std::unique_ptr<Program> program;
 
   // main loop
   while(this->current_token.type != TOK_EOF) {
     std::unique_ptr<Statement> stmt;
     switch(this->current_token.type) {
-      case TOK_LET:
+      case TOK_LET: // 'let' variable assignment statement
         printf("matched let\n");
         stmt = this->parse_let_statement();
         program->statements.push_back(std::move(stmt));
         this->next_token();
-        // goto exit_loop;
+
         break;
       default:
         printf("token: %s\n", this->current_token.literal.c_str());
@@ -190,7 +169,6 @@ Parser::parse_program() {
         break;
     }
   }
-  // exit_loop:
 
   printf(" -- Program --\n");
   program->print();

@@ -50,7 +50,7 @@ FloatExpr::print() {
       break;
   }
 
-  printf("intexpr val: %lf type: %s\n", this->value, dt.c_str());
+  printf("floatexpr val: %lf type: %s\n", this->value, dt.c_str());
 }
 
 void
@@ -81,7 +81,8 @@ void
 VariableAssignment::print() {
   this->variable->print();
   printf(" %s \n", this->op.literal.c_str());
-  this->RHS->print();
+  if (this->RHS)
+    this->RHS->print();
 }
 
 void
@@ -96,5 +97,8 @@ Expression::print() {}
 void
 LetStmt::print() {
   printf("%s\n", this->token.literal.c_str());
-  this->var_assign->print();
+  if (this->var_assign)
+    this->var_assign->print();
+  else 
+    printf("invalid variable assignment\n");
 }
