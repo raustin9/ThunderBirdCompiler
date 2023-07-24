@@ -58,6 +58,11 @@ Parser::parse_let_statement() {
   }
 
   auto let_statement = std::make_unique<LetStmt>(let_tok, std::move(assignment_expr));
+
+  this->next_token();
+  if (this->current_token.type != TOK_SEMICOLON) {
+    printf("error: unexpected token '%s'. Expected ';'\n", this->current_token.literal.c_str());
+  }
   return let_statement;
 }
 
@@ -206,6 +211,12 @@ Parser::parse_prototype() {
     } else {
       this->next_token(); // eat the ','
     }
+  }
+
+  this->next_token();
+  if (this->current_token.type != TOK_SEMICOLON) {
+    printf("error: unexpected token '%s'. Expected ';'\n", this->current_token.literal.c_str());
+    return nullptr;
   }
 
   return std::make_unique<Prototype>(proto_name, rt, params);
