@@ -214,12 +214,19 @@ Parser::parse_prototype() {
   }
 
   this->next_token();
-  if (this->current_token.type != TOK_SEMICOLON) {
-    printf("error: unexpected token '%s'. Expected ';'\n", this->current_token.literal.c_str());
+
+  if (this->current_token.type == TOK_COMMA) {
+    return std::make_unique<Prototype>(proto_name, rt, params);
+  } else if (this->current_token.type == TOK_LBRACE) {
+    // begin reading function body
+    // for now: eat function body until you get '}'
+    while (this->current_token.type != TOK_RBRACE)
+      this->next_token();
+    return std::make_unique<Prototype>(proto_name, rt, params);
+  } else {
+    printf("error: unexpected token '%s'. Expected ';' or '{'\n", this->current_token.literal.c_str());
     return nullptr;
   }
-
-  return std::make_unique<Prototype>(proto_name, rt, params);
 }
 
 // parse the program

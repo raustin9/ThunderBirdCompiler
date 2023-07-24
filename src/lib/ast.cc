@@ -7,7 +7,7 @@
 void
 Program::print() {
   for (unsigned i = 0; i < this->statements.size(); i++) {
-    this->statements[i]->print();
+    if (this->statements[i]) this->statements[i]->print();
   }
 }
 
