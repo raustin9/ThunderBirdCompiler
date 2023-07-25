@@ -12,22 +12,33 @@
 #include "lexer.hh"
 #include "ast.hh"
 #include <string>
+#include <map>
 
+// Parser class
+// Parses the token stream and generates
+// the Abstract Syntax Tree
 class Parser {
 public:
-  Parser(std::string input);
-  void next_token();
+  Parser(std::string input); // constructor -- uses string parameter to initialize a lexer
+  void next_token();         // eats current token and advances the peek and current tokens
  
-  std::unique_ptr<Program> parse_program();
-  std::unique_ptr<Statement> parse_let_statement();
-  std::unique_ptr<Statement> parse_prototype();
-  std::unique_ptr<Expression> parse_integer();
-  std::unique_ptr<Expression> parse_float();
-  std::unique_ptr<Expression> parse_assignment(DataType data_type); 
+  // Parsing functions
+  std::unique_ptr<Program> parse_program();                         // parse the top level program
+  std::unique_ptr<Statement> parse_let_statement();                 // parse let statements
+  std::unique_ptr<Statement> parse_prototype();                     // parse function prototypes
+  std::unique_ptr<Expression> parse_integer();                      // parse an integer literal
+  std::unique_ptr<Expression> parse_float();                        // parse floating point literal
+  std::unique_ptr<Expression> parse_assignment(DataType data_type); // parse variable assignment statement
+  std::unique_ptr<Statement> parse_expression_statement();          // parse expression statement wrapper
+  std::unique_ptr<Expression> parse_expr(int precedence);                         // parse expressions
+                                                                    
+  std::unique_ptr<Expression> parse_prefix_op();                               // parse a prefix (unary) operator "!a"
+  std::unique_ptr<Expression> parse_infix_op(std::unique_ptr<Expression> rhs); // parse an infix (binary) operator -- "a + b"
 
-  Lexer *lex;
-  token_t current_token;
-  token_t peek_token;
+  Lexer *lex;            // scanner that the parser gets the token stream from
+  token_t current_token; // the current token that the parser is 'looking at'
+  token_t peek_token;    // the next token that the parser would be looking at
+  std::map <int, int> operator_precedences;
 };
 
 #endif /* PARSER_ */

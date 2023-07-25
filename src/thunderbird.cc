@@ -44,9 +44,7 @@ main(int argc, char** argv) {
 bool
 test_let() {
   std::string input = 
-    "let int testvar = 5;\n"
-    "function int testfunc(int testparam, float test2, int param3) {fjsdaklfjsda jfskaldfj slkd jfsdfad}\n"
-    "let float test = 5.0;\n";
+    "5;\n";
 
   Parser *parser = new Parser(input);
 

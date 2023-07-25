@@ -19,6 +19,17 @@ Parser::Parser(std::string input) {
   this->peek_token.type = TOK_ILLEGAL;
   this->peek_token.literal = "";
 
+  // Set operator precedences
+  this->operator_precedences[TOK_EQUALTO] = 1;
+  this->operator_precedences[TOK_LT] = 2;
+  this->operator_precedences[TOK_GT] = 2;
+  this->operator_precedences[TOK_PLUS] = 3;
+  this->operator_precedences[TOK_MINUS] = 3;
+  this->operator_precedences[TOK_ASTERISK] = 4;
+  this->operator_precedences[TOK_SLASH] = 4;
+  this->operator_precedences[TOK_BANG] = 5;
+
+
   // fill in the first two tokens
   this->next_token();
   this->next_token();
@@ -229,6 +240,26 @@ Parser::parse_prototype() {
   }
 }
 
+// Parses the expression statement wrapper
+std::unique_ptr<Statement>
+Parser::parse_expression_statement() {
+  auto expr = this->parse_expr(0);
+
+  auto stmt = std::make_unique<ExpressionStatement>(this->current_token, std::move(expr));
+
+  return stmt;
+}
+
+std::unique_ptr<Expression>
+Parser::parse_expr(int precedence) {
+  int prec = this->operator_precedences[this->current_token.type];
+  if (!prec) {
+    return nullptr;
+  }
+
+  return std::make_unique<Expression>();
+}
+
 // parse the program
 // start at top level and cascade down the tree
 std::unique_ptr<Program>
@@ -252,7 +283,9 @@ Parser::parse_program() {
         program->statements.push_back(std::move(stmt));
         break;
       default:
-        printf("token: %s\n", this->current_token.literal.c_str());
+        stmt = this->parse_expression_statement();
+        program->statements.push_back(std::move(stmt));
+        // printf("token: %s\n", this->current_token.literal.c_str());
         this->next_token();
         break;
     }
