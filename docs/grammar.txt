@@ -17,7 +17,11 @@ $e = epsilon for empty
 <func_proto> ::= "function" <type_spec> <identifier> "(" <func_param_list> ")"
 <func_param_list> ::= $e
                     | <type_spec> <identifier> ("," <type_spec> <identifier>)*
-<
+<func_body> ::= "{" <statement>* "}"
+
+<statement> ::= 
+
+<expression> ::=
 
 
 <int_value> ::= [0-9]+

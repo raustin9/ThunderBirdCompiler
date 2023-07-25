@@ -82,12 +82,12 @@ VariableExpr::print() {
   switch (this->data_type) {
     case TYPE_INT:
       dt = "int";
-      printf("variable expr:\n\tname: %s\n\ttype: %s\n\tval: %lld\n",
+      printf("[name: '%s' type: '%s' val: %lld] ",
           this->name.c_str(), dt.c_str(), this->value);
       break;
     case TYPE_FLOAT:
       dt = "float";
-      printf("variable expr:\n\tname: %s\n\ttype: %s\n\tval: %lf\n",
+      printf("[name: '%s' type: '%s' val: %lf] ",
           this->name.c_str(), dt.c_str(), this->dvalue);
       break;
     case TYPE_STRING:
@@ -103,13 +103,13 @@ VariableExpr::print() {
 void
 VariableAssignment::print() {
   this->variable->print();
-  printf(" %s \n", this->op.literal.c_str());
+  printf(" %s ", this->op.literal.c_str());
   if (this->RHS)
     this->RHS->print();
 }
 
-void
-BinaryExpr::print() {}
+//void
+//BinaryExpr::print() {}
 
 void
 Statement::print() {}
@@ -119,7 +119,7 @@ Expression::print() {}
 
 void
 LetStmt::print() {
-  printf("%s\n", this->token.literal.c_str());
+  printf("%s ", this->token.literal.c_str());
   if (this->var_assign)
     this->var_assign->print();
   else 
