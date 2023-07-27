@@ -56,6 +56,11 @@ IntegerExpr::print() {
 }
 
 void
+IdentifierExpr::print() {
+  printf("%s", this->name.c_str());
+}
+
+void
 FloatExpr::print() {
   std::string dt;
   switch (this->data_type) {
@@ -115,7 +120,9 @@ void
 Statement::print() {}
 
 void
-Expression::print() {}
+Expression::print() {
+  
+}
 
 void
 LetStmt::print() {

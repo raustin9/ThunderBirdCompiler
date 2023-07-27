@@ -28,6 +28,7 @@ public:
   std::unique_ptr<Statement> parse_prototype();                     // parse function prototypes
   std::unique_ptr<Expression> parse_integer();                      // parse an integer literal
   std::unique_ptr<Expression> parse_float();                        // parse floating point literal
+  std::unique_ptr<Expression> parse_identifier();                   // parse an identifier expression
   std::unique_ptr<Expression> parse_assignment(DataType data_type); // parse variable assignment statement
   std::unique_ptr<Statement> parse_expression_statement();          // parse expression statement wrapper
   std::unique_ptr<Expression> parse_expr(int precedence);                         // parse expressions

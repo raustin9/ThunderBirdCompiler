@@ -27,7 +27,7 @@ Parser::Parser(std::string input) {
   this->operator_precedences[TOK_MINUS] = 3;
   this->operator_precedences[TOK_ASTERISK] = 4;
   this->operator_precedences[TOK_SLASH] = 4;
-  this->operator_precedences[TOK_BANG] = 5;
+  this->operator_precedences[TOK_BANG] = 5; // future: potentialy as bitwise not '~' prefix operator of SAME precedence as the bang operator
 
 
   // fill in the first two tokens
@@ -174,9 +174,9 @@ Parser::parse_prototype() {
   } else if (tok.type == TOK_TYPEFLOAT) {
     rt = TYPE_FLOAT;
   } else {
-    printf("error: unexpected token '%s'\n", tok.literal.c_str());
+    printf("error: unexpected token '%s'\n. Expected 'int' or 'float'", tok.literal.c_str());
   }
-  printf("matched int");
+  printf("matched int\n");
 
   this->next_token(); // eat the type specifier
               
@@ -195,7 +195,7 @@ Parser::parse_prototype() {
     printf("error: unexpected token '%s'. Expected '('\n", this->current_token.literal.c_str());
   }
   this->next_token(); // eat the '('
-  std::vector<Identifier> params;
+  std::vector<IdentifierExpr> params;
   while(this->current_token.type != TOK_RPAREN) {
     token_t param_type = this->current_token;
     if (param_type.type == TOK_RPAREN) 
@@ -208,7 +208,7 @@ Parser::parse_prototype() {
       return nullptr;
     }
 
-    Identifier identifier;
+    IdentifierExpr identifier;
     identifier.name = param_name.literal;
     identifier.data_type = (param_type.type == TOK_TYPEINT) ? (TYPE_INT) : (TYPE_FLOAT);
     params.push_back(identifier);
@@ -226,7 +226,7 @@ Parser::parse_prototype() {
 
   this->next_token();
 
-  if (this->current_token.type == TOK_COMMA) {
+  if (this->current_token.type == TOK_SEMICOLON) {
     return std::make_unique<Prototype>(proto_name, rt, params);
   } else if (this->current_token.type == TOK_LBRACE) {
     // begin reading function body
@@ -240,6 +240,14 @@ Parser::parse_prototype() {
   }
 }
 
+// Parse an identifier in an expression
+std::unique_ptr<Expression>
+Parser::parse_identifier() {
+  auto ident = std::make_unique<IdentifierExpr>();
+  ident->name = this->current_token.literal;
+  return ident;
+}
+
 // Parses the expression statement wrapper
 std::unique_ptr<Statement>
 Parser::parse_expression_statement() {
@@ -247,14 +255,29 @@ Parser::parse_expression_statement() {
 
   auto stmt = std::make_unique<ExpressionStatement>(this->current_token, std::move(expr));
 
+  this->next_token();
+  if (this->current_token.type == TOK_SEMICOLON) {
+    this->next_token();
+  }
+
   return stmt;
 }
 
 std::unique_ptr<Expression>
 Parser::parse_expr(int precedence) {
-  int prec = this->operator_precedences[this->current_token.type];
-  if (!prec) {
-    return nullptr;
+//  int prec = this->operator_precedences[this->current_token.type];
+//  if (!prec) {
+//    printf("prec %d -- %s\n", prec, this->current_token.literal.c_str());
+//    return nullptr;
+//  }
+
+  switch(this->current_token.type) {
+    case TOK_INT:
+      return this->parse_integer();
+    case TOK_IDENT:
+      return this->parse_identifier();
+    default:
+      return nullptr;
   }
 
   return std::make_unique<Expression>();
@@ -286,7 +309,7 @@ Parser::parse_program() {
         stmt = this->parse_expression_statement();
         program->statements.push_back(std::move(stmt));
         // printf("token: %s\n", this->current_token.literal.c_str());
-        this->next_token();
+        // this->next_token();
         break;
     }
   }

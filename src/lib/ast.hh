@@ -64,6 +64,14 @@ class ExpressionStatement : public Statement {
 //    void print() override;
 //};
 
+// Prefix or unary operator
+class PrefixOperator {
+  public:
+    token_t token;
+    std::string op;
+    std::unique_ptr<Expression> RHS;
+};
+
 // Node for assigning a variable
 // "x = 3 + 20"
 class VariableAssignment : public Expression {
@@ -99,6 +107,16 @@ class FloatExpr : public Expression {
     void print() override;
 };
 
+// Identifier class that holds the name and data type of the identifier
+// identifier can be either a function or a variable
+class IdentifierExpr : public Expression {
+  public:
+    std::string name;   // name of the identifie
+    DataType data_type; // data type of the identifier (return type for function, stored type for variable)
+
+    void print() override;
+};
+
 // Variable Expression node
 // Is an expression because a variable does contain a value that it is assigned to
 class VariableExpr : public Expression {
@@ -127,13 +145,6 @@ class LetStmt : public Statement {
     void print() override;
 };
 
-// Identifier class that holds the name and data type of the identifier
-// identifier can be either a function or a variable
-class Identifier {
-  public:
-    std::string name;   // name of the identifie
-    DataType data_type; // data type of the identifier (return type for function, stored type for variable)
-};
 
 // Function prototype statement node
 // add(...)
@@ -141,9 +152,9 @@ class Prototype : public Statement {
   public:
     std::string name;              // name of the function prototype
     DataType ret_type;             // return type of the function
-    std::vector <Identifier> args; // list of arguments in the function prototype -- func(int param1...)
+    std::vector <IdentifierExpr> args; // list of arguments in the function prototype -- func(int param1...)
 
-    Prototype(std::string name, DataType ret_type,  std::vector<Identifier> args)
+    Prototype(std::string name, DataType ret_type,  std::vector<IdentifierExpr> args)
       : name(name), ret_type(ret_type), args(std::move(args)) {}
     void print() override;
 };

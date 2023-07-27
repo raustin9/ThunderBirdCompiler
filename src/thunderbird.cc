@@ -44,7 +44,7 @@ main(int argc, char** argv) {
 bool
 test_let() {
   std::string input = 
-    "5;\n";
+    "foobar;\n";
 
   Parser *parser = new Parser(input);
 
