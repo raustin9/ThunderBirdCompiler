@@ -252,13 +252,13 @@ Parser::parse_identifier() {
 std::unique_ptr<Statement>
 Parser::parse_expression_statement() {
   auto LHS = this->parse_primary();
-  
+  auto RHS = this->parse_expr(0, std::move(LHS));
+  this->next_token();
 
   ////  auto RHS = this->parse_expr(0);
   // printf("expr: %s\n", dynamic_cast<IdentifierExpr*>(LHS.get())->name.c_str());
   auto stmt = std::make_unique<ExpressionStatement>(this->current_token, std::move(LHS));
 
-  this->next_token();
   if (this->current_token.type == TOK_SEMICOLON) {
     this->next_token();
   }
@@ -270,8 +270,10 @@ std::unique_ptr<Expression>
 Parser::parse_primary() {
   switch(this->current_token.type) {
     case TOK_INT:
+      printf("matched %s\n", this->current_token.literal.c_str());
       return this->parse_integer();
     case TOK_IDENT:
+      printf("matched %s\n", this->current_token.literal.c_str());
       return this->parse_identifier();
     default:
       return nullptr;
@@ -281,13 +283,17 @@ Parser::parse_primary() {
 std::unique_ptr<Expression>
 Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
   while (1) {
+    this->next_token();
     int prec = this->operator_precedences[this->current_token.type];
     if (prec < precedence) {
+      printf("prec %d\n", prec);
       return LHS;
     }
 
-    int binop = this->current_token.type;
+    token_t op = this->current_token;
     this->next_token();
+
+    printf("op %s\n", op.literal.c_str());
 
     auto RHS = this->parse_primary();
     if (!RHS) {
