@@ -124,12 +124,13 @@ VariableAssignment::print() {
 
 void
 BinaryExpr::print() {
-  printf("lhs: ");
+  // printf("lhs: ");
+  printf("\n");
   this->LHS->print();
   
   printf(" %s ", this->op.literal.c_str());
   
-  printf("rhs: ");
+  // printf("rhs: ");
   this->RHS->print();
   printf("\n");
 }
