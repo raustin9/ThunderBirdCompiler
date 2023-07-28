@@ -31,10 +31,11 @@ public:
   std::unique_ptr<Expression> parse_identifier();                   // parse an identifier expression
   std::unique_ptr<Expression> parse_assignment(DataType data_type); // parse variable assignment statement
   std::unique_ptr<Statement> parse_expression_statement();          // parse expression statement wrapper
-  std::unique_ptr<Expression> parse_expr(int precedence);                         // parse expressions
+  std::unique_ptr<Expression> parse_expr(int precedence, std::unique_ptr<Expression> LHS);                         // parse expressions
                                                                     
   std::unique_ptr<Expression> parse_prefix_op();                               // parse a prefix (unary) operator "!a"
   std::unique_ptr<Expression> parse_infix_op(std::unique_ptr<Expression> rhs); // parse an infix (binary) operator -- "a + b"
+  std::unique_ptr<Expression>parse_primary(); // parse members of an expression
 
   Lexer *lex;            // scanner that the parser gets the token stream from
   token_t current_token; // the current token that the parser is 'looking at'
