@@ -44,7 +44,8 @@ main(int argc, char** argv) {
 bool
 test_let() {
   std::string input = 
-    "x + 5 * y - 7;";
+    "x * y + a;\n"
+    "z - k;";
   printf("input:\n%s\n\n", input.c_str());
   Parser *parser = new Parser(input);
 

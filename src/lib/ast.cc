@@ -24,6 +24,15 @@ get_data_type(DataType dt) {
 }
 
 void
+ExpressionStatement::print() {
+  if (!this->expr) {
+    printf("null expr\n");
+  } else {
+    this->expr->print();
+  }
+}
+
+void
 Prototype::print() {
   printf("function %s %s (", get_data_type(this->ret_type).c_str(), this->name.c_str());
   for (size_t i = 0; i < this->args.size(); i++) {
@@ -113,8 +122,17 @@ VariableAssignment::print() {
     this->RHS->print();
 }
 
-//void
-//BinaryExpr::print() {}
+void
+BinaryExpr::print() {
+  printf("lhs: ");
+  this->LHS->print();
+  
+  printf(" %s ", this->op.literal.c_str());
+  
+  printf("rhs: ");
+  this->RHS->print();
+  printf("\n");
+}
 
 void
 Statement::print() {}

@@ -248,24 +248,7 @@ Parser::parse_identifier() {
   return ident;
 }
 
-// Parses the expression statement wrapper
-std::unique_ptr<Statement>
-Parser::parse_expression_statement() {
-  auto LHS = this->parse_primary();
-  auto RHS = this->parse_expr(0, std::move(LHS));
-  this->next_token();
-
-  ////  auto RHS = this->parse_expr(0);
-  // printf("expr: %s\n", dynamic_cast<IdentifierExpr*>(LHS.get())->name.c_str());
-  auto stmt = std::make_unique<ExpressionStatement>(this->current_token, std::move(LHS));
-
-  if (this->current_token.type == TOK_SEMICOLON) {
-    this->next_token();
-  }
-
-  return stmt;
-}
-
+// Parse parts in an expression
 std::unique_ptr<Expression>
 Parser::parse_primary() {
   switch(this->current_token.type) {
@@ -276,14 +259,36 @@ Parser::parse_primary() {
       printf("matched %s\n", this->current_token.literal.c_str());
       return this->parse_identifier();
     default:
+      printf("primary nul\n");
       return nullptr;
   }
 }
+
+// Parses the expression statement wrapper
+std::unique_ptr<Statement>
+Parser::parse_expression_statement() {
+  auto LHS = this->parse_primary();
+  LHS = this->parse_expr(0, std::move(LHS));
+
+  auto stmt = std::make_unique<ExpressionStatement>(this->current_token, std::move(LHS));
+
+  if (this->current_token.type == TOK_SEMICOLON) {
+    this->next_token();
+  }
+
+  return stmt;
+}
+
 
 std::unique_ptr<Expression>
 Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
   while (1) {
     this->next_token();
+    if (this->current_token.type == TOK_SEMICOLON) {
+      printf("semicolon\n");
+      this->next_token();
+      return LHS;
+    }
     int prec = this->operator_precedences[this->current_token.type];
     if (prec < precedence) {
       printf("prec %d\n", prec);
@@ -292,11 +297,13 @@ Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
 
     token_t op = this->current_token;
     this->next_token();
+  
 
     printf("op %s\n", op.literal.c_str());
 
     auto RHS = this->parse_primary();
     if (!RHS) {
+      printf("null\n");
       return nullptr;
     }
 
@@ -304,9 +311,13 @@ Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
     if (prec < next_prec) {
       RHS = this->parse_expr(prec+1, std::move(RHS));
       if (!RHS) {
+        printf("null\n");
         return nullptr;
       }
     }
+
+    // LHS = std::make_unique<BinaryExpr>(op, std::move(LHS), std::move(RHS));
+    LHS = std::make_unique<BinaryExpr>(op, std::move(LHS), std::move(RHS));
   }
 
   return std::make_unique<Expression>();
@@ -337,8 +348,6 @@ Parser::parse_program() {
       default:
         stmt = this->parse_expression_statement();
         program->statements.push_back(std::move(stmt));
-        // printf("token: %s\n", this->current_token.literal.c_str());
-        // this->next_token();
         break;
     }
   }

@@ -48,21 +48,22 @@ class ExpressionStatement : public Statement {
       token_t token,
       std::unique_ptr<Expression> expr
     ) : token(token) , expr(std::move(expr)) {}
+    void print() override;
 };
 
 //// Expression with an infix operator
-//class BinaryExpr : public Expression {
-//  public:
-//    token_t op;
-//    std::unique_ptr<Expression> LHS;
-//    std::unique_ptr<Expression> RHS;
-//    BinaryExpr(
-//        token_t op,
-//        std::unique_ptr<Expression> LHS,
-//        std::unique_ptr<Expression> RHS
-//      ) : op(op), LHS(std::move(LHS)), RHS(std::move(RHS)) {}
-//    void print() override;
-//};
+class BinaryExpr : public Expression {
+  public:
+    token_t op;
+    std::unique_ptr<Expression> LHS;
+    std::unique_ptr<Expression> RHS;
+    BinaryExpr(
+        token_t op,
+        std::unique_ptr<Expression> LHS,
+        std::unique_ptr<Expression> RHS
+      ) : op(op), LHS(std::move(LHS)), RHS(std::move(RHS)) {}
+    void print() override;
+};
 
 // Prefix or unary operator
 class PrefixOperator {
