@@ -17,7 +17,7 @@ function main() {
   int add_value = add(x, y);
 }
 ```
-The goal is to introduce a simple type system of ```int```s and ```float```s, but I may expand it to support basic strings as well
+The goal is to introduce a simple type system of ```int```s, ```float```s and ```bytes```, but I may expand it to support basic strings as well
 
 ## Compiler
 All components of the compiler are built on my own without the use of any generators.
