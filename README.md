@@ -29,5 +29,5 @@ The parser is a recursive descent parser that follows the basic grammar of the l
 
 ## Potential Features in the Future
 * Type casting
-     * let int x = 2 + 3.0; -- the 3.0 should be cast from ```float``` to ```int```. As of now, this is not supported and will flag an error
+     * ```let int x = 2 + 3.0;``` -- the ```3.0``` should be cast from ```float``` to ```int```. As of now, this is not supported and will flag an error
 * Strings
