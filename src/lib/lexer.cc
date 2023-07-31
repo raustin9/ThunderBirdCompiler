@@ -8,6 +8,7 @@ Lexer::Lexer(std::string input) {
   this->read_char();
 
   this->keywords["function"] = TOK_FUNCTION;
+  this->keywords["define"] = TOK_FUNCTION;
   this->keywords["return"] = TOK_RETURN;
   this->keywords["let"] = TOK_LET;
   this->keywords["int"] = TOK_TYPEINT;
