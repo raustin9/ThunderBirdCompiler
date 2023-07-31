@@ -35,6 +35,8 @@ enum TokenType {
   TOK_TYPEINT,    // "int" actual integer type
   TOK_FLOAT,      // "3.14" or "200.5"
   TOK_TYPEFLOAT,  // "float" actual float type
+  TOK_BYTE,       // "byte" a 1 byte integer
+  TOK_TYPEBYTE,   // "byte" type specifier
   TOK_STRING,     // "string" actual string type
   TOK_VOID,       // "void"
 

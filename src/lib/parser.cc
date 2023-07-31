@@ -23,6 +23,8 @@ Parser::Parser(std::string input) {
   this->operator_precedences[TOK_EQUALTO] = 1;
   this->operator_precedences[TOK_LT] = 2;
   this->operator_precedences[TOK_GT] = 2;
+  this->operator_precedences[TOK_LTEQUALTO] = 2;
+  this->operator_precedences[TOK_GTEQUALTO] = 2;
   this->operator_precedences[TOK_PLUS] = 3;
   this->operator_precedences[TOK_MINUS] = 3;
   this->operator_precedences[TOK_ASTERISK] = 4;
