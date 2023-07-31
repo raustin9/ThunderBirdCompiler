@@ -19,9 +19,10 @@
 // the Abstract Syntax Tree
 class Parser {
 public:
-  Parser(std::string input); // constructor -- uses string parameter to initialize a lexer
-  void next_token();         // eats current token and advances the peek and current tokens
- 
+  Parser(std::string input);  // constructor -- uses string parameter to initialize a lexer
+  void next_token();          // eats current token and advances the peek and current tokens
+  int get_token_precedence(); // gets the precedence for the current token
+
   // Parsing functions
   std::unique_ptr<Program> parse_program();                         // parse the top level program
   std::unique_ptr<Statement> parse_let_statement();                 // parse let statements
@@ -32,10 +33,12 @@ public:
   std::unique_ptr<Expression> parse_assignment(DataType data_type); // parse variable assignment statement
   std::unique_ptr<Statement> parse_expression_statement();          // parse expression statement wrapper
   std::unique_ptr<Expression> parse_expr(int precedence, std::unique_ptr<Expression> LHS);                         // parse expressions
+  std::unique_ptr<Expression> parse_parentheses_expr();             // parse expressions contained within parentheses
                                                                     
   std::unique_ptr<Expression> parse_prefix_op();                               // parse a prefix (unary) operator "!a"
   std::unique_ptr<Expression> parse_infix_op(std::unique_ptr<Expression> rhs); // parse an infix (binary) operator -- "a + b"
   std::unique_ptr<Expression>parse_primary(); // parse members of an expression
+  std::unique_ptr<Expression>parse_expression_interior(); // parses expression that are not top level
 
   Lexer *lex;            // scanner that the parser gets the token stream from
   token_t current_token; // the current token that the parser is 'looking at'

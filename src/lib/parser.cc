@@ -258,10 +258,52 @@ Parser::parse_primary() {
     case TOK_IDENT:
       printf("matched %s\n", this->current_token.literal.c_str());
       return this->parse_identifier();
+    case TOK_LPAREN:
+      printf("matched %s\n", this->current_token.literal.c_str());
+      return this->parse_parentheses_expr();
     default:
       printf("primary nul\n");
       return nullptr;
   }
+}
+
+// Parse expressions within parentheses
+// x + (5 * 2)
+std::unique_ptr<Expression>
+Parser::parse_parentheses_expr() {
+  this->next_token(); // eat the '('
+
+  auto expr = this->parse_expression_interior();
+
+  if (!expr) {
+    printf("parse_paren: null\n");
+    return nullptr;
+  }
+
+  if (this->current_token.type != TOK_RPAREN) {
+    printf("parse_paren: expected ')'\n");
+    return nullptr;
+  } else {
+    printf("matched ')'\n");
+  }
+  // this->next_token(); // eat the ')'
+
+  return expr;
+}
+
+// Parses expressions that are not top level
+std::unique_ptr<Expression>
+Parser::parse_expression_interior() {
+  auto LHS = this->parse_primary();
+  if (!LHS) {
+    printf("parse_expr_interior: LHS null\n");
+    return nullptr;
+  }
+
+  this->next_token();
+  LHS = this->parse_expr(0, std::move(LHS));
+  
+  return LHS;
 }
 
 // Parses the expression statement wrapper
@@ -280,17 +322,29 @@ Parser::parse_expression_statement() {
   return stmt;
 }
 
+// Get the precedence of the current token
+// if it is not a valid operator it returns -1
+int
+Parser::get_token_precedence() {
+  int tok_prec = this->operator_precedences[this->current_token.type];
+  if (tok_prec <= 0) 
+    return -1;
+
+  return tok_prec;
+}
 
 std::unique_ptr<Expression>
 Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
   while (1) {
     // this->next_token();
-    if (this->current_token.type == TOK_SEMICOLON) {
-      printf("semicolon\n");
-      this->next_token();
+    if (this->current_token.type == TOK_SEMICOLON || this->current_token.type == TOK_RPAREN) {
+      if (this->current_token.type == TOK_SEMICOLON) printf("semicolon\n");
+      else printf("rparen\n");
+      // this->next_token();
       return LHS;
     }
-    int prec = this->operator_precedences[this->current_token.type];
+//    int prec = this->operator_precedences[this->current_token.type];
+    int prec = this->get_token_precedence();
     if (prec < precedence) {
       printf("prec %d\n", prec);
       return LHS;
@@ -312,18 +366,21 @@ Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
 
 
     this->next_token();
-    if (this->current_token.type == TOK_SEMICOLON) {
-      printf("semicolon\n");
+    if (this->current_token.type == TOK_SEMICOLON || this->current_token.type == TOK_RPAREN) {
+      if (this->current_token.type == TOK_SEMICOLON) printf("semicolon\n");
+      else printf("rparen\n");
       // this->next_token();
       LHS = std::make_unique<BinaryExpr>(op, std::move(LHS), std::move(RHS));
       return LHS;
     }
-    int next_prec = this->operator_precedences[this->current_token.type];
+    int next_prec = this->get_token_precedence();
+    // int next_prec = this->operator_precedences[this->current_token.type];
     printf("next prec: '%s' %d\n", this->current_token.literal.c_str(), next_prec);
     if (prec < next_prec) {
+      printf("prec < next_prec\n");
       RHS = this->parse_expr(prec+1, std::move(RHS));
       if (!RHS) {
-        printf("null\n");
+        printf("rhs null\n");
         return nullptr;
       }
     }
