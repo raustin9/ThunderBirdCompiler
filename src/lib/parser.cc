@@ -99,7 +99,10 @@ Parser::parse_assignment(DataType data_type) {
   tok = this->current_token;
 
   token_t op;
-  if (tok.type != TOK_EQUALS) {
+  if (tok.type == TOK_SEMICOLON) {
+    // just declaring not assigning
+    return std::make_unique<VariableAssignment>(tok, std::move(variable), nullptr);
+  } else if (tok.type != TOK_EQUALS) {
     printf("error: unexpected token |%s|\n", tok.literal.c_str());
     return nullptr;
   } else {
