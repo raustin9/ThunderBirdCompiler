@@ -47,9 +47,9 @@ test_let() {
 //    "let int x = 5;\n"
 //    "variable - y * a + t;\n"
 //    "function float add();\n"
-//    "z * v - b;\n";
+//    "z * (a / b) - b;\n";
   std::string input = 
-    "x * (y + (u * v)) - b;\n";
+    "let int x = 5;\n";
   printf("input:\n%s\n\n", input.c_str());
   Parser *parser = new Parser(input);
 

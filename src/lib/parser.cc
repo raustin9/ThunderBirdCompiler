@@ -56,6 +56,7 @@ Parser::parse_let_statement() {
       printf("matched int\n");
 
       assignment_expr = this->parse_assignment(TYPE_INT);
+      // assignment_expr = this->parse_expression_interior();
       break;
     case TOK_TYPEFLOAT:
       printf("matched float\n");
@@ -70,7 +71,7 @@ Parser::parse_let_statement() {
 
   auto let_statement = std::make_unique<LetStmt>(let_tok, std::move(assignment_expr));
 
-  this->next_token();
+  // this->next_token();
   if (this->current_token.type != TOK_SEMICOLON) {
     printf("error: unexpected token '%s'. Expected ';'\n", this->current_token.literal.c_str());
   }
@@ -104,25 +105,26 @@ Parser::parse_assignment(DataType data_type) {
   }
 
   this->next_token(); // eat the TOK_EQUALS
-  std::unique_ptr<Expression> expr_val;
-  if (this->current_token.type == TOK_INT) {
-    if (variable->data_type != TYPE_INT) {
-      printf("error: invalid data type 'int'. Expected '%d'\n", variable->data_type);
-      return nullptr;
-    }
-    expr_val = this->parse_integer();
-    variable->value = dynamic_cast<IntegerExpr*>(expr_val.get())->value;
-  } else if (this->current_token.type == TOK_FLOAT) {
-    if (variable->data_type != TYPE_FLOAT) {
-      printf("error: invalid data type 'float'. Expected '%d'\n", variable->data_type);
-      return nullptr;
-    }
-    expr_val = this->parse_float();
-    variable->dvalue = dynamic_cast<FloatExpr*>(expr_val.get())->value;
-  } else {
-    printf("error: inavlid data type '%s'\n", this->current_token.literal.c_str());
-    return nullptr;
-  }
+  auto expr_val = this->parse_expression_interior();
+//  std::unique_ptr<Expression> expr_val;
+//  if (this->current_token.type == TOK_INT) {
+//    if (variable->data_type != TYPE_INT) {
+//      printf("error: invalid data type 'int'. Expected '%d'\n", variable->data_type);
+//      return nullptr;
+//    }
+//    expr_val = this->parse_integer();
+//    variable->value = dynamic_cast<IntegerExpr*>(expr_val.get())->value;
+//  } else if (this->current_token.type == TOK_FLOAT) {
+//    if (variable->data_type != TYPE_FLOAT) {
+//      printf("error: invalid data type 'float'. Expected '%d'\n", variable->data_type);
+//      return nullptr;
+//    }
+//    expr_val = this->parse_float();
+//    variable->dvalue = dynamic_cast<FloatExpr*>(expr_val.get())->value;
+//  } else {
+//    printf("error: inavlid data type '%s'\n", this->current_token.literal.c_str());
+//    return nullptr;
+//  }
 
 
   auto assignment_expr = std::make_unique<VariableAssignment>(op, std::move(variable), std::move(expr_val));
@@ -336,14 +338,11 @@ Parser::get_token_precedence() {
 std::unique_ptr<Expression>
 Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
   while (1) {
-    // this->next_token();
     if (this->current_token.type == TOK_SEMICOLON || this->current_token.type == TOK_RPAREN) {
       if (this->current_token.type == TOK_SEMICOLON) printf("semicolon\n");
       else printf("rparen\n");
-      // this->next_token();
       return LHS;
     }
-//    int prec = this->operator_precedences[this->current_token.type];
     int prec = this->get_token_precedence();
     if (prec < precedence) {
       printf("prec %d\n", prec);
@@ -364,12 +363,11 @@ Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
       return nullptr;
     }
 
-
     this->next_token();
     if (this->current_token.type == TOK_SEMICOLON || this->current_token.type == TOK_RPAREN) {
       if (this->current_token.type == TOK_SEMICOLON) printf("semicolon\n");
       else printf("rparen\n");
-      // this->next_token();
+ 
       LHS = std::make_unique<BinaryExpr>(op, std::move(LHS), std::move(RHS));
       return LHS;
     }
