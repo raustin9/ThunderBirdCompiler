@@ -26,3 +26,8 @@ The point of this is to learn, so I did not want to use flex/bison which I have 
 The scanner  (at the moment) is a single pass lexical analyzer. It simply iterates through the input string one character at a time, and matches
 tokens with the corresponding rulesets.
 The parser is a recursive descent parser that follows the basic grammar of the language
+
+## Potential Features in the Future
+* Type casting
+     * let int x = 2 + 3.0; -- the 3.0 should be cast from ```float``` to ```int```. As of now, this is not supported and will flag an error
+* Strings
