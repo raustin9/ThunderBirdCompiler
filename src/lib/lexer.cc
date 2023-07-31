@@ -11,6 +11,7 @@ Lexer::Lexer(std::string input) {
   this->keywords["define"] = TOK_FUNCTION;
   this->keywords["return"] = TOK_RETURN;
   this->keywords["let"] = TOK_LET;
+  this->keywords["henceforth"] = TOK_LET;
   this->keywords["int"] = TOK_TYPEINT;
   this->keywords["float"] = TOK_TYPEFLOAT;
   this->keywords["void"] = TOK_VOID;

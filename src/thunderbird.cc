@@ -51,7 +51,7 @@ test_let() {
 //  std::string input = 
 //    "let int x = 5 * (y * c);\n";
   std::string input = 
-    "function int func1();\n"
+    "henceforth int x = 4;\n"
     "define float func2();\n";
   printf("input:\n%s\n\n", input.c_str());
   Parser *parser = new Parser(input);
