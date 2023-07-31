@@ -49,7 +49,7 @@ test_let() {
 //    "function float add();\n"
 //    "z * (a / b) - b;\n";
   std::string input = 
-    "let int x = 5;\n";
+    "let int x = 5 * (y * c);\n";
   printf("input:\n%s\n\n", input.c_str());
   Parser *parser = new Parser(input);
 
