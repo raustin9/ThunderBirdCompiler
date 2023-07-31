@@ -43,11 +43,13 @@ main(int argc, char** argv) {
 
 bool
 test_let() {
+//  std::string input = 
+//    "let int x = 5;\n"
+//    "variable - y * a + t;\n"
+//    "function float add();\n"
+//    "z * v - b;\n";
   std::string input = 
-    "let int x = 5;\n"
-    "x - y * a;\n"
-    "function float add();\n"
-    "z * v - b;\n";
+    "x * (y + (u * v)) - b;\n";
   printf("input:\n%s\n\n", input.c_str());
   Parser *parser = new Parser(input);
 
