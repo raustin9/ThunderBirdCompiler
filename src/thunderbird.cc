@@ -46,7 +46,7 @@ test_let() {
   std::string input = 
     "define int func1() {\n"
     "  let int x = 0;\n"
-    "  x - z;\n"
+    "  x = y + z;\n"
     "}\n";
 
   printf("input:\n%s\n\n", input.c_str());

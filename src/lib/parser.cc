@@ -20,16 +20,17 @@ Parser::Parser(std::string input) {
   this->peek_token.literal = "";
 
   // Set operator precedences
-  this->operator_precedences[TOK_EQUALTO] = 1;
-  this->operator_precedences[TOK_LT] = 2;
-  this->operator_precedences[TOK_GT] = 2;
-  this->operator_precedences[TOK_LTEQUALTO] = 2;
-  this->operator_precedences[TOK_GTEQUALTO] = 2;
-  this->operator_precedences[TOK_PLUS] = 3;
-  this->operator_precedences[TOK_MINUS] = 3;
-  this->operator_precedences[TOK_ASTERISK] = 4;
-  this->operator_precedences[TOK_SLASH] = 4;
-  this->operator_precedences[TOK_BANG] = 5; // future: potentialy as bitwise not '~' prefix operator of SAME precedence as the bang operator
+  this->operator_precedences[TOK_EQUALS] = 1;
+  this->operator_precedences[TOK_EQUALTO] = 2;
+  this->operator_precedences[TOK_LT] = 3;
+  this->operator_precedences[TOK_GT] = 3;
+  this->operator_precedences[TOK_LTEQUALTO] = 3;
+  this->operator_precedences[TOK_GTEQUALTO] = 3;
+  this->operator_precedences[TOK_PLUS] = 4;
+  this->operator_precedences[TOK_MINUS] = 4;
+  this->operator_precedences[TOK_ASTERISK] = 5;
+  this->operator_precedences[TOK_SLASH] = 5;
+  this->operator_precedences[TOK_BANG] = 6; // future: potentialy as bitwise not '~' prefix operator of SAME precedence as the bang operator
 
 
   // fill in the first two tokens
