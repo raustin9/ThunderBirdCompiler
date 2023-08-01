@@ -171,8 +171,9 @@ class FunctionDecl : public Statement {
 //    std::vector <IdentifierExpr> args;
 
     FunctionDecl(
-      std::unique_ptr<Prototype> prototype
-    ) : prototype(std::move(prototype)) {}
+      std::unique_ptr<Prototype> prototype,
+      std::vector<std::unique_ptr<Statement> > body
+    ) : prototype(std::move(prototype)), body(std::move(body)) {}
 //    FunctionDecl(
 //      std::string name,
 //      DataType ret_type,

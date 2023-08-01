@@ -40,7 +40,12 @@ FunctionDecl::print() {
     if (i < this->prototype->params.size()-1)
       printf(", ");
   }
-  printf(")\n");
+  printf(") {\n");
+  for (size_t i = 0; i < this->body.size(); i++) {
+    this->body[i]->print();
+  }
+
+  printf("}\n");
 }
 
 void
