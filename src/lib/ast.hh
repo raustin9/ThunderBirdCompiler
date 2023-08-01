@@ -162,6 +162,17 @@ class Prototype : public Statement {
     void print() override;
 };
 
+class Function : public Node {
+  public:
+    std::unique_ptr<Prototype> prototype;           // function prototype
+    std::vector <std::unique_ptr<Statement> > body; // list of statements that make up the function body
+
+    Function(
+      std::unique_ptr<Prototype> prototype,
+      std::vector <std::unique_ptr<Statement> > body
+    ) : prototype(std::move(prototype)), body(std::move(body)) {}
+};
+
 // Program Node in the AST
 // should be the root node of the tree
 class Program : public Node {
