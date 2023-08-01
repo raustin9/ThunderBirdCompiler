@@ -27,6 +27,59 @@ The scanner  (at the moment) is a single pass lexical analyzer. It simply iterat
 tokens with the corresponding rulesets.
 The parser is a recursive descent parser that follows the basic grammar of the language
 
+## Language Features
+### Top Level Statements
+At the top or "global" level, you can either define a function or a global variable
+An example of this is:
+```
+let int global_x = 0;
+
+define int example_func() {
+  let int x = 2 + global_x;
+  return x;
+}
+```
+In this case, the variable ```global_x``` is at the global scope
+An example of an illegal top-level statement is 
+```
+let int global_x = 0;
+x + 4;
+```
+This is illegal because expressions as statements are not supported at the global level.
+The only thing you can do outside of a function is define functions and variables
+
+### Function Definitions
+To define a function, use the ```define``` keyword.
+A function definition requires a specified return type as well
+Here is an example of a basic function definition:
+```
+define float example(float arg1, float arg2) {
+  return arg1 + arg2;
+}
+```
+See, simple.
+
+### Variable declarations
+Use the ```let``` keyword to declare a variable.
+Variable declarations are required to be initialized to a value.
+
+Here is an example of a legal declaration:
+```let float x = 0.0;```
+Here is an example of an illegal declaration:
+```let float x;```
+This could seem annoying, but it is something that I find useful.
+
+For example, in C, sometimes ```int```s are defaulted to 0, and sometimes they are not. It is not hard to find out as you just have to look at your compiler version and details, but it is still irritating to have to keep that in mind.
+In ThunderBird, this is done so that you always know what your variables are initialized to.
+Isn't that nice?
+
+You can also initialize your variables to expressions
+```
+let float x = 3.0 - 1.0;
+```
+
+
+
 ## Potential Features in the Future
 * Type casting
      * ```let int x = 2 + 3.0;``` -- the ```3.0``` should be cast from ```float``` to ```int```. As of now, this is not supported and will flag an error
