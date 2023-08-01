@@ -134,8 +134,8 @@ Parser::parse_float() {
 }
 
 std::unique_ptr<Statement>
-Parser::parse_prototype() {
-  this->next_token(); // eat the "function"
+Parser::parse_function_defn() {
+  this->next_token(); // eat the "function" or "define" keyword
 
   // Get the type specifier
   token_t tok = this->current_token;
@@ -144,6 +144,8 @@ Parser::parse_prototype() {
     rt = TYPE_INT;
   } else if (tok.type == TOK_TYPEFLOAT) {
     rt = TYPE_FLOAT;
+  } else if (tok.type == TOK_TYPEBYTE) {
+    rt = TYPE_BYTE;
   } else {
     printf("error: unexpected token '%s'\n. Expected 'int' or 'float'", tok.literal.c_str());
   }
@@ -194,19 +196,32 @@ Parser::parse_prototype() {
       this->next_token(); // eat the ','
     }
   }
+  this->next_token(); // eat the ')' at end of parameter list
 
-  this->next_token();
-
-  if (this->current_token.type == TOK_SEMICOLON) {
-    return std::make_unique<Prototype>(proto_name, rt, params);
-  } else if (this->current_token.type == TOK_LBRACE) {
+  // FUNCTION BODY //
+  if (this->current_token.type == TOK_LBRACE) {
     // begin reading function body
     // for now: eat function body until you get '}'
-    while (this->current_token.type != TOK_RBRACE)
-      this->next_token();
-    return std::make_unique<Prototype>(proto_name, rt, params);
+
+    std::vector <std::unique_ptr<Statement> > func_body;
+    while (this->current_token.type != TOK_RBRACE) {
+      std::unique_ptr<Statement> stmt;
+      switch (this->current_token.type) {
+        case TOK_LET:
+          stmt = this->parse_let_statement();
+          func_body.push_back(std::move(stmt));
+          this->next_token();
+          break;
+        default:
+          printf("inner function stmt not supported yet\n");
+          this->next_token();
+          break;
+      }
+    }
+    auto proto = std::make_unique<Prototype>(proto_name, rt, params);
+    return std::make_unique<FunctionDecl>(std::move(proto), std::move(func_body));
   } else {
-    printf("error: unexpected token '%s'. Expected ';' or '{'\n", this->current_token.literal.c_str());
+    printf("error: unexpected token '%s'. Expected '{'\n", this->current_token.literal.c_str());
     return nullptr;
   }
 }
@@ -378,7 +393,7 @@ Parser::parse_program() {
         break;
       case TOK_FUNCTION:
         printf("matched function\n");
-        stmt = this->parse_prototype();
+        stmt = this->parse_function_defn();
         program->statements.push_back(std::move(stmt));
         this->next_token();
         break;

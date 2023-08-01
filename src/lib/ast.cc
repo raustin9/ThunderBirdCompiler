@@ -33,14 +33,19 @@ ExpressionStatement::print() {
 }
 
 void
-Prototype::print() {
-  printf("function %s %s (", get_data_type(this->ret_type).c_str(), this->name.c_str());
-  for (size_t i = 0; i < this->args.size(); i++) {
-    printf("%s %s", get_data_type(this->args[i].data_type).c_str(), this->args[i].name.c_str());
-    if (i < this->args.size()-1)
+FunctionDecl::print() {
+  printf("define %s %s (", get_data_type(this->prototype->ret_type).c_str(), this->prototype->name.c_str());
+  for (size_t i = 0; i < this->prototype->params.size(); i++) {
+    printf("%s %s", get_data_type(this->prototype->params[i].data_type).c_str(), this->prototype->params[i].name.c_str());
+    if (i < this->prototype->params.size()-1)
       printf(", ");
   }
-  printf(")\n");
+  printf(") {\n");
+  for (size_t i = 0; i < this->body.size(); i++) {
+    this->body[i]->print();
+  }
+
+  printf("}\n");
 }
 
 void

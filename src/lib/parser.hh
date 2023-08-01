@@ -26,7 +26,7 @@ public:
   // Parsing functions
   std::unique_ptr<Program> parse_program();                         // parse the top level program
   std::unique_ptr<Statement> parse_let_statement();                 // parse let statements
-  std::unique_ptr<Statement> parse_prototype();                     // parse function prototypes
+  std::unique_ptr<Statement> parse_function_defn();                 // parse function prototypes
   std::unique_ptr<Expression> parse_integer();                      // parse an integer literal
   std::unique_ptr<Expression> parse_float();                        // parse floating point literal
   std::unique_ptr<Expression> parse_identifier();                   // parse an identifier expression

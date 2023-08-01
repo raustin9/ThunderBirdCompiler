@@ -44,21 +44,16 @@ main(int argc, char** argv) {
 bool
 test_let() {
   std::string input = 
-    "let int x = 5;\n"
-    "variable - y * a + t;\n"
-    "function float add();\n"
-    "z * (a / b) - b;\n";
-//  std::string input = 
-//    "let int x = 5 * (y * c);\n";
-//  std::string input = 
-//    "let int x = 5 + 3;\n";
-
+    "define int func1() {\n"
+    "  let int x = 0;\n"
+    "}\n";
 
   printf("input:\n%s\n\n", input.c_str());
   Parser *parser = new Parser(input);
 
   parser->parse_program();
 
+  delete parser;
   return true;
 }
 

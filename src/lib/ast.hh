@@ -148,18 +148,49 @@ class LetStmt : public Statement {
     void print() override;
 };
 
-
-// Function prototype statement node
-// add(...)
-class Prototype : public Statement {
+class Prototype {
   public:
-    std::string name;              // name of the function prototype
-    DataType ret_type;             // return type of the function
-    std::vector <IdentifierExpr> args; // list of arguments in the function prototype -- func(int param1...)
+  std::string name;
+  DataType ret_type;
+  std::vector <IdentifierExpr> params;
 
-    Prototype(std::string name, DataType ret_type,  std::vector<IdentifierExpr> args)
-      : name(name), ret_type(ret_type), args(std::move(args)) {}
+  Prototype(
+    std::string name,
+    DataType ret_type,
+    std::vector <IdentifierExpr> params
+  ) : name(std::move(name)), ret_type(ret_type), params(std::move(params)) {}
+};
+
+// Class for function declarations
+class FunctionDecl : public Statement {
+  public:
+    std::unique_ptr<Prototype> prototype;          // the prototype of the function
+    std::vector<std::unique_ptr<Statement> > body; // list of statements that compose body of the function definition
+//    std::string name;
+//    DataType ret_type;
+//    std::vector <IdentifierExpr> args;
+
+    FunctionDecl(
+      std::unique_ptr<Prototype> prototype,
+      std::vector<std::unique_ptr<Statement> > body
+    ) : prototype(std::move(prototype)), body(std::move(body)) {}
+//    FunctionDecl(
+//      std::string name,
+//      DataType ret_type,
+//      std::vector <IdentifierExpr> args
+//    ) : name(std::move(name)), ret_type(ret_type), args(std::move(args)) {}
     void print() override;
+};
+
+class Function : public Node {
+  public:
+    std::unique_ptr<Prototype> prototype;           // function prototype
+    std::vector <std::unique_ptr<Statement> > body; // list of statements that make up the function body
+
+    Function(
+      std::unique_ptr<Prototype> prototype,
+      std::vector <std::unique_ptr<Statement> > body
+    ) : prototype(std::move(prototype)), body(std::move(body)) {}
 };
 
 // Program Node in the AST
