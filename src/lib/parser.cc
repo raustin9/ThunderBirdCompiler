@@ -66,6 +66,7 @@ Parser::parse_let_statement() {
       break;
     default:
       printf("error: invalid type specifier |%s|\n", type_spec.literal.c_str());
+      return nullptr;
   }
 
   // Parse the identifier
@@ -97,75 +98,6 @@ Parser::parse_let_statement() {
     printf("error: unexpected token |%s|. Expected |=|\n", this->current_token.literal.c_str());
     return nullptr;
   }
-
-//  // auto let_statement = std::make_unique<LetStmt>(let_tok, std::move(assignment_expr));
-//
-//  // this->next_token();
-//  if (this->current_token.type != TOK_SEMICOLON) {
-//    printf("error: unexpected token '%s'. Expected ';'\n", this->current_token.literal.c_str());
-//  }
-//  return let_statement;
-}
-
-// Parse variable assignment expression
-// "let x = 3;"
-std::unique_ptr<Expression>
-Parser::parse_assignment(DataType data_type) {
-
-  this->next_token(); // eat the '='
-  auto expr_val = this->parse_expression_interior();
-
-//  this->next_token(); // eat the Type Identifier
-//  token_t tok = this->current_token;
-//
-//  std::string var_name = tok.literal;
-//  if (tok.type != TOK_IDENT) {
-//    printf("error: unexpected token |%s|\n", tok.literal.c_str());
-//    return nullptr;
-//  }
-//  printf("matched identifier\n");
-//  auto variable = std::make_unique<VariableExpr>(tok.literal, data_type);
-//  
-//  this->next_token(); // eat the variable
-//  tok = this->current_token;
-//
-//  token_t op;
-//  if (tok.type == TOK_SEMICOLON) {
-//    // just declaring not assigning
-//    return std::make_unique<VariableAssignment>(tok, std::move(variable), nullptr);
-//  } else if (tok.type != TOK_EQUALS) {
-//    printf("error: unexpected token |%s|\n", tok.literal.c_str());
-//    return nullptr;
-//  } else {
-//    op = tok;
-//  }
-//
-//  this->next_token(); // eat the TOK_EQUALS
-//  auto expr_val = this->parse_expression_interior();
-////  std::unique_ptr<Expression> expr_val;
-////  if (this->current_token.type == TOK_INT) {
-////    if (variable->data_type != TYPE_INT) {
-////      printf("error: invalid data type 'int'. Expected '%d'\n", variable->data_type);
-////      return nullptr;
-////    }
-////    expr_val = this->parse_integer();
-////    variable->value = dynamic_cast<IntegerExpr*>(expr_val.get())->value;
-////  } else if (this->current_token.type == TOK_FLOAT) {
-////    if (variable->data_type != TYPE_FLOAT) {
-////      printf("error: invalid data type 'float'. Expected '%d'\n", variable->data_type);
-////      return nullptr;
-////    }
-////    expr_val = this->parse_float();
-////    variable->dvalue = dynamic_cast<FloatExpr*>(expr_val.get())->value;
-////  } else {
-////    printf("error: inavlid data type '%s'\n", this->current_token.literal.c_str());
-////    return nullptr;
-////  }
-//
-//
-//  auto assignment_expr = std::make_unique<VariableAssignment>(op, std::move(variable), std::move(expr_val));
-//  return assignment_expr;
-  return nullptr;
 }
 
 // Parse an integer expression
