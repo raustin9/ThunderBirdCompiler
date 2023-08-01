@@ -148,17 +148,35 @@ class LetStmt : public Statement {
     void print() override;
 };
 
-
-// Function prototype statement node
-// add(...)
-class Prototype : public Statement {
+class Prototype {
   public:
-    std::string name;              // name of the function prototype
-    DataType ret_type;             // return type of the function
-    std::vector <IdentifierExpr> args; // list of arguments in the function prototype -- func(int param1...)
+  std::string name;
+  DataType ret_type;
+  std::vector <IdentifierExpr> params;
 
-    Prototype(std::string name, DataType ret_type,  std::vector<IdentifierExpr> args)
-      : name(name), ret_type(ret_type), args(std::move(args)) {}
+  Prototype(
+    std::string name,
+    DataType ret_type,
+    std::vector <IdentifierExpr> params
+  ) : name(std::move(name)), ret_type(ret_type), params(std::move(params)) {}
+};
+
+// Class for function declarations
+class FunctionDecl : public Statement {
+  public:
+    std::unique_ptr<Prototype> prototype;
+//    std::string name;
+//    DataType ret_type;
+//    std::vector <IdentifierExpr> args;
+
+    FunctionDecl(
+      std::unique_ptr<Prototype> prototype
+    ) : prototype(std::move(prototype)) {}
+//    FunctionDecl(
+//      std::string name,
+//      DataType ret_type,
+//      std::vector <IdentifierExpr> args
+//    ) : name(std::move(name)), ret_type(ret_type), args(std::move(args)) {}
     void print() override;
 };
 

@@ -198,13 +198,15 @@ Parser::parse_prototype() {
   this->next_token();
 
   if (this->current_token.type == TOK_SEMICOLON) {
-    return std::make_unique<Prototype>(proto_name, rt, params);
+    auto proto = std::make_unique<Prototype>(proto_name, rt, params);
+    return std::make_unique<FunctionDecl>(std::move(proto));
   } else if (this->current_token.type == TOK_LBRACE) {
     // begin reading function body
     // for now: eat function body until you get '}'
     while (this->current_token.type != TOK_RBRACE)
       this->next_token();
-    return std::make_unique<Prototype>(proto_name, rt, params);
+    auto proto = std::make_unique<Prototype>(proto_name, rt, params);
+    return std::make_unique<FunctionDecl>(std::move(proto));
   } else {
     printf("error: unexpected token '%s'. Expected ';' or '{'\n", this->current_token.literal.c_str());
     return nullptr;
