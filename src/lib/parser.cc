@@ -209,17 +209,20 @@ Parser::parse_function_defn() {
     // for now: eat function body until you get '}'
 
     std::vector <std::unique_ptr<Statement> > func_body;
+    this->next_token(); // eat the '{'
     while (this->current_token.type != TOK_RBRACE) {
       std::unique_ptr<Statement> stmt;
       switch (this->current_token.type) {
         case TOK_LET:
+          printf("let token: ||%s||\n", this->current_token.literal.c_str());
           stmt = this->parse_let_statement();
           func_body.push_back(std::move(stmt));
           this->next_token();
           break;
         default:
-          printf("inner function stmt not supported yet\n");
-          this->next_token();
+          printf("default token: ||%s||\n", this->current_token.literal.c_str());
+          stmt = this->parse_expression_statement();
+          func_body.push_back(std::move(stmt));
           break;
       }
     }
