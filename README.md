@@ -78,7 +78,43 @@ You can also initialize your variables to expressions
 let float x = 3.0 - 1.0;
 ```
 
+### Program entry point
+Like C, C++, and many other programming languages, the entry point to a ThunderBird program is the ```main()``` function.  
 
+### Running a program
+**Currently unsupported and subject to change**
+To run a program, you will use the ```thunder``` command. 
+If you have the file ```test.tb```, you will run the command ```thunder test.tb```
+This will create a binary file ```test``` that you can run as normal
+
+Here is an example file I am going to call ```example.tb```
+```
+define int integer_add(int n1, int n2) {
+  return n1 + n2;
+}
+
+define int main() {
+  let int x = 0;
+  let int y = 0;
+
+  x = integer_add(1, 2) - 4;
+
+  if (x < 0) {
+    y = 1;
+  } else {
+    y = 2;
+  }
+
+  return 0;
+}
+```
+In this example file, we have a ```integer_add()``` function that takes two integers and adds them together.  
+Our entry point in the ```main``` function then does some basic arithmetic using that function, and includes some control flow via ``if`` statements.  
+
+To compile this program, we need to run ```thunder example.tb`` and then run the program using ```./example```
+
+### Compiling a basic example program
+Here is an example file
 
 ## Potential Features in the Future
 * Type casting
