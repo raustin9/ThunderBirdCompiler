@@ -34,7 +34,7 @@ ExpressionStatement::print() {
 
 void
 FunctionDecl::print() {
-  printf("function %s %s (", get_data_type(this->prototype->ret_type).c_str(), this->prototype->name.c_str());
+  printf("define %s %s (", get_data_type(this->prototype->ret_type).c_str(), this->prototype->name.c_str());
   for (size_t i = 0; i < this->prototype->params.size(); i++) {
     printf("%s %s", get_data_type(this->prototype->params[i].data_type).c_str(), this->prototype->params[i].name.c_str());
     if (i < this->prototype->params.size()-1)

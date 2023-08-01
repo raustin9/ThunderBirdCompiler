@@ -164,7 +164,8 @@ class Prototype {
 // Class for function declarations
 class FunctionDecl : public Statement {
   public:
-    std::unique_ptr<Prototype> prototype;
+    std::unique_ptr<Prototype> prototype;          // the prototype of the function
+    std::vector<std::unique_ptr<Statement> > body; // list of statements that compose body of the function definition
 //    std::string name;
 //    DataType ret_type;
 //    std::vector <IdentifierExpr> args;

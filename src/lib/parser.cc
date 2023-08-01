@@ -135,7 +135,7 @@ Parser::parse_float() {
 
 std::unique_ptr<Statement>
 Parser::parse_prototype() {
-  this->next_token(); // eat the "function"
+  this->next_token(); // eat the "function" or "define" keyword
 
   // Get the type specifier
   token_t tok = this->current_token;
@@ -144,6 +144,8 @@ Parser::parse_prototype() {
     rt = TYPE_INT;
   } else if (tok.type == TOK_TYPEFLOAT) {
     rt = TYPE_FLOAT;
+  } else if (tok.type == TOK_TYPEBYTE) {
+    rt = TYPE_BYTE;
   } else {
     printf("error: unexpected token '%s'\n. Expected 'int' or 'float'", tok.literal.c_str());
   }
@@ -195,12 +197,10 @@ Parser::parse_prototype() {
     }
   }
 
-  this->next_token();
+  this->next_token(); // eat the ')' at end of parameter list
 
-  if (this->current_token.type == TOK_SEMICOLON) {
-    auto proto = std::make_unique<Prototype>(proto_name, rt, params);
-    return std::make_unique<FunctionDecl>(std::move(proto));
-  } else if (this->current_token.type == TOK_LBRACE) {
+  // FUNCTION BODY //
+  if (this->current_token.type == TOK_LBRACE) {
     // begin reading function body
     // for now: eat function body until you get '}'
     while (this->current_token.type != TOK_RBRACE)
@@ -208,7 +208,7 @@ Parser::parse_prototype() {
     auto proto = std::make_unique<Prototype>(proto_name, rt, params);
     return std::make_unique<FunctionDecl>(std::move(proto));
   } else {
-    printf("error: unexpected token '%s'. Expected ';' or '{'\n", this->current_token.literal.c_str());
+    printf("error: unexpected token '%s'. Expected '{'\n", this->current_token.literal.c_str());
     return nullptr;
   }
 }
