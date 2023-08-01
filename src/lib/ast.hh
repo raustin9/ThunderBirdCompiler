@@ -136,13 +136,15 @@ class VariableExpr : public Expression {
 class LetStmt : public Statement {
   public:
     token_t token;                          // "let" token
+    std::unique_ptr<Expression> variable;
     std::unique_ptr<Expression> var_assign; // expression that variable will be assigned to
    
     LetStmt(
         token_t token,
+        std::unique_ptr<Expression> variable,
         // Expression *var_assign
         std::unique_ptr<Expression> var_assign
-      ) : token(token), /*variable(std::move(variable)),*/ var_assign(std::move(var_assign)) {}
+      ) : token(token), /*variable(std::move(variable)),*/ variable(std::move(variable)), var_assign(std::move(var_assign)) {}
     void print() override;
 };
 

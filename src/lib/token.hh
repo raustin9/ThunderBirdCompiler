@@ -78,6 +78,7 @@ enum TokenType {
 enum DataType {
   TYPE_INT,
   TYPE_FLOAT,
+  TYPE_BYTE,
   TYPE_STRING
 };
 
