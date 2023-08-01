@@ -37,6 +37,11 @@ Parser::Parser(std::string input) {
   this->next_token();
 }
 
+// Destructor -- delete the lexical analyzer
+Parser::~Parser() {
+  delete this->lex;
+}
+
 // Advance the current token to the next one
 void
 Parser::next_token() {

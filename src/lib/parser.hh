@@ -20,6 +20,7 @@
 class Parser {
 public:
   Parser(std::string input);  // constructor -- uses string parameter to initialize a lexer
+  ~Parser();                  // destructor -- deletes the lexer that it created
   void next_token();          // eats current token and advances the peek and current tokens
   int get_token_precedence(); // gets the precedence for the current token
 
