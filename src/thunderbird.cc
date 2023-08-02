@@ -44,7 +44,10 @@ main(int argc, char** argv) {
 bool
 test_let() {
   std::string input = 
-    "if (x < 2) {}\n";
+    "if (x < 2) {\n"
+    "  let int x = y + z * z;\n"
+    "}\n"
+    ;
 
   printf("input:\n%s\n\n", input.c_str());
   Parser *parser = new Parser(input);

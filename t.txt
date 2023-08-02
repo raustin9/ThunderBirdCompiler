@@ -1,0 +1,49 @@
+g++ -g -Wall -Isrc/lib -c src/lib/parser.cc -o obj/parser.o
+ar ru lib/parser.a obj/parser.o
+ranlib lib/parser.a
+g++ -g -Wall -Isrc/lib src/thunderbird.cc -o bin/thunder lib/lexer.a lib/parser.a lib/ast.a
+./bin/thunder
+input:
+if (x < 2) {
+  let int x = 4;
+}
+
+
+next_token: eating ''
+next_token: eating ''
+matched if
+next_token: eating 'if'
+primary matched (
+next_token: eating '('
+primary matched x
+next_token: eating 'x'
+prec: '<' 3
+op <
+next_token: eating '<'
+primary matched 2
+matched int: val = 2
+next_token: eating '2'
+rparen2
+parse_paren: matched ')'
+next_token: eating ')'
+prec1 '{' = -1
+next_token: eating '{'
+let token: ||let||
+next_token: eating 'let'
+next_token: eating 'int'
+next_token: eating 'x'
+next_token: eating '='
+primary matched 4
+matched int: val = 4
+next_token: eating '4'
+semicolon 1
+next_token: eating ';'
+next_token: eating '}'
+primary null
+prec1 '' = -1
+ -- Program --
+if ([ x ] < [ [[ intexpr val: 2 type: int ]] ]) {
+  let [name: 'x' type: 'int' val: 0]  = [[ intexpr val: 4 type: int ]]
+}
+null expr
+let statement passed
