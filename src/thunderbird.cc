@@ -44,12 +44,13 @@ main(int argc, char** argv) {
 bool
 test_let() {
   std::string input = 
-    "let int val = 5;\n"
-    "define int add () {}\n"
     "entry int func1() {\n"
     "  let int x = 0;\n"
     "  x = y + z;\n"
-    "}\n";
+    "  return x+2;\n"
+    "  let int test = 0;\n"
+    "}\n"
+    "let float test = 0.0;\n";
 
   printf("input:\n%s\n\n", input.c_str());
   Parser *parser = new Parser(input);

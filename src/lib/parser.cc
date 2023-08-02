@@ -142,6 +142,18 @@ Parser::parse_float() {
   return rv;
 }
 
+// Parse return statements from a function body
+// "return 0;"
+std::unique_ptr<Statement>
+Parser::parse_return_statement() {
+  token_t return_tok = this->current_token;
+  this->next_token(); // eat return token
+                      
+  auto return_val = this->parse_expression_interior(); // get the expression it is returning
+  this->next_token(); // eat the ';'
+  return std::make_unique<ReturnStmt>(return_tok, std::move(return_val));
+}
+
 // Parse a function definition
 // functions are required to be defined where they are declared,
 // so when we parse the prototype, the rest of the definition must follow
@@ -231,6 +243,13 @@ Parser::parse_function_defn() {
           func_body.push_back(std::move(stmt));
           this->next_token();
           break;
+        case TOK_RETURN:
+          // parse return statements
+          printf("retur token: ||%s||\n", this->current_token.literal.c_str());
+          stmt = this->parse_return_statement();
+          func_body.push_back(std::move(stmt));
+          while (this->current_token.type != TOK_RBRACE) this->next_token();
+          break;
         default:
           printf("default token: ||%s||\n", this->current_token.literal.c_str());
           stmt = this->parse_expression_statement();
@@ -261,6 +280,9 @@ Parser::parse_primary() {
     case TOK_INT:
       printf("matched %s\n", this->current_token.literal.c_str());
       return this->parse_integer();
+    case TOK_FLOAT:
+      printf("matched %s\n", this->current_token.literal.c_str());
+      return this->parse_float();
     case TOK_IDENT:
       printf("matched %s\n", this->current_token.literal.c_str());
       return this->parse_identifier();
@@ -268,7 +290,7 @@ Parser::parse_primary() {
       printf("matched %s\n", this->current_token.literal.c_str());
       return this->parse_parentheses_expr();
     default:
-      printf("primary nul\n");
+      printf("primary null\n");
       return nullptr;
   }
 }
