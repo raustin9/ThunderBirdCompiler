@@ -75,16 +75,18 @@ enum TokenType {
   TOK_ENTRY,      // "entry 
 };
 
+// Enumeration of the supported data types 
 enum DataType {
-  TYPE_INT,
-  TYPE_FLOAT,
-  TYPE_BYTE,
-  TYPE_STRING
+  TYPE_INT,   // integer type
+  TYPE_FLOAT, // floating point type
+  TYPE_BYTE,  // byte type -- similar to 'char' from C
+  TYPE_STRING // string type -- currently unsupported -- also might eventually be changed to byte[]
 };
 
+// Structure for tokens that the lexer creates
 typedef struct Token {
-  TokenType type;
-  std::string literal;
+  TokenType type;      // the actual token enum
+  std::string literal; // the literal of the token -- identifier string or the symbol that it represents
 } token_t;
 
 

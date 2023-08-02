@@ -11,6 +11,7 @@
 // Constructor
 Parser::Parser(std::string input) {
   this->lex = new Lexer(input);
+  this->has_entry = false;
 
   // Initialize the token values
   this->current_token.type = TOK_ILLEGAL;
@@ -50,7 +51,9 @@ Parser::next_token() {
   this->peek_token = this->lex->next_token();
 }
 
-// Parse let statemetns
+// Parse let statements
+// This statement is where variables are declared and initialized
+// Variables are required to be initialized to a specific value
 // "let int x = 5;"
 std::unique_ptr<Statement>
 Parser::parse_let_statement() {
@@ -59,7 +62,7 @@ Parser::parse_let_statement() {
   token_t type_spec = this->current_token;
   DataType data_type;
   
-  // Ensue valid type spec
+  // Ensure valid type spec
   switch(type_spec.type) {
     case TOK_TYPEINT:
       data_type = TYPE_INT;
@@ -106,7 +109,7 @@ Parser::parse_let_statement() {
   }
 }
 
-// Parse an integer expression
+// Parse an integer expression -- really just an integer literal
 // "3" "700";
 std::unique_ptr<Expression>
 Parser::parse_integer() {
@@ -122,7 +125,7 @@ Parser::parse_integer() {
   return std::make_unique<IntegerExpr>(val);
 }
 
-// Parse a float expression
+// Parse a float expression -- really just a float literal
 // "3.0" "700.29"
 std::unique_ptr<Expression>
 Parser::parse_float() {
@@ -139,16 +142,19 @@ Parser::parse_float() {
   return rv;
 }
 
+// Parse a function definition
+// functions are required to be defined where they are declared,
+// so when we parse the prototype, the rest of the definition must follow
 std::unique_ptr<Statement>
 Parser::parse_function_defn() {
   bool is_entry = false;
   token_t decl_keyword = this->current_token;
   this->next_token(); // eat the "function" or "define" or "entry" keyword
 
-  if (decl_keyword.type == TOK_ENTRY)
+  if (decl_keyword.type == TOK_ENTRY && this->has_entry == false)
     is_entry = true;
 
-  // Get the type specifier
+  // GET TYPE SPECIFIER //
   token_t tok = this->current_token;
   DataType rt;
   if (tok.type == TOK_TYPEINT) {
@@ -164,7 +170,7 @@ Parser::parse_function_defn() {
 
   this->next_token(); // eat the type specifier
               
-  // get the identifier
+  // GET IDENTIFIER //
   token_t ident = this->current_token;
   if (ident.type != TOK_IDENT) {
     printf("error: unexpected token '%s'. Expected IDENT\n", ident.literal.c_str());
@@ -174,7 +180,7 @@ Parser::parse_function_defn() {
   std::string proto_name = ident.literal;
   this->next_token(); // eat the identifier
 
-  // Parse the function arguments
+  // PARSE FUNCTION PARAMETERS //
   if (this->current_token.type != TOK_LPAREN) {
     printf("error: unexpected token '%s'. Expected '('\n", this->current_token.literal.c_str());
   }
@@ -393,7 +399,6 @@ Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
 std::unique_ptr<Program>
 Parser::parse_program() {
   auto program = std::make_unique<Program>();
-  bool has_entry = false;
 
   // main loop
   while(this->current_token.type != TOK_EOF) {
@@ -413,7 +418,7 @@ Parser::parse_program() {
         this->next_token();
         break;
       case TOK_ENTRY:
-        if (!has_entry) {
+        if (!this->has_entry) {
           printf("matched entry\n");
           stmt = this->parse_function_defn();
           program->statements.push_back(std::move(stmt));

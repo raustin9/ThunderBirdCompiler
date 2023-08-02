@@ -199,6 +199,7 @@ class Function : public Node {
 // should be the root node of the tree
 class Program : public Node {
   public:
+    std::unique_ptr<Statement> entry_point; // Potentially use to define entry point of program
     std::vector<std::unique_ptr<Statement> > statements; // top level of the program is a list of statements
     void print() override;
 };
