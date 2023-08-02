@@ -8,13 +8,13 @@ the mechanics of compiler development.
 This is a small language that will not have many features
 Here is a small layout of a sample program:
 ```
-function int add(int x, int y) {
-  int rv = x + y;
+define int add(int x, int y) {
+  let int rv = x + y;
 }
 
 entry int main() {
-  float fval = 2.0 + 4.0;
-  int add_value = add(x, y);
+  let float fval = 2.0 + 4.0;
+  let int add_value = add(x, y);
 }
 ```
 The goal is to introduce a simple type system of ```int```s, ```float```s and ```bytes```, but I may expand it to support basic strings as well
