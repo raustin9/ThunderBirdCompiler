@@ -21,6 +21,7 @@ Lexer::Lexer(std::string input) {
   this->keywords["else"] = TOK_ELSE;
   this->keywords["true"] = TOK_TRUE;
   this->keywords["false"] = TOK_FALSE;
+  this->keywords["entry"] = TOK_ENTRY;
 }
 
 // Copy constructor

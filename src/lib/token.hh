@@ -72,7 +72,7 @@ enum TokenType {
   TOK_FUNCTION,   // "function"
   TOK_RETURN,     // "return"
   TOK_LET,        // "let"
-
+  TOK_ENTRY,      // "entry 
 };
 
 enum DataType {
