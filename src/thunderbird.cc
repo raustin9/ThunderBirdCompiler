@@ -44,7 +44,7 @@ main(int argc, char** argv) {
 bool
 test_let() {
   std::string input = 
-    "define int func1() {\n"
+    "entry int func1() {\n"
     "  let int x = 0;\n"
     "  x = y + z;\n"
     "}\n";

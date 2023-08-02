@@ -164,6 +164,7 @@ class Prototype {
 // Class for function declarations
 class FunctionDecl : public Statement {
   public:
+    bool is_entry;                                 // true if it is the entry point to the program false otherwise
     std::unique_ptr<Prototype> prototype;          // the prototype of the function
     std::vector<std::unique_ptr<Statement> > body; // list of statements that compose body of the function definition
 //    std::string name;
@@ -171,9 +172,10 @@ class FunctionDecl : public Statement {
 //    std::vector <IdentifierExpr> args;
 
     FunctionDecl(
+      bool is_entry,
       std::unique_ptr<Prototype> prototype,
       std::vector<std::unique_ptr<Statement> > body
-    ) : prototype(std::move(prototype)), body(std::move(body)) {}
+    ) : is_entry(is_entry), prototype(std::move(prototype)), body(std::move(body)) {}
 //    FunctionDecl(
 //      std::string name,
 //      DataType ret_type,
