@@ -44,13 +44,7 @@ main(int argc, char** argv) {
 bool
 test_let() {
   std::string input = 
-    "entry int func1() {\n"
-    "  let int x = a + b * c;\n"
-    "  x = y + z;\n"
-    "  return 0;\n"
-    "}\n"
-    "let float test = 0.0;\n"
-    "test = 5.0;\n";
+    "if (x < 2) {}\n";
 
   printf("input:\n%s\n\n", input.c_str());
   Parser *parser = new Parser(input);

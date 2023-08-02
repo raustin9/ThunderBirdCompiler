@@ -242,6 +242,9 @@ Parser::parse_function_defn() {
           func_body.push_back(std::move(stmt));
           this->next_token();
           break;
+        case TOK_IF:
+          printf("if token: ||%s||\n", this->current_token.literal.c_str());
+          break;
         case TOK_RETURN:
           // parse return statements
           printf("retur token: ||%s||\n", this->current_token.literal.c_str());
@@ -267,6 +270,44 @@ Parser::parse_function_defn() {
     printf("error: unexpected token '%s'. Expected '{'\n", this->current_token.literal.c_str());
     return nullptr;
   }
+}
+
+// Parse an if statement
+std::unique_ptr<Statement>
+Parser::parse_if_statement() {
+  token_t token = this->current_token;
+  this->next_token(); // eat the 'if'
+
+  if (this->current_token.type != TOK_LPAREN) {
+    printf("error: unexpected token '%s'. Expected '('\n", this->current_token.literal.c_str());
+  }
+  this->next_token(); // eat the '('
+
+  auto condition = this->parse_expression_interior();
+  if (this->current_token.type != TOK_RPAREN) {
+    printf("error: unexpected token '%s'. Expected ')'\n", this->current_token.literal.c_str());
+  }
+  this->next_token(); // eat the ')'
+
+  if (this->current_token.type != TOK_LBRACE) {
+    printf("error: unexpected token '%s'. Expected '{'\n", this->current_token.literal.c_str());
+  }
+  this->next_token(); // eat the '{'
+
+  // PARSE IF STATEMENT BODY //
+  std::vector<std::unique_ptr<Statement> > consequence;
+  while (this->current_token.type != TOK_RBRACE) {
+    // for now: eat the body
+    this->next_token();
+  }
+
+  // for now: no else of else-if
+  // future: check if the next token is 'else', and if so then parse another block of code
+  this->next_token(); // eat the '}'
+
+  auto ifstmt = std::make_unique<Conditional>(token, std::move(condition), std::move(consequence), nullptr);
+
+  return ifstmt;
 }
 
 // Parse an identifier in an expression
@@ -457,6 +498,11 @@ Parser::parse_program() {
           this->next_token();
         }
         break;
+      case TOK_IF:
+        printf("matched if\n");
+        stmt = this->parse_if_statement();
+        program->statements.push_back(std::move(stmt));
+        //this->next_token();
       default:
         // invalid top level statement
         // error recovery: panic mode

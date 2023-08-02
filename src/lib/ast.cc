@@ -108,6 +108,22 @@ FloatExpr::print() {
 }
 
 void
+Conditional::print() {
+  printf("%s ", this->token.literal.c_str());
+  printf("(");
+  this->condition->print();
+  printf(") {\n");
+
+  for (unsigned i = 0; i < this->consequence.size(); i++) {
+    printf("  ");
+    this->consequence[i]->print();
+    printf("\n");
+  }
+
+  printf("}\n");
+}
+
+void
 VariableExpr::print() {
   std::string dt;
   switch (this->data_type) {

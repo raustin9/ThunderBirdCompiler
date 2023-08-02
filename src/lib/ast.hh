@@ -192,6 +192,7 @@ class Conditional : public Statement {
         consequence(std::move(consequence)),
         alternative(std::move(alternative))
       {}
+    void print() override;
 };
 
 // Class for function prototypes
