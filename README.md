@@ -8,16 +8,17 @@ the mechanics of compiler development.
 This is a small language that will not have many features
 Here is a small layout of a sample program:
 ```
-function add(int x, int y) {
+function int add(int x, int y) {
   int rv = x + y;
 }
 
-function main() {
+entry int main() {
   float fval = 2.0 + 4.0;
   int add_value = add(x, y);
 }
 ```
 The goal is to introduce a simple type system of ```int```s, ```float```s and ```bytes```, but I may expand it to support basic strings as well
+Strings will likely be an array of ```byte```s similar to how it is done in c
 
 ## Compiler
 All components of the compiler are built on my own without the use of any generators.
@@ -79,7 +80,17 @@ let float x = 3.0 - 1.0;
 ```
 
 ### Program entry point
-Like C, C++, and many other programming languages, the entry point to a ThunderBird program is the ```main()``` function.  
+To declare the entry point to your program, you will use the ```entry``` keyword. This word functions exactly the same as 
+```define``` or ```function``` except that it can only be used once per program. The reasoning behind this is obvious as you 
+can only have one entry point per program.
+Here is an example:
+```
+entry int main_func() {
+  return 0;
+}
+```
+The beauty of using the ```entry``` keyword is that you do not have to use a specific name for your entry point like ```int main()``` in C & C++.
+
 
 ### Running a program
 **Currently unsupported and subject to change**
@@ -93,7 +104,7 @@ define int integer_add(int n1, int n2) {
   return n1 + n2;
 }
 
-define int main() {
+entr int main() {
   let int x = 0;
   let int y = 0;
 
