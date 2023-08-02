@@ -10,6 +10,7 @@ Here is a small layout of a sample program:
 ```
 define int add(int x, int y) {
   let int rv = x + y;
+  return rv;
 }
 
 entry int main() {
