@@ -46,6 +46,9 @@ test_let() {
   std::string input = 
     "if (x < 2) {\n"
     "  let int x = y + z * z;\n"
+    "  if (x > 4) {\n"
+    "    let int z = 5;\n"
+    "  }\n"
     "}\n"
     ;
 

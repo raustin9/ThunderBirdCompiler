@@ -314,6 +314,8 @@ Parser::parse_if_statement() {
         break;
       case TOK_IF:
         printf("if token: ||%s||\n", this->current_token.literal.c_str());
+        stmt = this->parse_if_statement();
+        consequence.push_back(std::move(stmt));
         break;
       default:
         printf("default token: ||%s||\n", this->current_token.literal.c_str());
@@ -532,6 +534,7 @@ Parser::parse_program() {
         program->statements.push_back(std::move(stmt));
         //this->next_token();
       case TOK_EOF:
+        printf("parse_program: TOK_EOF in switch ending program\n");
         break;
       default:
         // invalid top level statement
