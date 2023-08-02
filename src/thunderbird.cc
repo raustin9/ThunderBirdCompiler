@@ -45,7 +45,7 @@ bool
 test_let() {
   std::string input = 
     "entry int func1() {\n"
-    "  let int x = 0;\n"
+    "  let int x = a + b * c;\n"
     "  x = y + z;\n"
     "  return 0;\n"
     "}\n"
