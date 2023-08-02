@@ -141,7 +141,12 @@ Parser::parse_float() {
 
 std::unique_ptr<Statement>
 Parser::parse_function_defn() {
-  this->next_token(); // eat the "function" or "define" keyword
+  bool is_entry = false;
+  token_t decl_keyword = this->current_token;
+  this->next_token(); // eat the "function" or "define" or "entry" keyword
+
+  if (decl_keyword.type == TOK_ENTRY)
+    is_entry = true;
 
   // Get the type specifier
   token_t tok = this->current_token;
@@ -228,7 +233,7 @@ Parser::parse_function_defn() {
       }
     }
     auto proto = std::make_unique<Prototype>(proto_name, rt, params);
-    return std::make_unique<FunctionDecl>(std::move(proto), std::move(func_body));
+    return std::make_unique<FunctionDecl>(is_entry, std::move(proto), std::move(func_body));
   } else {
     printf("error: unexpected token '%s'. Expected '{'\n", this->current_token.literal.c_str());
     return nullptr;
@@ -388,6 +393,7 @@ Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
 std::unique_ptr<Program>
 Parser::parse_program() {
   auto program = std::make_unique<Program>();
+  bool has_entry = false;
 
   // main loop
   while(this->current_token.type != TOK_EOF) {
@@ -405,6 +411,20 @@ Parser::parse_program() {
         stmt = this->parse_function_defn();
         program->statements.push_back(std::move(stmt));
         this->next_token();
+        break;
+      case TOK_ENTRY:
+        if (!has_entry) {
+          printf("matched entry\n");
+          stmt = this->parse_function_defn();
+          program->statements.push_back(std::move(stmt));
+          this->next_token();
+        } else {
+          // FUTURE: make it so that it will still parse the function correctly for error handling, but 
+          // change it so that it is not considered an entry point
+          printf("error: program cannot contain more than one entry point");
+          stmt = this->parse_function_defn();
+          this->next_token();
+        }
         break;
       default:
         stmt = this->parse_expression_statement();
