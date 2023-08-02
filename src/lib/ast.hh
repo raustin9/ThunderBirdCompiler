@@ -148,6 +148,21 @@ class LetStmt : public Statement {
     void print() override;
 };
 
+// Statement node for return statements
+// "return x + 5;"
+class ReturnStmt : public Statement {
+  public:
+    token_t token;
+    std::unique_ptr<Expression> ret_val; // return value of the function
+    
+    ReturnStmt(
+      token_t token,
+      std::unique_ptr<Expression> ret_val
+    ) : token(token), ret_val(std::move(ret_val)) {}
+    void print() override;
+};
+
+// Class for function prototypes
 class Prototype {
   public:
   std::string name;

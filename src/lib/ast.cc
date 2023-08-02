@@ -24,6 +24,12 @@ get_data_type(DataType dt) {
 }
 
 void
+ReturnStmt::print() {
+  printf("%s ", this->token.literal.c_str());
+  this->ret_val->print();
+}
+
+void
 ExpressionStatement::print() {
   if (!this->expr) {
     printf("null expr\n");
