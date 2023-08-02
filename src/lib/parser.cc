@@ -458,8 +458,13 @@ Parser::parse_program() {
         }
         break;
       default:
-        stmt = this->parse_expression_statement();
-        program->statements.push_back(std::move(stmt));
+        // invalid top level statement
+        // error recovery: panic mode
+        printf("error: invalid token '%s' at top level\n", this->current_token.literal.c_str());
+        this->parse_expression_statement();
+        // this->next_token();
+        // stmt = this->parse_expression_statement();
+        // program->statements.push_back(std::move(stmt));
         break;
     }
   }

@@ -47,9 +47,10 @@ test_let() {
     "entry int func1() {\n"
     "  let int x = 0;\n"
     "  x = y + z;\n"
-    "  let int test = 0;\n"
+    "  return 0;\n"
     "}\n"
-    "let float test = 0.0;\n";
+    "let float test = 0.0;\n"
+    "test = 5.0;\n";
 
   printf("input:\n%s\n\n", input.c_str());
   Parser *parser = new Parser(input);
