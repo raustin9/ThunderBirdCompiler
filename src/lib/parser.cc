@@ -229,11 +229,10 @@ Parser::parse_function_defn() {
 
   // FUNCTION BODY //
   if (this->current_token.type == TOK_LBRACE) {
-    // begin reading function body
-    // for now: eat function body until you get '}'
-
+    bool has_return = false;
     std::vector <std::unique_ptr<Statement> > func_body;
     this->next_token(); // eat the '{'
+ 
     while (this->current_token.type != TOK_RBRACE) {
       std::unique_ptr<Statement> stmt;
       switch (this->current_token.type) {
@@ -248,6 +247,7 @@ Parser::parse_function_defn() {
           printf("retur token: ||%s||\n", this->current_token.literal.c_str());
           stmt = this->parse_return_statement();
           func_body.push_back(std::move(stmt));
+          has_return = true;
           while (this->current_token.type != TOK_RBRACE) this->next_token();
           break;
         default:
@@ -258,6 +258,10 @@ Parser::parse_function_defn() {
       }
     }
     auto proto = std::make_unique<Prototype>(proto_name, rt, params);
+    if (!has_return) {
+      printf("error: function %s does not have return statement\n", proto->name.c_str());
+      return nullptr;
+    }       
     return std::make_unique<FunctionDecl>(is_entry, std::move(proto), std::move(func_body));
   } else {
     printf("error: unexpected token '%s'. Expected '{'\n", this->current_token.literal.c_str());

@@ -47,7 +47,6 @@ test_let() {
     "entry int func1() {\n"
     "  let int x = 0;\n"
     "  x = y + z;\n"
-    "  return x+2;\n"
     "  let int test = 0;\n"
     "}\n"
     "let float test = 0.0;\n";
