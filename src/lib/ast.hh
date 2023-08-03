@@ -108,6 +108,23 @@ class FloatExpr : public Expression {
     void print() override;
 };
 
+// Statement node for code block
+// Code block is contained within '{}'
+// {
+//   let int x = 1;
+// }
+class CodeBlock : public Statement {
+  public:
+    std::vector <std::unique_ptr<Statement> > body;
+
+    CodeBlock(
+      std::vector <std::unique_ptr<Statement> > body
+    ) : body(std::move(body))
+      {}
+
+    void print() override;
+};
+
 // Boolean Expression Node
 // Node that is a boolean value like 'true' or 'false'
 class BooleanExpr : public Expression {
@@ -204,6 +221,26 @@ class Conditional : public Statement {
         condition(std::move(condition)),
         consequence(std::move(consequence)),
         alternative(std::move(alternative))
+      {}
+    void print() override;
+};
+
+// Statement node for while loop
+// This will loop while the condition remains true and break when false
+// "while (x  < 4)..."
+class WhileLoop : public Statement {
+  public:
+    token_t token;
+    std::unique_ptr<Expression> condition;
+    std::vector<std::unique_ptr<Statement> > loop_body;
+
+    WhileLoop(
+      token_t token,
+      std::unique_ptr<Expression> condition,
+      std::vector<std::unique_ptr<Statement> > loop_body
+    ) : token(token), 
+        condition(std::move(condition)),
+        loop_body(std::move(loop_body))
       {}
     void print() override;
 };

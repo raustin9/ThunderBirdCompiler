@@ -138,6 +138,18 @@ Conditional::print() {
 }
 
 void
+WhileLoop::print() {
+  printf("%s ", this->token.literal.c_str());
+  printf("(");
+  printf(") {}\n");
+}
+
+void
+CodeBlock::print() {
+  
+}
+
+void
 VariableExpr::print() {
   std::string dt;
   switch (this->data_type) {
