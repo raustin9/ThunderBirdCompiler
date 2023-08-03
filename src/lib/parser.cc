@@ -246,10 +246,12 @@ Parser::parse_function_defn() {
           printf("let token: ||%s||\n", this->current_token.literal.c_str());
           stmt = this->parse_let_statement();
           func_body.push_back(std::move(stmt));
-          this->next_token();
+          // this->next_token();
           break;
         case TOK_IF:
           printf("if token: ||%s||\n", this->current_token.literal.c_str());
+          stmt = this->parse_if_statement();
+          func_body.push_back(std::move(stmt));
           break;
         case TOK_RETURN:
           // parse return statements
@@ -257,7 +259,7 @@ Parser::parse_function_defn() {
           stmt = this->parse_return_statement();
           func_body.push_back(std::move(stmt));
           has_return = true;
-          while (this->current_token.type != TOK_RBRACE) this->next_token();
+          // while (this->current_token.type != TOK_RBRACE) this->next_token();
           break;
         default:
           printf("default token: ||%s||\n", this->current_token.literal.c_str());
