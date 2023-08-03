@@ -127,6 +127,7 @@ Parser::parse_integer() {
   long long val = atoi(tok.literal.c_str());
   printf("matched int: val = %lld\n", val);
 
+  printf("parse_int: should be eating int literal\n");
   this->next_token();
   return std::make_unique<IntegerExpr>(val);
 }
@@ -144,6 +145,8 @@ Parser::parse_float() {
   double val = atof(tok.literal.c_str());
   printf("matched float: val %lf\n", val);
 
+  printf("parse_float: should be eating float literal\n");
+  this->next_token();
   auto rv = std::make_unique<FloatExpr>(val);
   return rv;
 }
@@ -153,11 +156,20 @@ Parser::parse_float() {
 std::unique_ptr<Statement>
 Parser::parse_return_statement() {
   token_t return_tok = this->current_token;
+  printf("parse_return: should be eating 'return'\n");
   this->next_token(); // eat return token
                       
   auto return_val = this->parse_expression_interior(); // get the expression it is returning
+  printf("parse_return: should be eating ';'\n");
   this->next_token(); // eat the ';'
   return std::make_unique<ReturnStmt>(return_tok, std::move(return_val));
+}
+
+// Parse an else clause within an if statement
+// checks to see if there is an else followed by an if to chain them together
+std::unique_ptr<Statement>
+Parser::parse_else_statement() {
+  return nullptr;
 }
 
 // Parse a function definition
@@ -167,6 +179,7 @@ std::unique_ptr<Statement>
 Parser::parse_function_defn() {
   bool is_entry = false;
   token_t decl_keyword = this->current_token;
+  printf("parse_func: should be eating 'function' or 'define' or 'entry'\n");
   this->next_token(); // eat the "function" or "define" or "entry" keyword
 
   if (decl_keyword.type == TOK_ENTRY && this->has_entry == false)
@@ -186,6 +199,7 @@ Parser::parse_function_defn() {
   }
   printf("matched int\n");
 
+  printf("parse_func: should be eating type spec\n");
   this->next_token(); // eat the type specifier
               
   // GET IDENTIFIER //
@@ -196,19 +210,23 @@ Parser::parse_function_defn() {
   }
 
   std::string proto_name = ident.literal;
+  printf("parse_func: should be eating identifier\n");
   this->next_token(); // eat the identifier
 
   // PARSE FUNCTION PARAMETERS //
   if (this->current_token.type != TOK_LPAREN) {
     printf("error: unexpected token '%s'. Expected '('\n", this->current_token.literal.c_str());
   }
+  printf("parse_func: should be eating '('\n");
   this->next_token(); // eat the '('
+                      
   std::vector<IdentifierExpr> params;
   while(this->current_token.type != TOK_RPAREN) {
     token_t param_type = this->current_token;
     if (param_type.type == TOK_RPAREN) 
       break;
 
+    printf("parse_func: should be eating param type spec\n");
     this->next_token(); // eat the parameter's type spec
     token_t param_name = this->current_token;
     if (param_name.type != TOK_IDENT) {
@@ -221,6 +239,7 @@ Parser::parse_function_defn() {
     identifier.data_type = (param_type.type == TOK_TYPEINT) ? (TYPE_INT) : (TYPE_FLOAT);
     params.push_back(identifier);
 
+    printf("parse_func: should be eating param identifier\n");
     this->next_token(); // eat the identifier
     if (this->current_token.type != TOK_COMMA) {
       if (this->current_token.type == TOK_RPAREN)
@@ -228,15 +247,18 @@ Parser::parse_function_defn() {
 
       printf("error: unexpected token '%s'. Expected ','\n", this->current_token.literal.c_str());
     } else {
+      printf("parse_func: should be eating ','\n");
       this->next_token(); // eat the ','
     }
   }
+  printf("parse_func: should be eating ')'\n");
   this->next_token(); // eat the ')' at end of parameter list
 
   // FUNCTION BODY //
   if (this->current_token.type == TOK_LBRACE) {
     bool has_return = false;
     std::vector <std::unique_ptr<Statement> > func_body;
+    printf("parse_func: should be eating '{'\n");
     this->next_token(); // eat the '{'
  
     while (this->current_token.type != TOK_RBRACE) {
@@ -246,7 +268,6 @@ Parser::parse_function_defn() {
           printf("let token: ||%s||\n", this->current_token.literal.c_str());
           stmt = this->parse_let_statement();
           func_body.push_back(std::move(stmt));
-          // this->next_token();
           break;
         case TOK_IF:
           printf("if token: ||%s||\n", this->current_token.literal.c_str());
@@ -268,6 +289,10 @@ Parser::parse_function_defn() {
           break;
       }
     }
+
+    printf("parse_func: should be eating '}'\n");
+    this->next_token(); // eat the '}' at end of function body
+
     auto proto = std::make_unique<Prototype>(proto_name, rt, params);
     if (!has_return) {
       printf("error: function %s does not have return statement\n", proto->name.c_str());
@@ -284,22 +309,19 @@ Parser::parse_function_defn() {
 std::unique_ptr<Statement>
 Parser::parse_if_statement() {
   token_t token = this->current_token;
+  printf("if_stmt: should be eating 'if'\n");
   this->next_token(); // eat the 'if'
 
   if (this->current_token.type != TOK_LPAREN) {
     printf("if_stmt: error: unexpected token '%s'. Expected '('\n", this->current_token.literal.c_str());
   }
-  // this->next_token(); // eat the '('
 
   auto condition = this->parse_expression_interior();
-//  if (this->current_token.type != TOK_RPAREN) {
-//    printf("if_stmt: error: unexpected token '%s'. Expected ')'\n", this->current_token.literal.c_str());
-//  }
-  // this->next_token(); // eat the ')'
 
   if (this->current_token.type != TOK_LBRACE) {
     printf("error: unexpected token '%s'. Expected '{'\n", this->current_token.literal.c_str());
   }
+  printf("if_stmt: should be eating '{'\n");
   this->next_token(); // eat the '{'
 
   // PARSE IF STATEMENT BODY //
@@ -312,7 +334,6 @@ Parser::parse_if_statement() {
         printf("let token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_let_statement();
         consequence.push_back(std::move(stmt));
-        // this->next_token();
         break;
       case TOK_IF:
         printf("if token: ||%s||\n", this->current_token.literal.c_str());
@@ -322,21 +343,71 @@ Parser::parse_if_statement() {
       default:
         printf("default token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_expression_statement();
-        // this->next_token();
         consequence.push_back(std::move(stmt));
         break;
     }
-    // this->next_token();
   }
 
   // for now: no else of else-if
   // future: check if the next token is 'else', and if so then parse another block of code
   printf("ifstmt: should be eating '}'\n");
   this->next_token(); // eat the '}'
+  
+  // PARSE ELSE CLAUSE //
+  if (this->current_token.type == TOK_ELSE) {
+    printf("if_stmt: contains else clause\n");
 
-  auto ifstmt = std::make_unique<Conditional>(token, std::move(condition), std::move(consequence), nullptr);
+    printf("if_stmt: should be eating 'else'\n");
+    token_t else_tok = this->current_token;
+    this->next_token();
 
-  return ifstmt;
+    if (this->current_token.type == TOK_IF) {
+      // else if...
+      printf("if_stmt: matched else if\n");
+      return nullptr;
+    } else if (this->current_token.type == TOK_LBRACE) {
+      // just normal else clause
+      printf("if_stmt: final else clause\n");
+      printf("if_stmt: else: should be eating '{'\n");
+      this->next_token();
+
+      // ELSE CLAUSE BODY //
+      std::vector <std::unique_ptr<Statement> > else_body;
+      while (this->current_token.type != TOK_RBRACE) {
+        std::unique_ptr<Statement> stmt;
+        switch (this->current_token.type) {
+          case TOK_LET:
+            printf("let token: ||%s||\n", this->current_token.literal.c_str());
+            stmt = this->parse_let_statement();
+            else_body.push_back(std::move(stmt));
+            break;
+          case TOK_IF:
+            printf("if token: ||%s||\n", this->current_token.literal.c_str());
+            stmt = this->parse_if_statement();
+            else_body.push_back(std::move(stmt));
+            break;
+          default:
+            printf("default token: ||%s||\n", this->current_token.literal.c_str());
+            stmt = this->parse_expression_statement();
+            else_body.push_back(std::move(stmt));
+            break;
+        }
+      }
+      auto else_condition = std::make_unique<BooleanExpr>(true);
+      auto else_stmt = std::make_unique<Conditional>(else_tok, std::move(else_condition), std::move(else_body), nullptr); 
+      
+      printf("if_stmt: else: should be eating '}'\n");
+      this->next_token();
+      
+      auto if_stmt = std::make_unique<Conditional>(token, std::move(condition), std::move(consequence), std::move(else_stmt));
+      return if_stmt;
+    }
+  }
+
+
+  // No else or else if clauses
+  auto if_stmt = std::make_unique<Conditional>(token, std::move(condition), std::move(consequence), nullptr);
+  return if_stmt;
 }
 
 // Parse an identifier in an expression
@@ -507,14 +578,14 @@ Parser::parse_program() {
         printf("matched let\n");
         stmt = this->parse_let_statement();
         program->statements.push_back(std::move(stmt));
-        this->next_token();
+        // this->next_token();
 
         break;
       case TOK_FUNCTION:
         printf("matched function\n");
         stmt = this->parse_function_defn();
         program->statements.push_back(std::move(stmt));
-        this->next_token();
+        // this->next_token();
         break;
       case TOK_ENTRY:
         if (!this->has_entry) {
@@ -549,6 +620,7 @@ Parser::parse_program() {
         break;
     }
   }
+  printf("\n -- Input --\n%s\n", this->lex->input.c_str());
 
   printf(" -- Program --\n");
   program->print();

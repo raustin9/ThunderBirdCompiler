@@ -50,14 +50,13 @@ FunctionDecl::print() {
     if (i < this->prototype->params.size()-1)
       printf(", ");
   }
-  printf(") {\n");
+  printf(") {\n\n");
   for (size_t i = 0; i < this->body.size(); i++) {
-    printf("  ");
     this->body[i]->print();
     printf("\n");
   }
 
-  printf("}\n");
+  printf("\n} end %s\n", this->prototype->name.c_str());
 }
 
 void
@@ -79,6 +78,12 @@ IntegerExpr::print() {
   }
 
   printf("[[ intexpr val: %lld type: %s ]]", this->value, dt.c_str());
+}
+
+void
+BooleanExpr::print() {
+  std::string val = (this->value == true) ? "true" : "false";
+  printf("[[ boolean val: %s ]]", val.c_str());
 }
 
 void
@@ -120,7 +125,11 @@ Conditional::print() {
     printf("\n");
   }
 
-  printf("}\n");
+  printf("} ");
+
+  if (this->alternative) {
+    this->alternative->print();
+  }
 }
 
 void

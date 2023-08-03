@@ -108,6 +108,19 @@ class FloatExpr : public Expression {
     void print() override;
 };
 
+// Boolean Expression Node
+// Node that is a boolean value like 'true' or 'false'
+class BooleanExpr : public Expression {
+  public:
+    bool value;
+    DataType data_type = TYPE_BOOL;
+
+    BooleanExpr(
+      bool value
+    ) : value(value) {}
+    void print() override;
+};
+
 // Identifier class that holds the name and data type of the identifier
 // identifier can be either a function or a variable
 class IdentifierExpr : public Expression {

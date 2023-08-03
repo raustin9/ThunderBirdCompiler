@@ -77,6 +77,7 @@ enum TokenType {
 
 // Enumeration of the supported data types 
 enum DataType {
+  TYPE_BOOL,  // boolean type
   TYPE_INT,   // integer type
   TYPE_FLOAT, // floating point type
   TYPE_BYTE,  // byte type -- similar to 'char' from C
