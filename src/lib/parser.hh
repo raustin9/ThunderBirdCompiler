@@ -29,6 +29,7 @@ public:
   std::unique_ptr<Program> parse_program();                         // parse the top level program
   std::unique_ptr<Statement> parse_let_statement();                 // parse let statements
   std::unique_ptr<Statement> parse_return_statement();              // parse return statements
+  std::unique_ptr<Statement> parse_else_statement();                // parse else clauses and else-if clauses
   std::unique_ptr<Statement> parse_if_statement();                  // parse if statements
   std::unique_ptr<Statement> parse_function_defn();                 // parse function prototypes
   std::unique_ptr<Expression> parse_integer();                      // parse an integer literal

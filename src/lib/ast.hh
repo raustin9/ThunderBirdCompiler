@@ -108,6 +108,19 @@ class FloatExpr : public Expression {
     void print() override;
 };
 
+// Boolean Expression Node
+// Node that is a boolean value like 'true' or 'false'
+class BooleanExpr : public Expression {
+  public:
+    bool value;
+    DataType data_type = TYPE_BOOL;
+
+    BooleanExpr(
+      bool value
+    ) : value(value) {}
+    void print() override;
+};
+
 // Identifier class that holds the name and data type of the identifier
 // identifier can be either a function or a variable
 class IdentifierExpr : public Expression {
@@ -180,13 +193,13 @@ class Conditional : public Statement {
     token_t token;
     std::unique_ptr<Expression> condition;                // the condition to evaluate
     std::vector<std::unique_ptr<Statement> > consequence; // the code block if the condition is true
-    std::unique_ptr<Conditional> alternative;             // the conditional to evaluate if the condition is not true -- this is how we do else-if
+    std::unique_ptr<Statement> alternative;             // the conditional to evaluate if the condition is not true -- this is how we do else-if
 
     Conditional(
       token_t token,
       std::unique_ptr<Expression> condition,
       std::vector<std::unique_ptr<Statement> > consequence,
-      std::unique_ptr<Conditional> alternative
+      std::unique_ptr<Statement> alternative
     ) : token(token), 
         condition(std::move(condition)),
         consequence(std::move(consequence)),
