@@ -57,6 +57,8 @@ test_let() {
     "    let int x = 5;\n"
     "  } else if (y < 10) {\n"
     "    let float y = 0.0;\n"
+    "  } else {\n"
+    "    let int z = 1;\n"
     "  }\n"
     "  return x;\n"
     "}\n";
