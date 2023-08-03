@@ -52,7 +52,9 @@ FunctionDecl::print() {
   }
   printf(") {\n");
   for (size_t i = 0; i < this->body.size(); i++) {
+    printf("  ");
     this->body[i]->print();
+    printf("\n");
   }
 
   printf("}\n");
@@ -76,7 +78,7 @@ IntegerExpr::print() {
       break;
   }
 
-  printf("intexpr val: %lld type: %s\n", this->value, dt.c_str());
+  printf("[[ intexpr val: %lld type: %s ]]", this->value, dt.c_str());
 }
 
 void
@@ -102,7 +104,23 @@ FloatExpr::print() {
       break;
   }
 
-  printf("floatexpr val: %lf type: %s\n", this->value, dt.c_str());
+  printf("[[ floatexpr val: %lf type: %s ]]", this->value, dt.c_str());
+}
+
+void
+Conditional::print() {
+  printf("%s ", this->token.literal.c_str());
+  printf("(");
+  this->condition->print();
+  printf(") {\n");
+
+  for (unsigned i = 0; i < this->consequence.size(); i++) {
+    printf("  ");
+    this->consequence[i]->print();
+    printf("\n");
+  }
+
+  printf("}\n");
 }
 
 void
@@ -140,14 +158,16 @@ VariableAssignment::print() {
 void
 BinaryExpr::print() {
   // printf("lhs: ");
-  printf("\n");
+  printf("[ ");
   this->LHS->print();
+  printf(" ]");
   
   printf(" %s ", this->op.literal.c_str());
   
   // printf("rhs: ");
+  printf("[ ");
   this->RHS->print();
-  printf("\n");
+  printf(" ]");
 }
 
 void

@@ -43,14 +43,21 @@ main(int argc, char** argv) {
 
 bool
 test_let() {
-  std::string input = 
-    "entry int func1() {\n"
-    "  let int x = 0;\n"
-    "  x = y + z;\n"
-    "  return 0;\n"
-    "}\n"
-    "let float test = 0.0;\n"
-    "test = 5.0;\n";
+//  std::string input = 
+//    "if (x < 2) {\n"
+//    "  let int x = y + z * z;\n"
+//    "  if (x > 4) {\n"
+//    "    let int z = 5;\n"
+//    "  }\n"
+//    "}\n"
+//    ;
+  std::string input =
+    "define int main() {\n"
+    "  if (x > 4) {\n"
+    "    let int x = 5;\n"
+    "  }\n"
+    "  return x;\n"
+    "}\n";
 
   printf("input:\n%s\n\n", input.c_str());
   Parser *parser = new Parser(input);
