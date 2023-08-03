@@ -348,8 +348,6 @@ Parser::parse_if_statement() {
     }
   }
 
-  // for now: no else of else-if
-  // future: check if the next token is 'else', and if so then parse another block of code
   printf("ifstmt: should be eating '}'\n");
   this->next_token(); // eat the '}'
   
@@ -364,7 +362,10 @@ Parser::parse_if_statement() {
     if (this->current_token.type == TOK_IF) {
       // else if...
       printf("if_stmt: matched else if\n");
-      return nullptr;
+      auto alternative = this->parse_if_statement();
+
+      auto if_stmt = std::make_unique<Conditional>(token, std::move(condition), std::move(consequence), std::move(alternative));
+      return if_stmt;
     } else if (this->current_token.type == TOK_LBRACE) {
       // just normal else clause
       printf("if_stmt: final else clause\n");

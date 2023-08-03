@@ -55,7 +55,7 @@ test_let() {
     "entry int main() {\n"
     "  if (x > 4) {\n"
     "    let int x = 5;\n"
-    "  } else {\n"
+    "  } else if (y < 10) {\n"
     "    let float y = 0.0;\n"
     "  }\n"
     "  return x;\n"
