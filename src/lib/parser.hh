@@ -35,6 +35,7 @@ public:
   std::unique_ptr<Expression> parse_integer();                      // parse an integer literal
   std::unique_ptr<Expression> parse_float();                        // parse floating point literal
   std::unique_ptr<Expression> parse_identifier();                   // parse an identifier expression
+  std::unique_ptr<Expression> parse_boolean();                      // parse a boolean literal
   std::unique_ptr<Statement> parse_expression_statement();          // parse expression statement wrapper
   std::unique_ptr<Expression> parse_expr(int precedence, std::unique_ptr<Expression> LHS);                         // parse expressions
   std::unique_ptr<Expression> parse_parentheses_expr();             // parse expressions contained within parentheses

@@ -1,3 +1,3 @@
-entry int main() {
-  return 0;
+define int example(bool p1) {
+  return 1;
 }

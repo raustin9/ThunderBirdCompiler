@@ -75,6 +75,9 @@ Parser::parse_let_statement() {
     case TOK_TYPEBYTE:
       data_type = TYPE_BYTE;
       break;
+    case TOK_TYPEBOOL:
+      data_type = TYPE_BOOL;
+      break;
     default:
       printf("error: invalid type specifier |%s|\n", type_spec.literal.c_str());
       return nullptr;
@@ -158,6 +161,24 @@ Parser::parse_float() {
   return rv;
 }
 
+// Parse a boolean expression -- boolean literal
+// "true" "false"
+std::unique_ptr<Expression>
+Parser::parse_boolean() {
+  token_t tok = this->current_token;
+
+  if (tok.type != TOK_TRUE && tok.type != TOK_FALSE) {
+    printf("parse_boolean: error: unexepected token '%s'. Expected 'true' or 'false'\n", tok.literal.c_str());
+    return nullptr;
+  }
+
+  printf("parse_boolean: should be eating 'true' or 'false'\n");
+  this->next_token();
+
+  bool val = (tok.type == TOK_TRUE) ? true : false;
+  return std::make_unique<BooleanExpr>(val);
+}
+
 // Parse return statements from a function body
 // "return 0;"
 std::unique_ptr<Statement>
@@ -201,6 +222,8 @@ Parser::parse_function_defn() {
     rt = TYPE_FLOAT;
   } else if (tok.type == TOK_TYPEBYTE) {
     rt = TYPE_BYTE;
+  } else if (tok.type == TOK_TYPEBOOL) {
+    rt = TYPE_BOOL;
   } else {
     printf("error: unexpected token '%s'\n. Expected 'int' or 'float'", tok.literal.c_str());
   }
@@ -243,7 +266,18 @@ Parser::parse_function_defn() {
 
     IdentifierExpr identifier;
     identifier.name = param_name.literal;
-    identifier.data_type = (param_type.type == TOK_TYPEINT) ? (TYPE_INT) : (TYPE_FLOAT);
+    if (param_type.type == TOK_TYPEINT) {
+      identifier.data_type = TYPE_INT;
+    } else if (param_type.type == TOK_TYPEFLOAT) {
+      identifier.data_type = TYPE_FLOAT;
+    } else if (param_type.type == TOK_TYPEBYTE) {
+      identifier.data_type = TYPE_BYTE;
+    } else if (param_type.type == TOK_TYPEBOOL) {
+      identifier.data_type = TYPE_BOOL;
+    } else {
+      printf("error: unexpected token '%s'\n. Expected 'int' or 'float'", tok.literal.c_str());
+    }
+    // identifier.data_type = (param_type.type == TOK_TYPEINT) ? (TYPE_INT) : (TYPE_FLOAT);
     params.push_back(identifier);
 
     printf("parse_func: should be eating param identifier\n");
@@ -438,6 +472,12 @@ Parser::parse_primary() {
     case TOK_FLOAT:
       printf("primary matched %s\n", this->current_token.literal.c_str());
       return this->parse_float();
+    case TOK_TRUE:
+      printf("primary matched %s\n", this->current_token.literal.c_str());
+      return this->parse_boolean();
+    case TOK_FALSE:
+      printf("primary matched %s\n", this->current_token.literal.c_str());
+      return this->parse_boolean();
     case TOK_IDENT:
       printf("primary matched %s\n", this->current_token.literal.c_str());
       return this->parse_identifier();

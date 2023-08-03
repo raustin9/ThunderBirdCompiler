@@ -8,6 +8,7 @@ void
 Program::print() {
   for (unsigned i = 0; i < this->statements.size(); i++) {
     if (this->statements[i]) this->statements[i]->print();
+    printf("\n");
   }
 }
 
@@ -18,6 +19,10 @@ get_data_type(DataType dt) {
       return "int";
     case TYPE_FLOAT:
       return "float";
+    case TYPE_BYTE:
+      return "byte";
+    case TYPE_BOOL:
+      return "bool";
     default:
       return "invalid";
   }
@@ -41,9 +46,9 @@ ExpressionStatement::print() {
 void
 FunctionDecl::print() {
   if (this->is_entry)
-    printf("entry %s %s (", get_data_type(this->prototype->ret_type).c_str(), this->prototype->name.c_str());
+    printf("\nentry %s %s (", get_data_type(this->prototype->ret_type).c_str(), this->prototype->name.c_str());
   else
-    printf("define %s %s (", get_data_type(this->prototype->ret_type).c_str(), this->prototype->name.c_str());
+    printf("\ndefine %s %s (", get_data_type(this->prototype->ret_type).c_str(), this->prototype->name.c_str());
   
   for (size_t i = 0; i < this->prototype->params.size(); i++) {
     printf("%s %s", get_data_type(this->prototype->params[i].data_type).c_str(), this->prototype->params[i].name.c_str());
