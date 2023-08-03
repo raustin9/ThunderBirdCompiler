@@ -59,6 +59,7 @@ Parser::next_token() {
 std::unique_ptr<Statement>
 Parser::parse_let_statement() {
   token_t let_tok = this->current_token;
+  printf("parse_let: should be eating 'let'\n");
   this->next_token(); // eat the TOK_LET token
   token_t type_spec = this->current_token;
   DataType data_type;
@@ -80,6 +81,7 @@ Parser::parse_let_statement() {
   }
 
   // Parse the identifier
+  printf("parse_let: should be eating type specifier\n");
   this->next_token(); // eat the type specifier
   token_t ident_tok = this->current_token; // grab the identifier
   if (ident_tok.type != TOK_IDENT) {
@@ -87,24 +89,29 @@ Parser::parse_let_statement() {
     return nullptr;
   }
 
+  printf("parse_let: should be eating identifier\n");
   this->next_token(); // eat the identifier
   if (this->current_token.type == TOK_SEMICOLON) {
     // Simple var declaration
     auto variable = std::make_unique<VariableExpr>(ident_tok.literal, data_type);
+    printf("parse_let: should be eating ';'\n");
     this->next_token(); // eat the semicolon
     
     return std::make_unique<LetStmt>(let_tok, std::move(variable), nullptr);
   } else if (this->current_token.type == TOK_EQUALS) {
     // Variable declaration and assignment
     token_t op = this->current_token;
+    printf("parse_let: should be eating '='\n");
     this->next_token(); // eat the '='
     auto expr_val = this->parse_expression_interior(); // get the expression being set to the variable
     auto variable = std::make_unique<VariableExpr>(ident_tok.literal, data_type);
     auto variable_for_assign = std::make_unique<VariableExpr>(ident_tok.literal, data_type);
     auto assignment_expr = std::make_unique<VariableAssignment>(op, std::move(variable_for_assign), std::move(expr_val));
 
-    if (this->current_token.type == TOK_SEMICOLON)
+    if (this->current_token.type == TOK_SEMICOLON) {
+      printf("parse_let: should be eating ';'\n");
       this->next_token();
+    }
     else
       printf("let_stmt: curtok = '%s'\n", this->current_token.literal.c_str());
     return std::make_unique<LetStmt>(let_tok, std::move(variable), std::move(assignment_expr));
@@ -355,8 +362,8 @@ Parser::parse_if_statement() {
   if (this->current_token.type == TOK_ELSE) {
     printf("if_stmt: contains else clause\n");
 
-    printf("if_stmt: should be eating 'else'\n");
     token_t else_tok = this->current_token;
+    printf("if_stmt: should be eating 'else'\n");
     this->next_token();
 
     if (this->current_token.type == TOK_IF) {
@@ -416,6 +423,7 @@ std::unique_ptr<Expression>
 Parser::parse_identifier() {
   auto ident = std::make_unique<IdentifierExpr>();
   ident->name = this->current_token.literal;
+  printf("parse_ident: should be eating identifier\n");
   this->next_token();
   return ident;
 }
@@ -449,6 +457,7 @@ Parser::parse_parentheses_expr() {
   if (this->current_token.type != TOK_LPAREN) {
     printf("parse_paren: error -- first token '%s' != ')'\n", this->current_token.literal.c_str());
   }
+  printf("parse_paren: should be eating '('\n");
   this->next_token(); // eat the '('
 
   auto expr = this->parse_expression_interior();
@@ -478,8 +487,6 @@ Parser::parse_expression_interior() {
     return nullptr;
   }
 
-  // printf("interior: eating '%s'\n", this->current_token.literal.c_str());
-  // this->next_token();
   LHS = this->parse_expr(0, std::move(LHS));
   
   return LHS;
@@ -489,12 +496,12 @@ Parser::parse_expression_interior() {
 std::unique_ptr<Statement>
 Parser::parse_expression_statement() {
   auto LHS = this->parse_primary();
-  // this->next_token();
   LHS = this->parse_expr(0, std::move(LHS));
 
   auto stmt = std::make_unique<ExpressionStatement>(this->current_token, std::move(LHS));
 
   if (this->current_token.type == TOK_SEMICOLON) {
+    printf("parse_expr_stmt: should be eating ';'\n");
     this->next_token();
   }
 
@@ -530,6 +537,8 @@ Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
 
     token_t op = this->current_token;
     printf("op %s\n", op.literal.c_str());
+
+    printf("parse_expr: should be eating operator\n");
     this->next_token();
   
     auto RHS = this->parse_primary();
@@ -538,7 +547,6 @@ Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
       return nullptr;
     }
 
-    // this->next_token();
     if (this->current_token.type == TOK_SEMICOLON || this->current_token.type == TOK_RPAREN) {
       if (this->current_token.type == TOK_SEMICOLON) printf("semicolon 2\n");
       else printf("rparen2\n");
@@ -579,34 +587,30 @@ Parser::parse_program() {
         printf("matched let\n");
         stmt = this->parse_let_statement();
         program->statements.push_back(std::move(stmt));
-        // this->next_token();
 
         break;
       case TOK_FUNCTION:
         printf("matched function\n");
         stmt = this->parse_function_defn();
         program->statements.push_back(std::move(stmt));
-        // this->next_token();
         break;
       case TOK_ENTRY:
         if (!this->has_entry) {
           printf("matched entry\n");
           stmt = this->parse_function_defn();
           program->statements.push_back(std::move(stmt));
-          this->next_token();
         } else {
           // FUTURE: make it so that it will still parse the function correctly for error handling, but 
           // change it so that it is not considered an entry point
           printf("error: program cannot contain more than one entry point");
           stmt = this->parse_function_defn();
-          this->next_token();
+          // this->next_token();
         }
         break;
       case TOK_IF:
         printf("matched if\n");
         stmt = this->parse_if_statement();
         program->statements.push_back(std::move(stmt));
-        //this->next_token();
       case TOK_EOF:
         printf("parse_program: TOK_EOF in switch ending program\n");
         break;
@@ -615,9 +619,6 @@ Parser::parse_program() {
         // error recovery: panic mode
         printf("error: invalid token '%s' at top level\n", this->current_token.literal.c_str());
         this->parse_expression_statement();
-        //this->next_token();
-//         stmt = this->parse_expression_statement();
-//         program->statements.push_back(std::move(stmt));
         break;
     }
   }
