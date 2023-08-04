@@ -332,54 +332,9 @@ Parser::parse_function_defn() {
   this->next_token(); // eat the ')' at end of parameter list
 
   // FUNCTION BODY //
-  if (this->current_token.type == TOK_LBRACE) {
-    bool has_return = false;
-    std::vector <std::unique_ptr<Statement> > func_body;
-    printf("parse_func: should be eating '{'\n");
-    this->next_token(); // eat the '{'
- 
-    while (this->current_token.type != TOK_RBRACE) {
-      std::unique_ptr<Statement> stmt;
-      switch (this->current_token.type) {
-        case TOK_LET:
-          printf("let token: ||%s||\n", this->current_token.literal.c_str());
-          stmt = this->parse_let_statement();
-          func_body.push_back(std::move(stmt));
-          break;
-        case TOK_IF:
-          printf("if token: ||%s||\n", this->current_token.literal.c_str());
-          stmt = this->parse_if_statement();
-          func_body.push_back(std::move(stmt));
-          break;
-        case TOK_RETURN:
-          // parse return statements
-          printf("retur token: ||%s||\n", this->current_token.literal.c_str());
-          stmt = this->parse_return_statement();
-          func_body.push_back(std::move(stmt));
-          has_return = true;
-          // while (this->current_token.type != TOK_RBRACE) this->next_token();
-          break;
-        default:
-          printf("default token: ||%s||\n", this->current_token.literal.c_str());
-          stmt = this->parse_expression_statement();
-          func_body.push_back(std::move(stmt));
-          break;
-      }
-    }
-
-    printf("parse_func: should be eating '}'\n");
-    this->next_token(); // eat the '}' at end of function body
-
-    auto proto = std::make_unique<Prototype>(proto_name, rt, params);
-    if (!has_return) {
-      printf("error: function %s does not have return statement\n", proto->name.c_str());
-      return nullptr;
-    }       
-    return std::make_unique<FunctionDecl>(is_entry, std::move(proto), std::move(func_body));
-  } else {
-    printf("error: unexpected token '%s'. Expected '{'\n", this->current_token.literal.c_str());
-    return nullptr;
-  }
+  auto func_body = this->parse_code_block();
+  auto proto = std::make_unique<Prototype>(proto_name, rt, params);
+  return std::make_unique<FunctionDecl>(is_entry, std::move(func_body), std::move(proto));
 }
 
 // Parse a code block
@@ -406,6 +361,12 @@ Parser::parse_code_block() {
       case TOK_IF:
         printf("if token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_if_statement();
+        body.push_back(std::move(stmt));
+        break;
+      case TOK_RETURN:
+        // parse return statements
+        printf("retur token: ||%s||\n", this->current_token.literal.c_str());
+        stmt = this->parse_return_statement();
         body.push_back(std::move(stmt));
         break;
       default:

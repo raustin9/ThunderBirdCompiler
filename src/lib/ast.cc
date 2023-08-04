@@ -58,10 +58,8 @@ FunctionDecl::print() {
       printf(", ");
   }
   printf(") {\n\n");
-  for (size_t i = 0; i < this->body.size(); i++) {
-    this->body[i]->print();
-    printf("\n");
-  }
+  if (this->func_body)
+    this->func_body->print();
 
   printf("\n} end %s\n", this->prototype->name.c_str());
 }
