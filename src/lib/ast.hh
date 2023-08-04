@@ -152,10 +152,8 @@ class IdentifierExpr : public Expression {
 // Is an expression because a variable does contain a value that it is assigned to
 class VariableExpr : public Expression {
   public:
-    std::string name;   // name of the variable
-    DataType data_type; // data type of the variable -- float or int
-    long long value;    // integer value that the variable can hold
-    double dvalue;      // floating point value that the variable can hold
+    std::string name;    // name of the variable
+    DataType data_type;  // data type of the variable -- float or int
 
     VariableExpr(const std::string &name, DataType data_type) : name(name), data_type(data_type) {}
     void print() override;

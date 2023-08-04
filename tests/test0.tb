@@ -1,1 +1,6 @@
-let int x;
+let int x = 0;
+
+define int main() {
+  let int g = 0;
+  return 0;
+}

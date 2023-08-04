@@ -159,13 +159,13 @@ VariableExpr::print() {
   switch (this->data_type) {
     case TYPE_INT:
       dt = "int";
-      printf("[name: '%s' type: '%s' val: %lld] ",
-          this->name.c_str(), dt.c_str(), this->value);
+      printf("[name: '%s' type: '%s'] ",
+          this->name.c_str(), dt.c_str());
       break;
     case TYPE_FLOAT:
       dt = "float";
-      printf("[name: '%s' type: '%s' val: %lf] ",
-          this->name.c_str(), dt.c_str(), this->dvalue);
+      printf("[name: '%s' type: '%s'] ",
+          this->name.c_str(), dt.c_str());
       break;
     case TYPE_STRING:
       dt = "string";
