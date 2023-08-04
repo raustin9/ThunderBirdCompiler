@@ -123,14 +123,7 @@ Parser::parse_let_statement() {
 
   printf("parse_let: should be eating identifier\n");
   this->next_token(); // eat the identifier
-  if (this->current_token.type == TOK_SEMICOLON) {
-    // Simple var declaration
-    auto variable = std::make_unique<VariableExpr>(ident_tok.literal, data_type);
-    printf("parse_let: should be eating ';'\n");
-    this->next_token(); // eat the semicolon
-    
-    return std::make_unique<LetStmt>(let_tok, std::move(variable), nullptr);
-  } else if (this->current_token.type == TOK_EQUALS) {
+  if (this->current_token.type == TOK_EQUALS) {
     // Variable declaration and assignment
     token_t op = this->current_token;
     printf("parse_let: should be eating '='\n");
@@ -147,6 +140,20 @@ Parser::parse_let_statement() {
     else
       printf("let_stmt: curtok = '%s'\n", this->current_token.literal.c_str());
     return std::make_unique<LetStmt>(let_tok, std::move(variable), std::move(assignment_expr));
+  } else if (this->current_token.type == TOK_SEMICOLON) {
+    // Variable declaration -- we do not allow declarations without initializations
+    printf("parse_let: error: variable '%s' missing initialization\n", ident_tok.literal.c_str());
+    token_t op;
+    op.literal = "=";
+    op.type = TOK_EQUALS;
+    auto expr = std::make_unique<Expression>();
+    auto variable = std::make_unique<VariableExpr>(ident_tok.literal, data_type);
+    auto variable_for_assign = std::make_unique<VariableExpr>(ident_tok.literal, data_type);
+    auto assignment_expr = std::make_unique<VariableAssignment>(op, std::move(variable), std::move(expr));
+
+    printf("parse_let: should be eating ';'\n");
+    this->next_token();
+    return std::make_unique<LetStmt>(let_tok, std::move(variable_for_assign), std::move(assignment_expr));
   } else {
     printf("error: unexpected token |%s|. Expected |=|\n", this->current_token.literal.c_str());
     return nullptr;
