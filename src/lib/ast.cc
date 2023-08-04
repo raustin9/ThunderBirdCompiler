@@ -126,11 +126,8 @@ Conditional::print() {
   this->condition->print();
   printf(") {\n");
 
-  for (unsigned i = 0; i < this->consequence.size(); i++) {
-    printf("  ");
-    this->consequence[i]->print();
-    printf("\n");
-  }
+  if (this->consequence)
+    this->consequence->print();
 
   printf("} ");
 
@@ -150,6 +147,7 @@ void
 CodeBlock::print() {
   for (size_t i = 0; i < this->body.size(); i++) {
     this->body[i]->print();
+    printf("\n");
   }
 }
 

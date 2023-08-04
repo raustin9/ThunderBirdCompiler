@@ -131,7 +131,7 @@ Lexer::next_token() {
       tok.type = TOK_MINUS;
       tok.literal = std::string(1, this->cur_char);
       break;
-    case 0:
+    case '\0':
       tok.type = TOK_EOF;
       tok.literal = "";
       break;
