@@ -23,6 +23,8 @@ get_data_type(DataType dt) {
       return "byte";
     case TYPE_BOOL:
       return "bool";
+    case TYPE_VOID:
+      return "void";
     default:
       return "invalid";
   }
@@ -146,7 +148,9 @@ WhileLoop::print() {
 
 void
 CodeBlock::print() {
-  
+  for (size_t i = 0; i < this->body.size(); i++) {
+    this->body[i]->print();
+  }
 }
 
 void
@@ -166,6 +170,10 @@ VariableExpr::print() {
     case TYPE_STRING:
       dt = "string";
       break;
+    case TYPE_VOID:
+      dt = "void";
+      printf("[name: '%s' type: '%s'] ",
+          this->name.c_str(), dt.c_str());
     default:
       dt = "invalid";
       break;

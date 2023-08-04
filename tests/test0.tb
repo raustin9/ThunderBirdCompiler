@@ -1,3 +1,1 @@
-define int example(bool p1) {
-  return 1;
-}
+let x = 0;

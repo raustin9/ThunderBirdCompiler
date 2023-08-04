@@ -78,18 +78,47 @@ Parser::parse_let_statement() {
     case TOK_TYPEBOOL:
       data_type = TYPE_BOOL;
       break;
+    case TOK_IDENT:
+      data_type = TYPE_VOID;
+      break;
     default:
       printf("error: invalid type specifier |%s|\n", type_spec.literal.c_str());
       return nullptr;
   }
 
   // Parse the identifier
-  printf("parse_let: should be eating type specifier\n");
-  this->next_token(); // eat the type specifier
-  token_t ident_tok = this->current_token; // grab the identifier
-  if (ident_tok.type != TOK_IDENT) {
-    printf("error: unexpected token |%s|. Expected |TOK_IDENT|\n", ident_tok.literal.c_str());
-    return nullptr;
+  token_t ident_tok;
+  if (data_type != TYPE_VOID) {
+    // We got a valid type specifier, we can parse normally
+    printf("parse_let: should be eating type specifier\n");
+    this->next_token(); // eat the type specifier
+    ident_tok = this->current_token; // grab the identifier
+    if (ident_tok.type != TOK_IDENT) {
+      printf("error: unexpected token |%s|. Expected |TOK_IDENT|\n", ident_tok.literal.c_str());
+      return nullptr;
+    }
+  } else {
+    // We got invalid data type, either mispelled type spec or forgotten type spec
+    if (this->peek_token.type == TOK_EQUALS) {
+      // read identifier then an equals -> assume they forgot to put type spec
+      // because they forgot it, we have one less token, and we are already at the variable identifier
+      printf("parse_let: error: missing type specifier for '%s'\n", type_spec.literal.c_str());
+      ident_tok = type_spec;
+
+    } else if (this->peek_token.type == TOK_IDENT) {
+      // read identifier then another identifier, assume they mispelled type spec
+      // we should still have correct number of tokens, so we can continue
+      // keep the data type as VOID for now
+      printf("parse_let: error: misspelled type specifier '%s'\n", type_spec.literal.c_str());
+
+      printf("parse_let: should be eating type specifier\n");
+      this->next_token(); // eat the type specifier
+      ident_tok = this->current_token; // grab the identifier
+      if (ident_tok.type != TOK_IDENT) {
+        printf("error: unexpected token |%s|. Expected |TOK_IDENT|\n", ident_tok.literal.c_str());
+        return nullptr;
+      }
+    }
   }
 
   printf("parse_let: should be eating identifier\n");
@@ -344,6 +373,47 @@ Parser::parse_function_defn() {
     printf("error: unexpected token '%s'. Expected '{'\n", this->current_token.literal.c_str());
     return nullptr;
   }
+}
+
+// Parse a code block
+std::unique_ptr<Statement>
+Parser::parse_code_block() {
+  token_t tok = this->current_token;
+  if (tok.type != TOK_LBRACE) {
+    printf("parse_code_block: error: unexpected token '%s'. Expected '{'\n", tok.literal.c_str());
+  }
+
+  printf("parse_code_block: should be eating '{'\n");
+  this->next_token();
+
+  std::vector <std::unique_ptr<Statement> > body;
+  while (this->current_token.type != TOK_RBRACE) {
+    // for now: eat the body
+    std::unique_ptr<Statement> stmt;
+    switch (this->current_token.type) {
+      case TOK_LET:
+        printf("let token: ||%s||\n", this->current_token.literal.c_str());
+        stmt = this->parse_let_statement();
+        body.push_back(std::move(stmt));
+        break;
+      case TOK_IF:
+        printf("if token: ||%s||\n", this->current_token.literal.c_str());
+        stmt = this->parse_if_statement();
+        body.push_back(std::move(stmt));
+        break;
+      default:
+        printf("default token: ||%s||\n", this->current_token.literal.c_str());
+        stmt = this->parse_expression_statement();
+        body.push_back(std::move(stmt));
+        break;
+    }
+    
+  }
+
+  printf("parse_code_block: should be eating '}'\n");
+  this->next_token();
+
+  return std::make_unique<CodeBlock>(std::move(body));
 }
 
 // Parse an if statement
