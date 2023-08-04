@@ -206,18 +206,18 @@ class ReturnStmt : public Statement {
 class Conditional : public Statement {
   public:
     token_t token;
+    std::unique_ptr<Statement> consequence;                   // body of if statement
     std::unique_ptr<Expression> condition;                // the condition to evaluate
-    std::vector<std::unique_ptr<Statement> > consequence; // the code block if the condition is true
     std::unique_ptr<Statement> alternative;             // the conditional to evaluate if the condition is not true -- this is how we do else-if
 
     Conditional(
       token_t token,
+      std::unique_ptr<Statement> consequence,
       std::unique_ptr<Expression> condition,
-      std::vector<std::unique_ptr<Statement> > consequence,
       std::unique_ptr<Statement> alternative
     ) : token(token), 
-        condition(std::move(condition)),
         consequence(std::move(consequence)),
+        condition(std::move(condition)),
         alternative(std::move(alternative))
       {}
     void print() override;

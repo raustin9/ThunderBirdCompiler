@@ -430,44 +430,10 @@ Parser::parse_if_statement() {
   printf("if_stmt: should be eating 'if'\n");
   this->next_token(); // eat the 'if'
 
-  if (this->current_token.type != TOK_LPAREN) {
-    printf("if_stmt: error: unexpected token '%s'. Expected '('\n", this->current_token.literal.c_str());
-  }
-
   auto condition = this->parse_expression_interior();
 
-  if (this->current_token.type != TOK_LBRACE) {
-    printf("error: unexpected token '%s'. Expected '{'\n", this->current_token.literal.c_str());
-  }
-  printf("if_stmt: should be eating '{'\n");
-  this->next_token(); // eat the '{'
-
   // PARSE IF STATEMENT BODY //
-  std::vector<std::unique_ptr<Statement> > consequence;
-  while (this->current_token.type != TOK_RBRACE) {
-    // for now: eat the body
-    std::unique_ptr<Statement> stmt;
-    switch (this->current_token.type) {
-      case TOK_LET:
-        printf("let token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_let_statement();
-        consequence.push_back(std::move(stmt));
-        break;
-      case TOK_IF:
-        printf("if token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_if_statement();
-        consequence.push_back(std::move(stmt));
-        break;
-      default:
-        printf("default token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_expression_statement();
-        consequence.push_back(std::move(stmt));
-        break;
-    }
-  }
-
-  printf("ifstmt: should be eating '}'\n");
-  this->next_token(); // eat the '}'
+  auto consequence = this->parse_code_block();
   
   // PARSE ELSE CLAUSE //
   if (this->current_token.type == TOK_ELSE) {
@@ -475,57 +441,33 @@ Parser::parse_if_statement() {
 
     token_t else_tok = this->current_token;
     printf("if_stmt: should be eating 'else'\n");
-    this->next_token();
+    this->next_token(); // eat the 'else'
 
     if (this->current_token.type == TOK_IF) {
       // else if...
       printf("if_stmt: matched else if\n");
       auto alternative = this->parse_if_statement();
 
-      auto if_stmt = std::make_unique<Conditional>(token, std::move(condition), std::move(consequence), std::move(alternative));
+      auto if_stmt = std::make_unique<Conditional>(token, std::move(consequence), std::move(condition), std::move(alternative));
       return if_stmt;
     } else if (this->current_token.type == TOK_LBRACE) {
       // just normal else clause
       printf("if_stmt: final else clause\n");
-      printf("if_stmt: else: should be eating '{'\n");
-      this->next_token();
-
-      // ELSE CLAUSE BODY //
       std::vector <std::unique_ptr<Statement> > else_body;
-      while (this->current_token.type != TOK_RBRACE) {
-        std::unique_ptr<Statement> stmt;
-        switch (this->current_token.type) {
-          case TOK_LET:
-            printf("let token: ||%s||\n", this->current_token.literal.c_str());
-            stmt = this->parse_let_statement();
-            else_body.push_back(std::move(stmt));
-            break;
-          case TOK_IF:
-            printf("if token: ||%s||\n", this->current_token.literal.c_str());
-            stmt = this->parse_if_statement();
-            else_body.push_back(std::move(stmt));
-            break;
-          default:
-            printf("default token: ||%s||\n", this->current_token.literal.c_str());
-            stmt = this->parse_expression_statement();
-            else_body.push_back(std::move(stmt));
-            break;
-        }
-      }
+      auto else_block = this->parse_code_block();
+
       auto else_condition = std::make_unique<BooleanExpr>(true);
-      auto else_stmt = std::make_unique<Conditional>(else_tok, std::move(else_condition), std::move(else_body), nullptr); 
+      auto else_stmt = std::make_unique<Conditional>(else_tok, std::move(else_block), std::move(else_condition), nullptr); 
       
-      printf("if_stmt: else: should be eating '}'\n");
-      this->next_token();
       
-      auto if_stmt = std::make_unique<Conditional>(token, std::move(condition), std::move(consequence), std::move(else_stmt));
+      auto if_stmt = std::make_unique<Conditional>(token, std::move(consequence), std::move(condition), std::move(else_stmt));
       return if_stmt;
     }
   }
 
 
   // No else or else if clauses
-  auto if_stmt = std::make_unique<Conditional>(token, std::move(condition), std::move(consequence), nullptr);
+  auto if_stmt = std::make_unique<Conditional>(token, std::move(consequence), std::move(condition), nullptr);
   return if_stmt;
 }
 
@@ -728,6 +670,7 @@ Parser::parse_program() {
         printf("matched if\n");
         stmt = this->parse_if_statement();
         program->statements.push_back(std::move(stmt));
+        break;
       case TOK_EOF:
         printf("parse_program: TOK_EOF in switch ending program\n");
         break;
