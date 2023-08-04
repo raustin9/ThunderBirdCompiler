@@ -23,6 +23,8 @@ get_data_type(DataType dt) {
       return "byte";
     case TYPE_BOOL:
       return "bool";
+    case TYPE_VOID:
+      return "void";
     default:
       return "invalid";
   }
@@ -138,22 +140,40 @@ Conditional::print() {
 }
 
 void
+WhileLoop::print() {
+  printf("%s ", this->token.literal.c_str());
+  printf("(");
+  printf(") {}\n");
+}
+
+void
+CodeBlock::print() {
+  for (size_t i = 0; i < this->body.size(); i++) {
+    this->body[i]->print();
+  }
+}
+
+void
 VariableExpr::print() {
   std::string dt;
   switch (this->data_type) {
     case TYPE_INT:
       dt = "int";
-      printf("[name: '%s' type: '%s' val: %lld] ",
-          this->name.c_str(), dt.c_str(), this->value);
+      printf("[name: '%s' type: '%s'] ",
+          this->name.c_str(), dt.c_str());
       break;
     case TYPE_FLOAT:
       dt = "float";
-      printf("[name: '%s' type: '%s' val: %lf] ",
-          this->name.c_str(), dt.c_str(), this->dvalue);
+      printf("[name: '%s' type: '%s'] ",
+          this->name.c_str(), dt.c_str());
       break;
     case TYPE_STRING:
       dt = "string";
       break;
+    case TYPE_VOID:
+      dt = "void";
+      printf("[name: '%s' type: '%s'] ",
+          this->name.c_str(), dt.c_str());
     default:
       dt = "invalid";
       break;

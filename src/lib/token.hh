@@ -78,11 +78,12 @@ enum TokenType {
 
 // Enumeration of the supported data types 
 enum DataType {
-  TYPE_BOOL,  // boolean type
-  TYPE_INT,   // integer type
-  TYPE_FLOAT, // floating point type
-  TYPE_BYTE,  // byte type -- similar to 'char' from C
-  TYPE_STRING // string type -- currently unsupported -- also might eventually be changed to byte[]
+  TYPE_BOOL,   // boolean type
+  TYPE_INT,    // integer type
+  TYPE_FLOAT,  // floating point type
+  TYPE_BYTE,   // byte type -- similar to 'char' from C
+  TYPE_STRING, // string type -- currently unsupported -- also might eventually be changed to byte[]
+  TYPE_VOID,   // void type -- currently only used by the compiler
 };
 
 // Structure for tokens that the lexer creates

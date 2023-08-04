@@ -1,3 +1,6 @@
-define int example(bool p1) {
-  return 1;
+let int x = 0;
+
+define int main() {
+  let int g = 0;
+  return 0;
 }
