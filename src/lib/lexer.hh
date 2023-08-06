@@ -13,6 +13,7 @@ class Lexer {
 
   public:
     std::string input; // the source code input
+    int line_num;      // the line number that we are currently on
     int position;      // the current position in the input
     int read_position; // the current reading position in input (after current char)
     char cur_char;     // current char under examination

@@ -102,14 +102,14 @@ Parser::parse_let_statement() {
     if (this->peek_token.type == TOK_EQUALS) {
       // read identifier then an equals -> assume they forgot to put type spec
       // because they forgot it, we have one less token, and we are already at the variable identifier
-      printf("parse_let: error: missing type specifier for '%s'\n", type_spec.literal.c_str());
+      printf("parse_let: error on line %d: missing type specifier for '%s'\n", type_spec.line_num, type_spec.literal.c_str());
       ident_tok = type_spec;
 
     } else if (this->peek_token.type == TOK_IDENT) {
       // read identifier then another identifier, assume they mispelled type spec
       // we should still have correct number of tokens, so we can continue
       // keep the data type as VOID for now
-      printf("parse_let: error: misspelled type specifier '%s'\n", type_spec.literal.c_str());
+      printf("parse_let: error on line %d: misspelled type specifier '%s'\n", type_spec.line_num, type_spec.literal.c_str());
 
       printf("parse_let: should be eating type specifier\n");
       this->next_token(); // eat the type specifier
@@ -302,10 +302,10 @@ Parser::parse_function_defn() {
       printf("parse_func: should be eating type spec\n");
       this->next_token(); // eat the type specifer
 
-      printf("parse_func_defn: error: mispelled return type specifier '%s'\n", tok.literal.c_str());
+      printf("parse_func_defn: error on line %d: mispelled return type specifier '%s'\n", tok.line_num, tok.literal.c_str());
       ident = this->current_token;
       if (ident.type != TOK_IDENT) {
-        printf("parse_func_defn: error: unexpected token '%s'. Expected 'IDENT'\n", ident.literal.c_str());
+        printf("parse_func_defn: error on line %d: unexpected token '%s'. Expected 'IDENT'\n", tok.line_num, ident.literal.c_str());
         return nullptr;
       }
       proto_name = ident.literal;

@@ -4,6 +4,7 @@
 
 // Constructor
 Lexer::Lexer(std::string input) {
+  this->line_num = 1;
   this->input = input;
   this->read_char();
 
@@ -46,46 +47,57 @@ Lexer::next_token() {
         this->read_char();
         tok.type = TOK_EQUALTO;
         tok.literal = "==";
+        tok.line_num = this->line_num;
       } else {
         tok.type = TOK_EQUALS;
         tok.literal = std::string(1, this->cur_char);
+        tok.line_num = this->line_num;
       }
       break;
     case ';':
       tok.type = TOK_SEMICOLON;
       tok.literal = std::string(1, this->cur_char);
+      tok.line_num = this->line_num;
       break;
     case '(':
       tok.type = TOK_LPAREN;
       tok.literal = std::string(1, this->cur_char);
+      tok.line_num = this->line_num;
       break;
     case ')':
       tok.type = TOK_RPAREN;
       tok.literal = std::string(1, this->cur_char);
+      tok.line_num = this->line_num;
       break;
     case '{':
       tok.type = TOK_LBRACE;
       tok.literal = std::string(1, this->cur_char);
+      tok.line_num = this->line_num;
       break;
     case '}':
       tok.type = TOK_RBRACE;
       tok.literal = std::string(1, this->cur_char);
+      tok.line_num = this->line_num;
       break;
     case '[':
       tok.type = TOK_LBRACKET;
       tok.literal = std::string(1, this->cur_char);
+      tok.line_num = this->line_num;
       break;
     case ']':
       tok.type = TOK_RBRACKET;
       tok.literal = std::string(1, this->cur_char);
+      tok.line_num = this->line_num;
       break;
     case ',':
       tok.type = TOK_COMMA;
       tok.literal = std::string(1, this->cur_char);
+      tok.line_num = this->line_num;
       break;
     case '+':
       tok.type = TOK_PLUS;
       tok.literal = std::string(1, this->cur_char);
+      tok.line_num = this->line_num;
       break;
     case '<':
       // future: account for '<<' for bitshifting
@@ -93,9 +105,11 @@ Lexer::next_token() {
         this->read_char();
         tok.type = TOK_LTEQUALTO;
         tok.literal = "<=";
+        tok.line_num = this->line_num;
       } else {
         tok.type = TOK_LT;
         tok.literal = std::string(1, this->cur_char);
+        tok.line_num = this->line_num;
       }
       break;
     case '>':
@@ -104,9 +118,11 @@ Lexer::next_token() {
         this->read_char();
         tok.type = TOK_GTEQUALTO;
         tok.literal = ">=";
+        tok.line_num = this->line_num;
       } else {
         tok.type = TOK_GT;
         tok.literal = std::string(1, this->cur_char);
+        tok.line_num = this->line_num;
       }
       break;
     case '!':
@@ -114,40 +130,49 @@ Lexer::next_token() {
         this->read_char();
         tok.type = TOK_NOTEQUALTO;
         tok.literal = "!=";
+        tok.line_num = this->line_num;
       } else {
         tok.type = TOK_BANG;
         tok.literal = std::string(1, this->cur_char);
+        tok.line_num = this->line_num;
       }
       break;
     case '*':
       tok.type = TOK_ASTERISK;
       tok.literal = std::string(1, this->cur_char);
+      tok.line_num = this->line_num;
       break;
     case '/':
       tok.type = TOK_SLASH;
       tok.literal = std::string(1, this->cur_char);
+      tok.line_num = this->line_num;
       break;
     case '-':
       tok.type = TOK_MINUS;
       tok.literal = std::string(1, this->cur_char);
+      tok.line_num = this->line_num;
       break;
     case '\0':
       tok.type = TOK_EOF;
       tok.literal = "";
+      tok.line_num = this->line_num;
       break;
     default:
       if (isalpha(this->cur_char) != 0) {
         tok.literal = this->read_identifier();
         tok.type = this->lookup_identifier(tok.literal);
+        tok.line_num = this->line_num;
         return tok; // we return early here because read_identifier() advances this->cur_char repeatedly
       } else if (isdigit(this->cur_char) != 0) {
         // for now assume all number are ints
         // tok.type = TOK_INT;
         tok = this->read_number();
+        tok.line_num = this->line_num;
         return tok;
       } else {
         tok.type = TOK_ILLEGAL;
         tok.literal = std::string(1, this->cur_char);
+        tok.line_num = this->line_num;
       }
   };
 
@@ -226,6 +251,8 @@ Lexer::skip_whitespace() {
     this->cur_char == '\t' ||
     this->cur_char == '\r'
   ) {
+    if (this->cur_char == '\n')
+      this->line_num++;
     this->read_char();
   }
 }
