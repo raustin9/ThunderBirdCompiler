@@ -88,6 +88,7 @@ enum DataType {
 
 // Structure for tokens that the lexer creates
 typedef struct Token {
+  int line_num;        // the line number of the source code the token exists in
   TokenType type;      // the actual token enum
   std::string literal; // the literal of the token -- identifier string or the symbol that it represents
 } token_t;

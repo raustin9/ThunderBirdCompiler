@@ -1,4 +1,4 @@
-define main() {
-  let int x = 0;
+define inty main() {
+  let x = 0;
   return x;
 }
