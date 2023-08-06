@@ -105,7 +105,7 @@ define int integer_add(int n1, int n2) {
   return n1 + n2;
 }
 
-entr int main() {
+entry int main() {
   let int x = 0;
   let int y = 0;
 
