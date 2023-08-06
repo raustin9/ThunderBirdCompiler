@@ -243,9 +243,19 @@ std::unique_ptr<Statement>
 Parser::parse_function_defn() {
   bool is_entry = false;
   token_t decl_keyword = this->current_token;
+
+  // Ensure correct keyword
+  // this function should only be called when the 'define' or 'entry' tokens are read,
+  // so this ideally should not happen but it is nice to check for debugging
+  if (this->current_token.type != TOK_ENTRY && 
+      this->current_token.type != TOK_FUNCTION) {
+    printf("parse_func_defn: error: Unexpected token '%s'. Expected 'define' or 'entry'\n", this->current_token.literal.c_str());
+  }
+
   printf("parse_func: should be eating 'function' or 'define' or 'entry'\n");
   this->next_token(); // eat the "function" or "define" or "entry" keyword
 
+  // Check if entry point already exists if this function is entry point
   if (decl_keyword.type == TOK_ENTRY && this->has_entry == false)
     is_entry = true;
 
@@ -260,25 +270,57 @@ Parser::parse_function_defn() {
     rt = TYPE_BYTE;
   } else if (tok.type == TOK_TYPEBOOL) {
     rt = TYPE_BOOL;
+  } else if (tok.type == TOK_IDENT) {
+    // Assume they either mispelled the type spec or they forgot it
+    rt = TYPE_VOID;
   } else {
     printf("error: unexpected token '%s'\n. Expected 'int' or 'float'", tok.literal.c_str());
+    rt = TYPE_VOID;
   }
-  printf("matched int\n");
 
-  printf("parse_func: should be eating type spec\n");
-  this->next_token(); // eat the type specifier
               
   // GET IDENTIFIER //
-  token_t ident = this->current_token;
-  if (ident.type != TOK_IDENT) {
-    printf("error: unexpected token '%s'. Expected IDENT\n", ident.literal.c_str());
-    return nullptr;
+  std::string proto_name;
+  token_t ident;
+  if (rt != TYPE_VOID) {
+    // Function has valid return type specification
+    printf("parse_func: should be eating type spec\n");
+    this->next_token(); // eat the type specifier
+    ident = this->current_token;
+    if (ident.type != TOK_IDENT) {
+      printf("error: unexpected token '%s'. Expected IDENT\n", ident.literal.c_str());
+      return nullptr;
+    }
+
+    proto_name = ident.literal;
+  } else {
+    // Invalid return type specification
+    // Either they forgot it, or they mispelled it
+    if (this->peek_token.type == TOK_IDENT) {
+      // next token is identifier after missed type_spec
+      // assume they mispelled it
+      printf("parse_func: should be eating type spec\n");
+      this->next_token(); // eat the type specifer
+
+      printf("parse_func_defn: error: mispelled return type specifier '%s'\n", tok.literal.c_str());
+      ident = this->current_token;
+      if (ident.type != TOK_IDENT) {
+        printf("parse_func_defn: error: unexpected token '%s'. Expected 'IDENT'\n", ident.literal.c_str());
+        return nullptr;
+      }
+      proto_name = ident.literal;
+    } else if (this->peek_token.type == TOK_LPAREN) {
+      // next token is opening parentheses
+      // assume they forgot the return type specifier
+      printf("parse_func_defn: error: missing return type specifier for '%s'\n", tok.literal.c_str());
+      proto_name = tok.literal;
+      ident = tok;
+    }
   }
 
-  std::string proto_name = ident.literal;
   printf("parse_func: should be eating identifier\n");
   this->next_token(); // eat the identifier
-
+                      
   // PARSE FUNCTION PARAMETERS //
   if (this->current_token.type != TOK_LPAREN) {
     printf("error: unexpected token '%s'. Expected '('\n", this->current_token.literal.c_str());

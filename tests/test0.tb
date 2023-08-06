@@ -1,12 +1,4 @@
-define int main() {
-  if (x == a + b) {
-    let int x = 0;
-    let int y = 0;
-  } else if (x == 1) {
-    let int var = 2;
-  } else {
-    let int z = 0;
-  }
-
-  return 0;
+define main() {
+  let int x = 0;
+  return x;
 }
