@@ -477,10 +477,12 @@ Parser::parse_if_statement() {
 // Parse an identifier in an expression
 std::unique_ptr<Expression>
 Parser::parse_identifier() {
+  token_t ident_tok = this->current_token;
+  printf("parse_identifier: should be eating identifier\n");
+  this->next_token(); // eat the identifier
+
   auto ident = std::make_unique<IdentifierExpr>();
-  ident->name = this->current_token.literal;
-  printf("parse_ident: should be eating identifier\n");
-  this->next_token();
+  ident->name = ident_tok.literal;
   return ident;
 }
 
