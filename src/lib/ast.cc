@@ -65,6 +65,17 @@ FunctionDecl::print() {
 }
 
 void
+FunctionCallExpr::print() {
+  printf("%s(", this->name.c_str());
+  for (size_t i = 0; i < this->args.size(); i++) {
+    this->args[i]->print();
+    if (i < this->args.size()-1)
+      printf(", ");
+  }
+  printf(") ");
+}
+
+void
 IntegerExpr::print() {
   std::string dt;
   switch (this->data_type) {

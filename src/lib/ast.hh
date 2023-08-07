@@ -138,6 +138,22 @@ class BooleanExpr : public Expression {
     void print() override;
 };
 
+// Function Call Expression node
+// This node is for when a function is called in an expression
+// "func1(x, y);"
+// "let int x = add(1, 2) + 4;"
+class FunctionCallExpr : public Expression {
+  public:
+    std::string name;
+    std::vector <std::unique_ptr<Expression> > args;
+
+    FunctionCallExpr(
+      std::string &name,
+      std::vector <std::unique_ptr<Expression> > args
+    ) : name(name), args(std::move(args)) {}
+    void print() override;
+};
+
 // Identifier class that holds the name and data type of the identifier
 // identifier can be either a function or a variable
 class IdentifierExpr : public Expression {

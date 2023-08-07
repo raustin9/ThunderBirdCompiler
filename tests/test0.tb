@@ -1,4 +1,4 @@
-define inty main() {
-  let x = 0;
+define int main() {
+  let int x = add(1+1, y) + 14;
   return x;
 }
