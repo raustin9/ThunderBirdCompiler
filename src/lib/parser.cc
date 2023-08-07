@@ -680,18 +680,18 @@ Parser::parse_program() {
   while(this->current_token.type != TOK_EOF) {
     std::unique_ptr<Statement> stmt;
     switch(this->current_token.type) {
-      case TOK_LET: // 'let' variable assignment statement
+      case TOK_LET: // Top-level variable declarations;
         printf("matched let\n");
         stmt = this->parse_let_statement();
         program->statements.push_back(std::move(stmt));
 
         break;
-      case TOK_FUNCTION:
+      case TOK_FUNCTION: // Top-level function definitions
         printf("matched function\n");
         stmt = this->parse_function_defn();
         program->statements.push_back(std::move(stmt));
         break;
-      case TOK_ENTRY:
+      case TOK_ENTRY: // Top-level function definition, but entry point to the program
         if (!this->has_entry) {
           printf("matched entry\n");
           stmt = this->parse_function_defn();
@@ -704,12 +704,8 @@ Parser::parse_program() {
           // this->next_token();
         }
         break;
-      case TOK_IF:
-        printf("matched if\n");
-        stmt = this->parse_if_statement();
-        program->statements.push_back(std::move(stmt));
-        break;
-      case TOK_EOF:
+      case TOK_EOF: // End of the program
+        // low key shouldn't ever reach this unless I fucked up the parsing
         printf("parse_program: TOK_EOF in switch ending program\n");
         break;
       default:
