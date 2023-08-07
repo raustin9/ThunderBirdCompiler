@@ -481,9 +481,42 @@ Parser::parse_identifier() {
   printf("parse_identifier: should be eating identifier\n");
   this->next_token(); // eat the identifier
 
-  auto ident = std::make_unique<IdentifierExpr>();
-  ident->name = ident_tok.literal;
-  return ident;
+
+  if (this->current_token.type != TOK_LPAREN) {
+    // Normal variable reference not function call
+    auto ident = std::make_unique<IdentifierExpr>();
+    ident->name = ident_tok.literal;
+    return ident;
+  }
+
+  printf("parse_ident: should be eating '('\n");
+  this->next_token();
+
+  std::vector <std::unique_ptr<Expression> > func_args;
+  while (this->current_token.type != TOK_RPAREN) {
+    if (auto arg = this->parse_expression_interior())
+      func_args.push_back(std::move(arg));
+    else {
+      // function arg invalid
+      printf("parse_ident: error: invalid argument on line %d: '%s'\n", this->current_token.line_num, this->current_token.literal.c_str());
+      return nullptr;
+    }
+
+    if (this->current_token.type == TOK_RPAREN)
+      break;
+
+    if (this->current_token.type != TOK_COMMA) {
+      printf("parse_ident: error: invalid token on line %d '%s'. Expected ','\n", this->current_token.line_num, this->current_token.literal.c_str());
+      return nullptr;
+    }
+
+    printf("parse_ident: should be eating ','\n");
+    this->next_token();
+  }
+
+  printf("parse_ident: should be eating ')'\n");
+  this->next_token();
+  return std::make_unique<FunctionCallExpr>(ident_tok.literal, std::move(func_args));
 }
 
 // Parse parts in an expression

@@ -151,6 +151,7 @@ class FunctionCallExpr : public Expression {
       std::string &name,
       std::vector <std::unique_ptr<Expression> > args
     ) : name(name), args(std::move(args)) {}
+    void print() override;
 };
 
 // Identifier class that holds the name and data type of the identifier
