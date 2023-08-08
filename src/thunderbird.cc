@@ -11,7 +11,6 @@
 #include "parser.hh"
 
 bool test_lexer();
-bool test_let();
 std::string read_file(char *file_name);
 
 
@@ -20,12 +19,12 @@ main(int argc, char** argv) {
   std::string file_name;
 
   if (argc < 2) {
-//    if (test_lexer() == true) {
-//      printf("-- all tests passed --\n");
-//    }
-    if (test_let() == true) {
-      printf("let statement passed\n");
-    }
+    std::string input = read_file((char*)"tests/test0.tb");
+    Compiler *compiler = new Compiler(input);
+
+    compiler->test_parser();
+
+    delete compiler;
   } else {
     // Read the file specified through the command line argument
     // ignore all other args for now
@@ -41,18 +40,6 @@ main(int argc, char** argv) {
 
   return 0;
 }
-
-bool
-test_let() {
-  std::string input = read_file((char*)"tests/test0.tb");
-  Compiler *compiler = new Compiler(input);
-
-  compiler->parser->parse_program();
-
-  delete compiler;
-  return true;
-}
-
 
 // read input from file
 std::string

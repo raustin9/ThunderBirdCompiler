@@ -19,11 +19,14 @@
 // the Abstract Syntax Tree
 class Parser {
 public:
-  Parser(std::string input);  // constructor -- uses string parameter to initialize a lexer
+  Parser(std::vector<token_t> token_stream);  // constructor -- uses string parameter to initialize a lexer
   ~Parser();                  // destructor -- deletes the lexer that it created
+
   void next_token();          // eats current token and advances the peek and current tokens
   int get_token_precedence(); // gets the precedence for the current token
   bool has_entry;             // true if there is an entry point false otherwise
+  std::vector <token_t> token_stream; // token stream to parse
+  size_t current_position;               // the current position we are at in the token stream
 
   // Parsing functions
   std::unique_ptr<Program> parse_program();                         // parse the top level program
@@ -46,7 +49,6 @@ public:
   std::unique_ptr<Expression>parse_primary(); // parse members of an expression
   std::unique_ptr<Expression>parse_expression_interior(); // parses expression that are not top level
 
-  Lexer *lex;            // scanner that the parser gets the token stream from
   token_t current_token; // the current token that the parser is 'looking at'
   token_t peek_token;    // the next token that the parser would be looking at
   std::map <int, int> operator_precedences;
