@@ -44,34 +44,11 @@ main(int argc, char** argv) {
 
 bool
 test_let() {
-//  std::string input = 
-//    "if (x < 2) {\n"
-//    "  let int x = y + z * z;\n"
-//    "  if (x > 4) {\n"
-//    "    let int z = 5;\n"
-//    "  }\n"
-//    "}\n"
-//    ;
-//  std::string input =
-//    "entry int main() {\n"
-//    "  if (x > 4) {\n"
-//    "    let int x = 5;\n"
-//    "  } else if (y < 10) {\n"
-//    "    let float y = 0.0;\n"
-//    "  } else {\n"
-//    "    let int z = 1;\n"
-//    "  }\n"
-//    "  return x;\n"
-//    "}\n";
   std::string input = read_file((char*)"tests/test0.tb");
   Compiler *compiler = new Compiler(input);
 
-  printf("input:\n%s\n\n", input.c_str());
-  // Parser *parser = new Parser(input);
-
   compiler->parser->parse_program();
 
-  // delete parser;
   delete compiler;
   return true;
 }
