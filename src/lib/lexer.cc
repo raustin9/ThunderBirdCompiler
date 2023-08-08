@@ -172,12 +172,14 @@ Lexer::next_token() {
         tok.literal = this->read_identifier();
         tok.type = this->lookup_identifier(tok.literal);
         tok.line_num = this->line_num;
+        this->tokens.push_back(tok);
         return tok; // we return early here because read_identifier() advances this->cur_char repeatedly
       } else if (isdigit(this->cur_char) != 0) {
         // for now assume all number are ints
         // tok.type = TOK_INT;
         tok = this->read_number();
         tok.line_num = this->line_num;
+        this->tokens.push_back(tok);
         return tok;
       } else {
         tok.type = TOK_ILLEGAL;

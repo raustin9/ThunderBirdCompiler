@@ -9,8 +9,9 @@
 #include <type_traits>
 
 // Constructor
-Parser::Parser(std::string input) {
-  this->lex = new Lexer(input);
+Parser::Parser(std::vector<token_t> token_stream) {
+  this->token_stream = token_stream;
+  this->current_position = 0;
   this->has_entry = false;
 
   // Initialize the token values
@@ -41,7 +42,6 @@ Parser::Parser(std::string input) {
 
 // Destructor -- delete the lexical analyzer
 Parser::~Parser() {
-  delete this->lex;
 }
 
 // Advance the current token to the next one
@@ -49,7 +49,10 @@ void
 Parser::next_token() {
   printf("next_token: eating '%s'\n", this->current_token.literal.c_str());
   this->current_token = this->peek_token;
-  this->peek_token = this->lex->next_token();
+  if (this->current_position < this->token_stream.size())
+    this->peek_token = this->token_stream[this->current_position];
+  this->current_position++;
+  // this->peek_token = this->lex->next_token();
 }
 
 // Parse let statements
@@ -677,7 +680,7 @@ Parser::parse_program() {
   auto program = std::make_unique<Program>();
 
   // main loop
-  while(this->current_token.type != TOK_EOF) {
+  while (this->current_token.type != TOK_EOF) {
     std::unique_ptr<Statement> stmt;
     switch(this->current_token.type) {
       case TOK_LET: // Top-level variable declarations;
@@ -716,7 +719,6 @@ Parser::parse_program() {
         break;
     }
   }
-  printf("\n -- Input --\n%s\n", this->lex->input.c_str());
 
   printf(" -- Program --\n");
   program->print();
