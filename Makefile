@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-g -Wall -Isrc/lib
 EXECS=bin/thunder
-LIB=lib/lexer.a lib/parser.a lib/ast.a
+LIB=lib/compiler.a lib/lexer.a lib/parser.a lib/ast.a
 
 all: $(EXECS)
 
@@ -14,6 +14,13 @@ run: $(EXECS)
 
 $(EXECS): src/thunderbird.cc $(LIB)
 	$(CC) $(CFLAGS) $< -o $@ $(LIB)
+
+lib/compiler.a: obj/compiler.o
+	ar ru $@ $<
+	ranlib $@
+
+obj/compiler.o: src/lib/compiler.cc
+	$(CC) $(CFLAGS) -c $< -o $@
 
 lib/lexer.a: obj/lexer.o
 	ar ru $@ $<

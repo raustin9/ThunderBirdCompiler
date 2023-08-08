@@ -4,6 +4,7 @@
 #include <vector>
 #include <unistd.h>
 #include <sys/stat.h>
+#include "compiler.hh"
 #include "lexer.hh"
 #include "token.hh"
 #include "ast.hh"
@@ -63,13 +64,15 @@ test_let() {
 //    "  return x;\n"
 //    "}\n";
   std::string input = read_file((char*)"tests/test0.tb");
+  Compiler *compiler = new Compiler(input);
 
   printf("input:\n%s\n\n", input.c_str());
-  Parser *parser = new Parser(input);
+  // Parser *parser = new Parser(input);
 
-  parser->parse_program();
+  compiler->parser->parse_program();
 
-  delete parser;
+  // delete parser;
+  delete compiler;
   return true;
 }
 
