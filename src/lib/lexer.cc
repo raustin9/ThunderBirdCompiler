@@ -26,6 +26,7 @@ Lexer::Lexer(std::string input) {
   this->keywords["entry"] = TOK_ENTRY;
 }
 
+
 // Copy constructor
 Lexer::Lexer(Lexer &l) {
   input = l.input;
@@ -33,6 +34,15 @@ Lexer::Lexer(Lexer &l) {
   position = l.position;
   read_position = l.read_position;
   cur_char = l.cur_char;
+}
+
+// Iterate over entire input and create a token stream
+void
+Lexer::tokenize_input() {
+  token_t tok;
+  while (tok.type != TOK_EOF) {
+    tok = this->next_token();
+  }
 }
 
 // get the next token
@@ -177,6 +187,7 @@ Lexer::next_token() {
   };
 
   this->read_char();
+  this->tokens.push_back(tok);
   return tok;
 }
 

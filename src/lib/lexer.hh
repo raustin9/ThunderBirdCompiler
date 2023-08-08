@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <vector>
 
 #include "token.hh"
 
@@ -18,6 +19,7 @@ class Lexer {
     int read_position; // the current reading position in input (after current char)
     char cur_char;     // current char under examination
     std::map<std::string, TokenType> keywords;
+    std::vector <token_t> tokens;
 
     Lexer(std::string input);
     Lexer(Lexer &l);
@@ -28,6 +30,7 @@ class Lexer {
     char peek_char();
     TokenType lookup_identifier(std::string ident);
     void skip_whitespace();
+    void tokenize_input(); // iterate through the entire input and create a token stream
 };
 
 #endif /* LEXER_ */
