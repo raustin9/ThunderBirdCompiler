@@ -417,6 +417,11 @@ Parser::parse_code_block() {
         stmt = this->parse_while_statement();
         body.push_back(std::move(stmt));
         break;
+      case TOK_FOR:
+        printf("for token: ||%s||\n", this->current_token.literal.c_str());
+        stmt = this->parse_for_statement();
+        body.push_back(std::move(stmt));
+        break;
       case TOK_RETURN:
         // parse return statements
         printf("retur token: ||%s||\n", this->current_token.literal.c_str());
@@ -436,6 +441,12 @@ Parser::parse_code_block() {
   this->next_token();
 
   return std::make_unique<CodeBlock>(std::move(body));
+}
+
+// Parse a for loop statement
+std::unique_ptr<Statement>
+Parser::parse_for_statement() {
+ return nullptr;
 }
 
 
