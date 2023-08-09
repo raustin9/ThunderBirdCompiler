@@ -187,6 +187,9 @@ Lexer::next_token() {
         tok.type = TOK_ILLEGAL;
         tok.literal = std::string(1, this->cur_char);
         tok.line_num = this->line_num;
+        char err[50];
+        sprintf(err, "lexer: illegal token %s", tok.literal.c_str());
+        this->error_handler->new_error(tok.line_num, err);
       }
   };
 

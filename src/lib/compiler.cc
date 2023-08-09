@@ -8,10 +8,13 @@
 // Constructor for the compiler
 Compiler::Compiler(std::string input_text) {
   this->input = input_text;
-  this->lexer = new Lexer(this->input);
-
   this->symbol_table = new SymbolTable();
   this->error_handler = new ErrorHandler();
+  this->lexer = new Lexer(this->input);
+
+  // Point the lexer's symbol table and error handler to the compiler's
+  this->lexer->error_handler = this->error_handler;
+  this->lexer->symbol_table = this->symbol_table;
 }
 
 // Destructor for the compiler
