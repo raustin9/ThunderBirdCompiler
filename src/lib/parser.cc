@@ -446,7 +446,42 @@ Parser::parse_code_block() {
 // Parse a for loop statement
 std::unique_ptr<Statement>
 Parser::parse_for_statement() {
- return nullptr;
+  token_t for_token = this->current_token;
+
+  printf("for_stmt: should be eating 'for'\n");
+  this->next_token(); // eat the 'for'
+
+  if (this->current_token.type != TOK_LPAREN) {
+    char err[60];
+    sprintf(err, "invalid token '%s'. Expected '('\n", this->current_token.literal.c_str());
+
+    // no '(', for error handling, pretend they had it and continue parsing
+    this->error_handler->new_error(this->current_token.line_num, err);
+  }  else {
+    // Successfully found '('
+    printf("for_stmt: should be eating '('\n");
+    this->next_token(); // eat the '('
+  }
+
+  auto initialization = this->parse_let_statement(); // FOR NOW: only parse let_stmts. in the future, use a function that can parse any low-level statements
+  
+  auto condition = this->parse_expression_interior();
+  printf("for_stmt: should be eating ';'\n");
+  this->next_token();
+  
+  auto action = this->parse_expression_interior();
+  if (this->current_token.type == TOK_SEMICOLON) { // optional semicolon at end of action
+    printf("for_stmt: should be eating ';'\n");
+    this->next_token();
+  }
+
+  printf("for_stmt: should be eating ')'\n");
+  this->next_token();
+  auto loop_body = this->parse_code_block();
+
+  auto for_stmt = std::make_unique<ForLoop>(for_token, std::move(initialization), std::move(condition), std::move(action), std::move(loop_body));
+
+  return for_stmt;
 }
 
 

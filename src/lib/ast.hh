@@ -277,8 +277,9 @@ class ForLoop : public Statement {
       token_t token,
       std::unique_ptr<Statement> initialization,
       std::unique_ptr<Expression> condition,
-      std::unique_ptr<Expression> action
-    ) : token(token) , initialization(std::move(initialization)), condition(std::move(condition)) , action(std::move(action)) {}
+      std::unique_ptr<Expression> action,
+      std::unique_ptr<Statement> loop_body
+    ) : token(token) , initialization(std::move(initialization)), condition(std::move(condition)) , action(std::move(action)), loop_body(std::move(loop_body)) {}
     void print() override;
 };
 

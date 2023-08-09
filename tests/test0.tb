@@ -1,4 +1,6 @@
 define int main() {
-  let int x = add(1+1, y) + 14;
+  for (let int x = 0; x < 2; x = x + 1) {
+    let int y = 0;
+  }
   return x;
 }
