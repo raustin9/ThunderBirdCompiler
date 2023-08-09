@@ -45,6 +45,8 @@ enum TokenType {
   TOK_FALSE,      // "false" keyword
   TOK_IF,         // "if" keyword
   TOK_ELSE,       // "else" keyword
+  TOK_WHILE,      // "while" keyword
+  TOK_FOR,        // "for" keyword
 
   TOK_EQUALS,     // "="
   TOK_PLUS,       // "+"

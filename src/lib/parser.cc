@@ -412,6 +412,11 @@ Parser::parse_code_block() {
         stmt = this->parse_if_statement();
         body.push_back(std::move(stmt));
         break;
+      case TOK_WHILE:
+        printf("while token: ||%s||\n", this->current_token.literal.c_str());
+        stmt = this->parse_while_statement();
+        body.push_back(std::move(stmt));
+        break;
       case TOK_RETURN:
         // parse return statements
         printf("retur token: ||%s||\n", this->current_token.literal.c_str());
@@ -431,6 +436,23 @@ Parser::parse_code_block() {
   this->next_token();
 
   return std::make_unique<CodeBlock>(std::move(body));
+}
+
+
+// Parse an while loop statement
+std::unique_ptr<Statement>
+Parser::parse_while_statement() {
+  token_t token = this->current_token;
+  printf("while_stmt: should be eating 'while\n");
+  this->next_token(); // eat the 'while'
+
+  auto condition = this->parse_expression_interior();
+
+  // PARSE WHILE LOOP BODY //
+  auto loop_body = this->parse_code_block();
+  
+  auto while_stmt = std::make_unique<WhileLoop>(token, std::move(condition), std::move(loop_body));
+  return while_stmt;
 }
 
 // Parse an if statement

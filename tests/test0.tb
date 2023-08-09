@@ -1,5 +1,9 @@
 define int main() {
-  let inty x = add(1+1, y) + 14;
-  let y = 0;
+  let int x = add(1+1, y) + 14;
+  while (x < 2) {
+    if (x > 3) {
+      let int y = 0;
+    }
+  }
   return x;
 }

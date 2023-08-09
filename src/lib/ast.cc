@@ -61,7 +61,7 @@ FunctionDecl::print() {
   if (this->func_body)
     this->func_body->print();
 
-  printf("\n} end %s\n", this->prototype->name.c_str());
+  printf("\n} end [%s]\n", this->prototype->name.c_str());
 }
 
 void
@@ -149,7 +149,14 @@ void
 WhileLoop::print() {
   printf("%s ", this->token.literal.c_str());
   printf("(");
-  printf(") {}\n");
+  this->condition->print();
+  printf(") {\n");
+
+  if (this->loop_body) {
+    this->loop_body->print();
+  }
+
+  printf("}\n");
 }
 
 void
