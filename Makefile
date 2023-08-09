@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-g -Wall -Isrc/lib
 EXECS=bin/thunder
-LIB=lib/compiler.a lib/lexer.a lib/parser.a lib/ast.a
+LIB=lib/compiler.a lib/lexer.a lib/parser.a lib/ast.a lib/errorhandler.a
 
 all: $(EXECS)
 
@@ -20,6 +20,13 @@ lib/compiler.a: obj/compiler.o
 	ranlib $@
 
 obj/compiler.o: src/lib/compiler.cc
+	$(CC) $(CFLAGS) -c $< -o $@
+
+lib/errorhandler.a: obj/errorhandler.o
+	ar ru $@ $<
+	ranlib $@
+
+obj/errorhandler.o: src/lib/errorhandler.cc
 	$(CC) $(CFLAGS) -c $< -o $@
 
 lib/lexer.a: obj/lexer.o
