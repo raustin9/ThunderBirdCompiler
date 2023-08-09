@@ -21,6 +21,7 @@ Compiler::test_lexer() {
 
 }
 
+// Function to test the parser
 void
 Compiler::test_parser() {
   this->lexer->tokenize_input();
