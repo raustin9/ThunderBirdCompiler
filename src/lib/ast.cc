@@ -156,20 +156,23 @@ WhileLoop::print() {
     this->loop_body->print();
   }
 
-  printf("}\n");
+  printf("} end [while]\n");
 }
 
 void
 ForLoop::print() {
-  printf("%s (", this->token.literal.c_str());
+  printf("%s (\n", this->token.literal.c_str());
 
+  printf("\t");
   this->initialization->print();
+  printf("\n\t");
   this->condition->print();
+  printf("\n\t");
   this->action->print();
 
-  printf(") {\n");
+  printf("\n) {\n");
   this->loop_body->print();
-  printf("}\n");
+  printf("} end [for]\n");
 }
 
 void
