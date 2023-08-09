@@ -246,12 +246,13 @@ class WhileLoop : public Statement {
   public:
     token_t token;
     std::unique_ptr<Expression> condition;
-    std::vector<std::unique_ptr<Statement> > loop_body;
+    // std::vector<std::unique_ptr<Statement> > loop_body;
+    std::unique_ptr<Statement> loop_body;
 
     WhileLoop(
       token_t token,
       std::unique_ptr<Expression> condition,
-      std::vector<std::unique_ptr<Statement> > loop_body
+      std::unique_ptr<Statement> loop_body
     ) : token(token), 
         condition(std::move(condition)),
         loop_body(std::move(loop_body))

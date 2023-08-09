@@ -21,6 +21,8 @@ Lexer::Lexer(std::string input) {
   this->keywords["string"] = TOK_STRING;
   this->keywords["if"] = TOK_IF;
   this->keywords["else"] = TOK_ELSE;
+  this->keywords["while"] = TOK_WHILE;
+  this->keywords["for"] = TOK_FOR;
   this->keywords["true"] = TOK_TRUE;
   this->keywords["false"] = TOK_FALSE;
   this->keywords["entry"] = TOK_ENTRY;
