@@ -260,6 +260,29 @@ class WhileLoop : public Statement {
     void print() override;
 };
 
+// Statement node for a for loop
+// This will perform the intialization before entering the loop
+// Then check the condition, and if true it will run the loop body
+// At end of loop body, it will perform the action
+// "for (let int x = 0; x < 13; x = x + 1) {...}"
+class ForLoop : public Statement {
+  public:
+    token_t token; // the token that represents the command
+    std::unique_ptr<Statement> initialization; // the initialization statement in the for loop
+    std::unique_ptr<Expression> condition;      // the condition that the loop runs until fulfilled
+    std::unique_ptr<Expression> action;         // the action that gets taken at the end of each iteration
+    std::unique_ptr<Statement> loop_body;      // the body of the for loop
+
+    ForLoop(
+      token_t token,
+      std::unique_ptr<Statement> initialization,
+      std::unique_ptr<Expression> condition,
+      std::unique_ptr<Expression> action,
+      std::unique_ptr<Statement> loop_body
+    ) : token(token) , initialization(std::move(initialization)), condition(std::move(condition)) , action(std::move(action)), loop_body(std::move(loop_body)) {}
+    void print() override;
+};
+
 // Class for function prototypes
 class Prototype {
   public:

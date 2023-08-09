@@ -160,6 +160,19 @@ WhileLoop::print() {
 }
 
 void
+ForLoop::print() {
+  printf("%s (", this->token.literal.c_str());
+
+  this->initialization->print();
+  this->condition->print();
+  this->action->print();
+
+  printf(") {\n");
+  this->loop_body->print();
+  printf("}\n");
+}
+
+void
 CodeBlock::print() {
   for (size_t i = 0; i < this->body.size(); i++) {
     this->body[i]->print();
