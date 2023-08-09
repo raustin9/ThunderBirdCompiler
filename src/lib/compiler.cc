@@ -1,3 +1,5 @@
+#include "errorhandler.hh"
+#include "symboltable.hh"
 #include "token.hh"
 #include "lexer.hh"
 #include "parser.hh"
@@ -7,13 +9,17 @@
 Compiler::Compiler(std::string input_text) {
   this->input = input_text;
   this->lexer = new Lexer(this->input);
+
+  this->symbol_table = new SymbolTable();
+  this->error_handler = new ErrorHandler();
 }
 
 // Destructor for the compiler
 Compiler::~Compiler() {
   delete this->parser;
   delete this->lexer;
-
+  delete this->symbol_table;
+  delete this->error_handler;
 }
 
 void
@@ -27,5 +33,8 @@ Compiler::test_parser() {
   this->lexer->tokenize_input();
   std::vector<token_t> tokens = this->lexer->tokens;
   this->parser = new Parser(tokens);
+  this->parser->error_handler = this->error_handler;
   this->parser->parse_program();
+
+  this->error_handler->print_errors();
 }

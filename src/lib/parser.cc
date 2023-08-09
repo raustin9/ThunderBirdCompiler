@@ -2,6 +2,7 @@
 #include "ast.hh"
 #include "token.hh"
 #include "lexer.hh"
+#include "errorhandler.hh"
 
 #include <string>
 #include <cstdlib>
@@ -105,7 +106,10 @@ Parser::parse_let_statement() {
     if (this->peek_token.type == TOK_EQUALS) {
       // read identifier then an equals -> assume they forgot to put type spec
       // because they forgot it, we have one less token, and we are already at the variable identifier
-      printf("parse_let: error on line %d: missing type specifier for '%s'\n", type_spec.line_num, type_spec.literal.c_str());
+      char msg[100];
+      sprintf(msg, "parse_let: error on line %d: missing type specifier for '%s'\n", type_spec.line_num, type_spec.literal.c_str());
+      std::string errmsg = msg;
+      this->error_handler->new_error(type_spec.line_num, errmsg);
       ident_tok = type_spec;
 
     } else if (this->peek_token.type == TOK_IDENT) {

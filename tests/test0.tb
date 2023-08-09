@@ -1,4 +1,5 @@
 define int main() {
-  let int x = add(1+1, y) + 14;
+  let inty x = add(1+1, y) + 14;
+  let y = 0;
   return x;
 }
