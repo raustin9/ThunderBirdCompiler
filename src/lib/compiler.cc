@@ -37,7 +37,9 @@ Compiler::test_parser() {
   std::vector<token_t> tokens = this->lexer->tokens;
   this->parser = new Parser(tokens);
   this->parser->error_handler = this->error_handler;
+  this->parser->symbol_table = this->symbol_table;
   this->parser->parse_program();
 
   this->error_handler->print_errors();
+  this->symbol_table->print_elements();
 }

@@ -1,6 +1,5 @@
 define int main() {
-  for (let int x = 0; x < 2; x = x + 1) {
-    let int y = 0;
-  }
+  let int x = 0;
+  let int x = 14;
   return x;
 }
