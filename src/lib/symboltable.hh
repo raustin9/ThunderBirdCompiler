@@ -17,12 +17,27 @@ class SymbolTableEntry {
     uint32_t decl_line;  // line of declaration of the element
     uint32_t usage_line; // line of usage of the element
     uint64_t mem_addr;   // location in memory of the element
+
+    SymbolTableEntry(
+      std::string name,
+      DataType data_type,
+      uint32_t size,
+      uint32_t dimensions,
+      uint32_t decl_line
+    ) : name(name),
+        data_type(data_type),
+        size(size),
+        dimensions(dimensions),
+        decl_line(decl_line)
+    {}
 };
 
 // The symbol table itself
 class SymbolTable {
   public:
     std::map <std::string, std::unique_ptr<SymbolTableEntry> > elements;
+    bool find(std::string name); // find an element in the table, if it is in the table return true
+    void add(std::unique_ptr<SymbolTableEntry> entry); // add an element into the symbol table
 };
 
 #endif /* SYMBOL_TABLE */

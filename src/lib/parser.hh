@@ -24,6 +24,7 @@ public:
   ~Parser();                  // destructor -- deletes the lexer that it created
 
   ErrorHandler *error_handler; // error hander given to the parser by the compiler -- DO NOT FREE: THIS SHOULD BE GIVEN BACK TO THE COMPILER WHEN WE ARE DONE
+  SymbolTable *symbol_table;   // symbol table given to the parser by the compiler -- DO NOT FREE: THIS SHOULD BE GIVEN BACK TO THE COMPILER WHEN WE ARE DONE
   void next_token();          // eats current token and advances the peek and current tokens
   int get_token_precedence(); // gets the precedence for the current token
   bool has_entry;             // true if there is an entry point false otherwise

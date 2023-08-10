@@ -3,6 +3,7 @@
 #include "token.hh"
 #include "lexer.hh"
 #include "errorhandler.hh"
+#include "symboltable.hh"
 
 #include <string>
 #include <cstdlib>
@@ -146,6 +147,9 @@ Parser::parse_let_statement() {
     }
     else
       printf("let_stmt: curtok = '%s'\n", this->current_token.literal.c_str());
+
+    // Check and/or place variable in symbol table
+
     return std::make_unique<LetStmt>(let_tok, std::move(variable), std::move(assignment_expr));
   } else if (this->current_token.type == TOK_SEMICOLON) {
     // Variable declaration -- we do not allow declarations without initializations

@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-g -Wall -Isrc/lib
 EXECS=bin/thunder
-LIB=lib/compiler.a lib/lexer.a lib/parser.a lib/ast.a lib/errorhandler.a
+LIB=lib/compiler.a lib/lexer.a lib/parser.a lib/ast.a lib/errorhandler.a lib/symboltable.a
 
 all: $(EXECS)
 
@@ -27,6 +27,13 @@ lib/errorhandler.a: obj/errorhandler.o
 	ranlib $@
 
 obj/errorhandler.o: src/lib/errorhandler.cc
+	$(CC) $(CFLAGS) -c $< -o $@
+
+lib/symboltable.a: obj/symboltable.o
+	ar ru $@ $<
+	ranlib $@
+
+obj/symboltable.o: src/lib/symboltable.cc
 	$(CC) $(CFLAGS) -c $< -o $@
 
 lib/lexer.a: obj/lexer.o
