@@ -16,7 +16,7 @@ SymbolTable::find(std::string name) {
 // Adds an element to the symbol table
 void
 SymbolTable::add(std::unique_ptr<SymbolTableEntry> entry) {
-  this->elements[entry->name] = std::move(entry);
+  // this->elements[entry->name] = std::move(entry);
 }
 
 void
@@ -29,10 +29,13 @@ SymbolTable::print_elements() {
 
 void
 SymbolTableEntry::print() {
-  printf("[\"%s\"] type: [null fn] size: %dbits dimensions: %d decl-line: %d\n", this->name.c_str(),
-                                                          // will be data type later...
-                                                          this->size,
-                                                          this->dimensions,
-                                                          this->decl_line
-                                                        );
 }
+//void
+//SymbolTableEntry::print() {
+//  printf("[\"%s\"] type: [null fn] size: %dbits dimensions: %d decl-line: %d\n", this->name.c_str(),
+//                                                          // will be data type later...
+//                                                          this->size,
+//                                                          this->dimensions,
+//                                                          this->decl_line
+//                                                        );
+//}

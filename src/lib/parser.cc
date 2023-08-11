@@ -148,22 +148,23 @@ Parser::parse_let_statement() {
     else
       printf("let_stmt: curtok = '%s'\n", this->current_token.literal.c_str());
 
-    // Check and/or place variable in symbol table
-    if (this->symbol_table->find(variable->name)) {
-      // identifier is already in symbol_table
-      char existserr[200];
-      sprintf(existserr, "parse_let: error: variable '%s' redeclared", ident_tok.literal.c_str());
-      this->error_handler->new_error(ident_tok.line_num, std::string(existserr));
-    } else {
-      // identifier is not in the symbol table: add it to it
-      auto entry = std::make_unique<SymbolTableEntry>(variable->name,
-                                                      variable->data_type,
-                                                      64,
-                                                      1,
-                                                      ident_tok.line_num
-      );
-      this->symbol_table->add(std::move(entry));
-    }
+    // REMOVE SYMBOL TABLE CHECK UNTIL SCOPE IS IMPLEMENTED
+//    // Check and/or place variable in symbol table
+//    if (this->symbol_table->find(variable->name)) {
+//      // identifier is already in symbol_table
+//      char existserr[200];
+//      sprintf(existserr, "parse_let: error: variable '%s' redeclared", ident_tok.literal.c_str());
+//      this->error_handler->new_error(ident_tok.line_num, std::string(existserr));
+//    } else {
+//      // identifier is not in the symbol table: add it to it
+//      auto entry = std::make_unique<SymbolTableEntry>(variable->name,
+//                                                      variable->data_type,
+//                                                      64,
+//                                                      1,
+//                                                      ident_tok.line_num
+//      );
+//      this->symbol_table->add(std::move(entry));
+//    }
 
     return std::make_unique<LetStmt>(let_tok, std::move(variable), std::move(assignment_expr));
   } else if (this->current_token.type == TOK_SEMICOLON) {
