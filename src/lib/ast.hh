@@ -9,6 +9,7 @@
 #define AST_
 
 #include "token.hh"
+#include "symboltable.hh"
 #include <vector>
 #include <string>
 #include <memory>
@@ -115,7 +116,8 @@ class FloatExpr : public Expression {
 // }
 class CodeBlock : public Statement {
   public:
-    std::vector <std::unique_ptr<Statement> > body;
+    std::vector <std::unique_ptr<Statement> > body; // the body of code of this scope
+    std::unique_ptr<SymbolTable> symbol_table;      // the symbol table of identifiers for this code block's scope
     // add a field for an inner scope
 
     CodeBlock(
