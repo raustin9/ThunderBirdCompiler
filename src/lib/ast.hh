@@ -121,10 +121,10 @@ class CodeBlock : public Statement {
     std::shared_ptr<Statement> parent_scope;        // the parent scope of this code block. Can be function or global scope
     // add a field for an inner scope
 
-    CodeBlock(
-      std::vector <std::unique_ptr<Statement> > body
-    ) : body(std::move(body))
-      {}
+//    CodeBlock(
+//      //std::vector <std::unique_ptr<Statement> > body
+//    );// : body(std::move(body))
+//      // {}
 
     void print() override;
 };
@@ -190,9 +190,8 @@ class LetStmt : public Statement {
     LetStmt(
         token_t token,
         std::unique_ptr<Expression> variable,
-        // Expression *var_assign
         std::unique_ptr<Expression> var_assign
-      ) : token(token), /*variable(std::move(variable)),*/ variable(std::move(variable)), var_assign(std::move(var_assign)) {}
+      ) : token(token), variable(std::move(variable)), var_assign(std::move(var_assign)) {}
     void print() override;
 };
 
@@ -226,9 +225,10 @@ class ReturnStmt : public Statement {
 class Conditional : public Statement {
   public:
     token_t token;
-    std::shared_ptr<Statement> consequence;                   // body of if statement
-    std::unique_ptr<Expression> condition;                // the condition to evaluate
+    std::shared_ptr<Statement> consequence;             // body of if statement
+    std::unique_ptr<Expression> condition;              // the condition to evaluate
     std::shared_ptr<Statement> alternative;             // the conditional to evaluate if the condition is not true -- this is how we do else-if
+    std::shared_ptr<Statement> parent;                  // parent scope of the conditional
 
     Conditional(
       token_t token,
@@ -250,8 +250,8 @@ class WhileLoop : public Statement {
   public:
     token_t token;
     std::unique_ptr<Expression> condition;
-    // std::vector<std::unique_ptr<Statement> > loop_body;
     std::shared_ptr<Statement> loop_body;
+    std::shared_ptr<Statement> parent;    // symbol table of the loop 
 
     WhileLoop(
       token_t token,
@@ -271,11 +271,12 @@ class WhileLoop : public Statement {
 // "for (let int x = 0; x < 13; x = x + 1) {...}"
 class ForLoop : public Statement {
   public:
-    token_t token; // the token that represents the command
+    token_t token;                             // the token that represents the command
     std::unique_ptr<Statement> initialization; // the initialization statement in the for loop
-    std::unique_ptr<Expression> condition;      // the condition that the loop runs until fulfilled
-    std::unique_ptr<Expression> action;         // the action that gets taken at the end of each iteration
+    std::unique_ptr<Expression> condition;     // the condition that the loop runs until fulfilled
+    std::unique_ptr<Expression> action;        // the action that gets taken at the end of each iteration
     std::shared_ptr<Statement> loop_body;      // the body of the for loop
+    std::shared_ptr<Statement> parent;         // symbol table of the loop 
 
     ForLoop(
       token_t token,
@@ -307,6 +308,7 @@ class FunctionDecl : public Statement {
     bool is_entry;                                 // true if it is the entry point to the program false otherwise
     std::shared_ptr<Statement> func_body;          // a CodeBlock that contains the body of the function
     std::unique_ptr<Prototype> prototype;          // the prototype of the function
+    std::shared_ptr<class Program> parent;         // parent scope of the function -- global scope
 
     FunctionDecl(
       bool is_entry,
@@ -316,16 +318,16 @@ class FunctionDecl : public Statement {
     void print() override;
 };
 
-class Function : public Node {
-  public:
-    std::unique_ptr<Prototype> prototype;           // function prototype
-    std::vector <std::unique_ptr<Statement> > body; // list of statements that make up the function body
-
-    Function(
-      std::unique_ptr<Prototype> prototype,
-      std::vector <std::unique_ptr<Statement> > body
-    ) : prototype(std::move(prototype)), body(std::move(body)) {}
-};
+//class Function : public Node {
+//  public:
+//    std::unique_ptr<Prototype> prototype;           // function prototype
+//    std::vector <std::unique_ptr<Statement> > body; // list of statements that make up the function body
+//
+//    Function(
+//      std::unique_ptr<Prototype> prototype,
+//      std::vector <std::unique_ptr<Statement> > body
+//    ) : prototype(std::move(prototype)), body(std::move(body)) {}
+//};
 
 // Program Node in the AST
 // should be the root node of the tree
@@ -333,6 +335,7 @@ class Program : public Node {
   public:
     std::unique_ptr<Statement> entry_point; // Potentially use to define entry point of program
     std::vector<std::shared_ptr<Statement> > statements; // top level of the program is a list of statements
+    std::shared_ptr<SymbolTable> symbol_table;           // the symbol table for the global scope
     void print() override;
 };
 
