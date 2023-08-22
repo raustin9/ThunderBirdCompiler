@@ -460,7 +460,11 @@ Parser::parse_code_block() {
   printf("parse_code_block: should be eating '}'\n");
   this->next_token();
 
-  return std::make_shared<CodeBlock>(std::move(body));
+  auto code_block = std::make_shared<CodeBlock>(std::move(body));
+  auto symbol_table = std::make_unique<SymbolTable>();
+  code_block->symbol_table = std::move(symbol_table);
+
+  return code_block; 
 }
 
 // Parse a for loop statement
