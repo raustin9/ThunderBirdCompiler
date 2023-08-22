@@ -417,7 +417,11 @@ Parser::parse_code_block() {
   printf("parse_code_block: should be eating '{'\n");
   this->next_token();
 
+  auto code_block = std::make_shared<CodeBlock>();
+  auto symbol_table = std::make_unique<SymbolTable>();
+  code_block->symbol_table = std::move(symbol_table);
   std::vector <std::unique_ptr<Statement> > body;
+
   while (this->current_token.type != TOK_RBRACE) {
     // for now: eat the body
     std::unique_ptr<Statement> stmt;
@@ -430,16 +434,19 @@ Parser::parse_code_block() {
       case TOK_IF:
         printf("if token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_if_statement();
+        dynamic_cast<Conditional*>(stmt.get())->parent = code_block;
         body.push_back(std::move(stmt));
         break;
       case TOK_WHILE:
         printf("while token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_while_statement();
+        dynamic_cast<WhileLoop*>(stmt.get())->parent = code_block;
         body.push_back(std::move(stmt));
         break;
       case TOK_FOR:
         printf("for token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_for_statement();
+        dynamic_cast<ForLoop*>(stmt.get())->parent = code_block;
         body.push_back(std::move(stmt));
         break;
       case TOK_RETURN:
@@ -457,12 +464,14 @@ Parser::parse_code_block() {
     
   }
 
+  code_block->body = std::move(body);
+
   printf("parse_code_block: should be eating '}'\n");
   this->next_token();
 
-  auto code_block = std::make_shared<CodeBlock>(std::move(body));
-  auto symbol_table = std::make_unique<SymbolTable>();
-  code_block->symbol_table = std::move(symbol_table);
+//  auto code_block = std::make_shared<CodeBlock>(std::move(body));
+//  auto symbol_table = std::make_unique<SymbolTable>();
+//  code_block->symbol_table = std::move(symbol_table);
 
   return code_block; 
 }
