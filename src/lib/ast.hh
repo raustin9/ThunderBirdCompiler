@@ -226,15 +226,15 @@ class ReturnStmt : public Statement {
 class Conditional : public Statement {
   public:
     token_t token;
-    std::unique_ptr<Statement> consequence;                   // body of if statement
+    std::shared_ptr<Statement> consequence;                   // body of if statement
     std::unique_ptr<Expression> condition;                // the condition to evaluate
-    std::unique_ptr<Statement> alternative;             // the conditional to evaluate if the condition is not true -- this is how we do else-if
+    std::shared_ptr<Statement> alternative;             // the conditional to evaluate if the condition is not true -- this is how we do else-if
 
     Conditional(
       token_t token,
-      std::unique_ptr<Statement> consequence,
+      std::shared_ptr<Statement> consequence,
       std::unique_ptr<Expression> condition,
-      std::unique_ptr<Statement> alternative
+      std::shared_ptr<Statement> alternative
     ) : token(token), 
         consequence(std::move(consequence)),
         condition(std::move(condition)),
@@ -251,12 +251,12 @@ class WhileLoop : public Statement {
     token_t token;
     std::unique_ptr<Expression> condition;
     // std::vector<std::unique_ptr<Statement> > loop_body;
-    std::unique_ptr<Statement> loop_body;
+    std::shared_ptr<Statement> loop_body;
 
     WhileLoop(
       token_t token,
       std::unique_ptr<Expression> condition,
-      std::unique_ptr<Statement> loop_body
+      std::shared_ptr<Statement> loop_body
     ) : token(token), 
         condition(std::move(condition)),
         loop_body(std::move(loop_body))
@@ -275,14 +275,14 @@ class ForLoop : public Statement {
     std::unique_ptr<Statement> initialization; // the initialization statement in the for loop
     std::unique_ptr<Expression> condition;      // the condition that the loop runs until fulfilled
     std::unique_ptr<Expression> action;         // the action that gets taken at the end of each iteration
-    std::unique_ptr<Statement> loop_body;      // the body of the for loop
+    std::shared_ptr<Statement> loop_body;      // the body of the for loop
 
     ForLoop(
       token_t token,
       std::unique_ptr<Statement> initialization,
       std::unique_ptr<Expression> condition,
       std::unique_ptr<Expression> action,
-      std::unique_ptr<Statement> loop_body
+      std::shared_ptr<Statement> loop_body
     ) : token(token) , initialization(std::move(initialization)), condition(std::move(condition)) , action(std::move(action)), loop_body(std::move(loop_body)) {}
     void print() override;
 };
@@ -305,12 +305,12 @@ class Prototype {
 class FunctionDecl : public Statement {
   public:
     bool is_entry;                                 // true if it is the entry point to the program false otherwise
-    std::unique_ptr<Statement> func_body;          // a CodeBlock that contains the body of the function
+    std::shared_ptr<Statement> func_body;          // a CodeBlock that contains the body of the function
     std::unique_ptr<Prototype> prototype;          // the prototype of the function
 
     FunctionDecl(
       bool is_entry,
-      std::unique_ptr<Statement> func_body,
+      std::shared_ptr<Statement> func_body,
       std::unique_ptr<Prototype> prototype
     ) : is_entry(is_entry), func_body(std::move(func_body)), prototype(std::move(prototype)) {}
     void print() override;
