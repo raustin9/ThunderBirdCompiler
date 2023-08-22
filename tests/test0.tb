@@ -3,3 +3,9 @@ define int main() {
   let int x = 14;
   return x;
 }
+
+define int test() {
+  if (x == 0) {
+    let int y = 0;
+  }
+}
