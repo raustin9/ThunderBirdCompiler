@@ -7,5 +7,11 @@ define int main() {
 define int test() {
   if (x == 0) {
     let int y = 0;
+
+    for (let int x = 0; x < 2; x = x + 1) {
+      while (y == x) {
+        let int x = 3 + 5;
+      }
+    }
   }
 }
