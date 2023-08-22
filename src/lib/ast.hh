@@ -116,6 +116,7 @@ class FloatExpr : public Expression {
 class CodeBlock : public Statement {
   public:
     std::vector <std::unique_ptr<Statement> > body;
+    // add a field for an inner scope
 
     CodeBlock(
       std::vector <std::unique_ptr<Statement> > body
@@ -328,7 +329,7 @@ class Function : public Node {
 class Program : public Node {
   public:
     std::unique_ptr<Statement> entry_point; // Potentially use to define entry point of program
-    std::vector<std::unique_ptr<Statement> > statements; // top level of the program is a list of statements
+    std::vector<std::shared_ptr<Statement> > statements; // top level of the program is a list of statements
     void print() override;
 };
 

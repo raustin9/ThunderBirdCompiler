@@ -40,7 +40,7 @@ public:
   std::unique_ptr<Statement> parse_if_statement();                  // parse if statements
   std::unique_ptr<Statement> parse_while_statement();               // parse while loop statements
   std::unique_ptr<Statement> parse_for_statement();                 // parse for loop statements
-  std::unique_ptr<Statement> parse_function_defn();                 // parse function prototypes
+  std::shared_ptr<Statement> parse_function_defn();                 // parse function prototypes
   std::unique_ptr<Expression> parse_integer();                      // parse an integer literal
   std::unique_ptr<Expression> parse_float();                        // parse floating point literal
   std::unique_ptr<Expression> parse_identifier();                   // parse an identifier expression

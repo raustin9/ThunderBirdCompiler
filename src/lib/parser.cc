@@ -148,22 +148,23 @@ Parser::parse_let_statement() {
     else
       printf("let_stmt: curtok = '%s'\n", this->current_token.literal.c_str());
 
-    // Check and/or place variable in symbol table
-    if (this->symbol_table->find(variable->name)) {
-      // identifier is already in symbol_table
-      char existserr[200];
-      sprintf(existserr, "parse_let: error: variable '%s' redeclared", ident_tok.literal.c_str());
-      this->error_handler->new_error(ident_tok.line_num, std::string(existserr));
-    } else {
-      // identifier is not in the symbol table: add it to it
-      auto entry = std::make_unique<SymbolTableEntry>(variable->name,
-                                                      variable->data_type,
-                                                      64,
-                                                      1,
-                                                      ident_tok.line_num
-      );
-      this->symbol_table->add(std::move(entry));
-    }
+    // REMOVE SYMBOL TABLE CHECK UNTIL SCOPE IS IMPLEMENTED
+//    // Check and/or place variable in symbol table
+//    if (this->symbol_table->find(variable->name)) {
+//      // identifier is already in symbol_table
+//      char existserr[200];
+//      sprintf(existserr, "parse_let: error: variable '%s' redeclared", ident_tok.literal.c_str());
+//      this->error_handler->new_error(ident_tok.line_num, std::string(existserr));
+//    } else {
+//      // identifier is not in the symbol table: add it to it
+//      auto entry = std::make_unique<SymbolTableEntry>(variable->name,
+//                                                      variable->data_type,
+//                                                      64,
+//                                                      1,
+//                                                      ident_tok.line_num
+//      );
+//      this->symbol_table->add(std::move(entry));
+//    }
 
     return std::make_unique<LetStmt>(let_tok, std::move(variable), std::move(assignment_expr));
   } else if (this->current_token.type == TOK_SEMICOLON) {
@@ -265,7 +266,7 @@ Parser::parse_else_statement() {
 // Parse a function definition
 // functions are required to be defined where they are declared,
 // so when we parse the prototype, the rest of the definition must follow
-std::unique_ptr<Statement>
+std::shared_ptr<Statement>
 Parser::parse_function_defn() {
   bool is_entry = false;
   token_t decl_keyword = this->current_token;
@@ -402,7 +403,7 @@ Parser::parse_function_defn() {
   // FUNCTION BODY //
   auto func_body = this->parse_code_block();
   auto proto = std::make_unique<Prototype>(proto_name, rt, params);
-  return std::make_unique<FunctionDecl>(is_entry, std::move(func_body), std::move(proto));
+  return std::make_shared<FunctionDecl>(is_entry, std::move(func_body), std::move(proto));
 }
 
 // Parse a code block
@@ -772,7 +773,7 @@ Parser::parse_program() {
 
   // main loop
   while (this->current_token.type != TOK_EOF) {
-    std::unique_ptr<Statement> stmt;
+    std::shared_ptr<Statement> stmt;
     switch(this->current_token.type) {
       case TOK_LET: // Top-level variable declarations;
         printf("matched let\n");
