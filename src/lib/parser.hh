@@ -33,7 +33,7 @@ public:
 
   // Parsing functions
   std::unique_ptr<Program> parse_program();                         // parse the top level program
-  std::unique_ptr<Statement> parse_code_block();                    // parse a block of code
+  std::shared_ptr<Statement> parse_code_block();                    // parse a block of code
   std::unique_ptr<Statement> parse_let_statement();                 // parse let statements
   std::unique_ptr<Statement> parse_return_statement();              // parse return statements
   std::unique_ptr<Statement> parse_else_statement();                // parse else clauses and else-if clauses
