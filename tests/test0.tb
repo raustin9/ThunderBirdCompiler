@@ -3,5 +3,18 @@ let int z = 2;
 define int main() {
   let int x = 0;
   let float y = 4.0;
+
+  if (x == 0) {
+    let int ifval = 20 + 3 / 3;
+
+    while (x == 0) {
+      let int while1 = 0;
+      let float while2 = 0.0;
+    }
+  }
+
+  for (let int i = 0; i < 10; i  = i + 1) {
+  }
+
   return x;
 }

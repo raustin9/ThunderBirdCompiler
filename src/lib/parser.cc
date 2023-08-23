@@ -496,6 +496,8 @@ Parser::parse_for_statement() {
   printf("for_stmt: should be eating ')'\n");
   this->next_token();
   auto loop_body = this->parse_code_block();
+  auto initialization_ste = dynamic_cast<LetStmt*>(initialization.get())->get_st_entry();
+  dynamic_cast<CodeBlock*>(loop_body.get())->symbol_table->add(std::move(initialization_ste));
 
   auto for_stmt = std::make_unique<ForLoop>(for_token, std::move(initialization), std::move(condition), std::move(action), std::move(loop_body));
 

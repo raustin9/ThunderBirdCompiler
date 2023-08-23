@@ -125,6 +125,7 @@ class CodeBlock : public Statement {
       this->symbol_table = std::make_shared<SymbolTable>();
     }
     void print() override;
+    void print_st();
 };
 
 // Boolean Expression Node
