@@ -317,6 +317,7 @@ class FunctionDecl : public Statement {
       std::unique_ptr<Prototype> prototype
     ) : is_entry(is_entry), func_body(std::move(func_body)), prototype(std::move(prototype)) {}
     void print() override;
+    std::unique_ptr<SymbolTableEntry> get_st_entry();
 };
 
 //class Function : public Node {

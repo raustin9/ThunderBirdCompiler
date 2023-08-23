@@ -47,6 +47,7 @@ ExpressionStatement::print() {
   }
 }
 
+// FUNCTION //
 void
 FunctionDecl::print() {
   if (this->is_entry)
@@ -66,6 +67,21 @@ FunctionDecl::print() {
   printf("\n} end [%s]\n", this->prototype->name.c_str());
 }
 
+// Create symbol table entry from fields in the FunctionDecl class
+std::unique_ptr<SymbolTableEntry>
+FunctionDecl::get_st_entry() {
+  auto symbol_table_entry = std::make_unique<SymbolTableEntry>(
+                              this->prototype->name,
+                              this->prototype->ret_type,
+                              64, // size -- 64 bits for both floats and ints
+                              1,  // dimensions -- 1 because we do not parse arrays yet
+                              1   // decl line -- change when we read this when parsing
+                            );
+
+  return symbol_table_entry;
+}
+
+// FUNCTION CALL EXPRESSION //
 void
 FunctionCallExpr::print() {
   printf("%s(", this->name.c_str());

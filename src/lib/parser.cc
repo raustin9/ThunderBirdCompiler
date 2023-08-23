@@ -800,6 +800,8 @@ Parser::parse_program() {
       case TOK_FUNCTION: // Top-level function definitions
         printf("matched function\n");
         stmt = this->parse_function_defn();
+        symbol_table_entry = dynamic_cast<FunctionDecl*>(stmt.get())->get_st_entry();
+        program->symbol_table->add(std::move(symbol_table_entry));
         program->statements.push_back(std::move(stmt));
         break;
       case TOK_ENTRY: // Top-level function definition, but entry point to the program
