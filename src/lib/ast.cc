@@ -138,7 +138,10 @@ Conditional::print() {
   if (this->consequence)
     this->consequence->print();
 
-  printf("} ");
+  if (!this->alternative)
+    printf("} end [if]");
+  else
+    printf("} ");
 
   if (this->alternative) {
     this->alternative->print();
