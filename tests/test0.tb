@@ -1,3 +1,5 @@
+let int z = 2;
+
 define int main() {
   let int x = 0;
   let float y = 4.0;

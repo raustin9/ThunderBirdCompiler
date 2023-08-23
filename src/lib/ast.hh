@@ -117,15 +117,13 @@ class FloatExpr : public Expression {
 class CodeBlock : public Statement {
   public:
     std::vector <std::unique_ptr<Statement> > body; // the body of code of this scope
-    std::unique_ptr<SymbolTable> symbol_table;      // the symbol table of identifiers for this code block's scope
+    std::shared_ptr<SymbolTable> symbol_table;      // the symbol table of identifiers for this code block's scope
     std::shared_ptr<Statement> parent_scope;        // the parent scope of this code block. Can be function or global scope
     // add a field for an inner scope
 
-//    CodeBlock(
-//      //std::vector <std::unique_ptr<Statement> > body
-//    );// : body(std::move(body))
-//      // {}
-
+    CodeBlock() {
+      this->symbol_table = std::make_shared<SymbolTable>();
+    }
     void print() override;
 };
 
@@ -184,7 +182,8 @@ class VariableExpr : public Expression {
 class LetStmt : public Statement {
   public:
     token_t token;                          // "let" token
-    std::unique_ptr<Expression> variable;
+    std::unique_ptr<Expression> variable;   // expression of the variable being declared
+    unsigned decl_line;                     // the line of the statement
     std::unique_ptr<Expression> var_assign; // expression that variable will be assigned to
    
     LetStmt(
@@ -193,6 +192,7 @@ class LetStmt : public Statement {
         std::unique_ptr<Expression> var_assign
       ) : token(token), variable(std::move(variable)), var_assign(std::move(var_assign)) {}
     void print() override;
+    std::unique_ptr<SymbolTableEntry> get_st_entry();
 };
 
 // Statement node for return statements
@@ -338,6 +338,10 @@ class Program : public Node {
     std::vector<std::shared_ptr<Statement> > statements; // top level of the program is a list of statements
     std::shared_ptr<SymbolTable> symbol_table;           // the symbol table for the global scope
     void print() override;
+
+    Program() {
+      this->symbol_table = std::make_shared<SymbolTable>();
+    }
 };
 
 #endif

@@ -16,7 +16,7 @@ SymbolTable::find(std::string name) {
 // Adds an element to the symbol table
 void
 SymbolTable::add(std::unique_ptr<SymbolTableEntry> entry) {
-  // this->elements[entry->name] = std::move(entry);
+  this->elements[entry->name] = std::move(entry);
 }
 
 void

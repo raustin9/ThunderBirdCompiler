@@ -45,5 +45,4 @@ Compiler::test_parser() {
   this->parser->parse_program();
 
   this->error_handler->print_errors();
-  this->symbol_table->print_elements();
 }
