@@ -9,6 +9,7 @@
 #include "parser.hh"
 #include "symboltable.hh"
 #include "errorhandler.hh"
+#include "preprocessor.hh"
 
 class Compiler {
   public:
@@ -17,6 +18,7 @@ class Compiler {
     SymbolTable *symbol_table;
     ErrorHandler *error_handler;
 
+    Preprocessor *preprocessor;
     Lexer *lexer;
     Parser *parser;
   
