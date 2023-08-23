@@ -29,13 +29,10 @@ SymbolTable::print_elements() {
 
 void
 SymbolTableEntry::print() {
+  printf("[\"%s\"] type: [null fn] size: %dbits dimensions: %d decl-line: %d\n", this->name.c_str(),
+                                                          // will be data type later...
+                                                          this->size,
+                                                          this->dimensions,
+                                                          this->decl_line
+                                                        );
 }
-//void
-//SymbolTableEntry::print() {
-//  printf("[\"%s\"] type: [null fn] size: %dbits dimensions: %d decl-line: %d\n", this->name.c_str(),
-//                                                          // will be data type later...
-//                                                          this->size,
-//                                                          this->dimensions,
-//                                                          this->decl_line
-//                                                        );
-//}

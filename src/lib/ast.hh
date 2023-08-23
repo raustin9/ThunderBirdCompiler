@@ -309,6 +309,7 @@ class FunctionDecl : public Statement {
     std::shared_ptr<Statement> func_body;          // a CodeBlock that contains the body of the function
     std::unique_ptr<Prototype> prototype;          // the prototype of the function
     std::shared_ptr<class Program> parent;         // parent scope of the function -- global scope
+    
 
     FunctionDecl(
       bool is_entry,
