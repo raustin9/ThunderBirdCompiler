@@ -148,24 +148,6 @@ Parser::parse_let_statement() {
     else
       printf("let_stmt: curtok = '%s'\n", this->current_token.literal.c_str());
 
-    // REMOVE SYMBOL TABLE CHECK UNTIL SCOPE IS IMPLEMENTED
-//    // Check and/or place variable in symbol table
-//    if (this->symbol_table->find(variable->name)) {
-//      // identifier is already in symbol_table
-//      char existserr[200];
-//      sprintf(existserr, "parse_let: error: variable '%s' redeclared", ident_tok.literal.c_str());
-//      this->error_handler->new_error(ident_tok.line_num, std::string(existserr));
-//    } else {
-//      // identifier is not in the symbol table: add it to it
-//      auto entry = std::make_unique<SymbolTableEntry>(variable->name,
-//                                                      variable->data_type,
-//                                                      64,
-//                                                      1,
-//                                                      ident_tok.line_num
-//      );
-//      this->symbol_table->add(std::move(entry));
-//    }
-
     return std::make_unique<LetStmt>(let_tok, std::move(variable), std::move(assignment_expr));
   } else if (this->current_token.type == TOK_SEMICOLON) {
     // Variable declaration -- we do not allow declarations without initializations
@@ -419,16 +401,18 @@ Parser::parse_code_block() {
 
   auto code_block = std::make_shared<CodeBlock>();
   auto symbol_table = std::make_unique<SymbolTable>();
-  code_block->symbol_table = std::move(symbol_table);
   std::vector <std::unique_ptr<Statement> > body;
 
   while (this->current_token.type != TOK_RBRACE) {
     // for now: eat the body
     std::unique_ptr<Statement> stmt;
+    std::unique_ptr<SymbolTableEntry> symbol_table_entry;
     switch (this->current_token.type) {
       case TOK_LET:
         printf("let token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_let_statement();
+        symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->get_st_entry();
+        symbol_table->add(std::move(symbol_table_entry));
         body.push_back(std::move(stmt));
         break;
       case TOK_IF:
@@ -464,6 +448,7 @@ Parser::parse_code_block() {
     
   }
 
+  code_block->symbol_table = std::move(symbol_table);
   code_block->body = std::move(body);
 
   printf("parse_code_block: should be eating '}'\n");
@@ -511,6 +496,8 @@ Parser::parse_for_statement() {
   printf("for_stmt: should be eating ')'\n");
   this->next_token();
   auto loop_body = this->parse_code_block();
+  auto initialization_ste = dynamic_cast<LetStmt*>(initialization.get())->get_st_entry();
+  dynamic_cast<CodeBlock*>(loop_body.get())->symbol_table->add(std::move(initialization_ste));
 
   auto for_stmt = std::make_unique<ForLoop>(for_token, std::move(initialization), std::move(condition), std::move(action), std::move(loop_body));
 

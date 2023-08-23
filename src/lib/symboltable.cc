@@ -1,5 +1,25 @@
 #include "symboltable.hh"
+#include "token.hh"
 #include <map>
+
+// Get string based on data type enum
+std::string
+get_dt(DataType dt) {
+  std::string rv;
+  switch (dt) {
+    case TYPE_FLOAT:
+      rv = "float";
+      break;
+    case TYPE_INT:
+      rv = "int";
+      break;
+    default:
+      rv = "invalid";
+      break;
+  }
+
+  return rv;
+}
 
 // Finds if an element is in the symbol table already
 // returns 'true' if the element exists, 'false' otherwise
@@ -29,10 +49,11 @@ SymbolTable::print_elements() {
 
 void
 SymbolTableEntry::print() {
-  printf("[\"%s\"] type: [null fn] size: %dbits dimensions: %d decl-line: %d\n", this->name.c_str(),
-                                                          // will be data type later...
-                                                          this->size,
-                                                          this->dimensions,
-                                                          this->decl_line
-                                                        );
+  printf("[\"%s\"] type: [%s] size: %dbits dimensions: %d decl-line: %d\n", 
+    this->name.c_str(),
+    get_dt(this->data_type).c_str(),
+    this->size,
+    this->dimensions,
+    this->decl_line
+  );
 }
