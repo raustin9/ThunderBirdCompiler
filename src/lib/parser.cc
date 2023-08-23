@@ -787,10 +787,13 @@ Parser::parse_program() {
   // main loop
   while (this->current_token.type != TOK_EOF) {
     std::shared_ptr<Statement> stmt;
+    std::unique_ptr<SymbolTableEntry> symbol_table_entry;
     switch(this->current_token.type) {
       case TOK_LET: // Top-level variable declarations;
         printf("matched let\n");
         stmt = this->parse_let_statement();
+        symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->get_st_entry();
+        program->symbol_table->add(std::move(symbol_table_entry));
         program->statements.push_back(std::move(stmt));
 
         break;
@@ -827,5 +830,6 @@ Parser::parse_program() {
 
   printf(" -- Program --\n");
   program->print();
+  program->symbol_table->print_elements();
   return program;
 }

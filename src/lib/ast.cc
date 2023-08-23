@@ -1,8 +1,10 @@
 #include "ast.hh"
 #include "token.hh"
 
+#include <locale>
 #include <string>
 #include <cstdio>
+#include <memory>
 
 void
 Program::print() {
@@ -245,6 +247,7 @@ Expression::print() {
   
 }
 
+// Let Statements
 void
 LetStmt::print() {
   printf("%s ", this->token.literal.c_str());
@@ -252,4 +255,17 @@ LetStmt::print() {
     this->var_assign->print();
   else 
     printf("invalid variable assignment\n");
+}
+
+// Creates and returns a symbol table entry from the values in the statement
+std::unique_ptr<SymbolTableEntry>
+LetStmt::get_st_entry() {
+  auto symbol_table_entry = std::make_unique<SymbolTableEntry>(
+                              dynamic_cast<VariableExpr*>(this->variable.get())->name,
+                              dynamic_cast<VariableExpr*>(this->variable.get())->data_type,
+                              64, // size -- 64 bits for both floats and ints
+                              1,  // dimensions -- 1 because we do not parse arrays yet
+                              1   // decl line -- change when we read this when parsing
+                            );
+  return symbol_table_entry;
 }
