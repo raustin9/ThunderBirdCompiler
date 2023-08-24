@@ -17,6 +17,7 @@ class Preprocessor {
     char peek_char();
     std::string process();
     void single_line_comment();
+    void multi_line_comment();
 };
 
 #endif /* PREPROCESSOR */
