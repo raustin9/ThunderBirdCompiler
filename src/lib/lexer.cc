@@ -6,6 +6,8 @@
 Lexer::Lexer(std::string input) {
   this->line_num = 1;
   this->input = input;
+  this->read_position = 0;
+  this->position = 0;
   this->read_char();
 
   this->keywords["function"] = TOK_FUNCTION;

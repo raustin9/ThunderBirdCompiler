@@ -5,14 +5,18 @@
 
 class Preprocessor {
   public:
-    std::string input;
+    std::string input;    // input source code
+    char cur_char;        // current character
+    size_t read_position; // currect read position in the source code
+    size_t position;
 
     // Functions
-    Preprocessor (
-      std::string input
-    ) : input(std::move(input)) {}
+    Preprocessor (std::string input); 
 
-    void process();
+    void advance_char();
+    char peek_char();
+    std::string process();
+    void single_line_comment();
 };
 
 #endif /* PREPROCESSOR */
