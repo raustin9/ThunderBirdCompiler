@@ -92,6 +92,24 @@ entry int main_func() {
 ```
 The beauty of using the ```entry``` keyword is that you do not have to use a specific name for your entry point like ```int main()``` in C & C++.
 
+### Comments
+Comments in ThunderBird are similar to C and many other languages.
+Single line comments begin with ```//``` and multi-line comments are contained within ```/*``` and ```*/```
+Here is an example:
+```
+define int func() {
+  let int x = 0; // This is a single-line comment
+
+  /* 
+     This is a
+     multi-line
+     comment
+  */
+
+  return x;
+}
+```
+
 
 ### Running a program
 **Currently unsupported and subject to change**
