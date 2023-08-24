@@ -23,7 +23,6 @@ class Lexer {
     std::map<std::string, TokenType> keywords;
     std::vector <token_t> tokens;
     ErrorHandler *error_handler; // a pointer to the -compilers's- error handler -- THIS IS OWNED BY THE COMPILER DO NOT FREE
-    SymbolTable *symbol_table;   // a pointer to the -compiler's'- symbol table  -- THIS IS OWNED BY THE COMPILER DO NOT FREE
 
     Lexer(std::string input);
     Lexer(Lexer &l);
