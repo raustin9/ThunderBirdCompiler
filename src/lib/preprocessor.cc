@@ -21,6 +21,10 @@ Preprocessor::process() {
           // single line comment
           printf("SINGLE LINE COMMENT\n");
           this->single_line_comment();
+        } else if (this->peek_char() == '*') {
+          // multi-line comment
+          printf("MULTI_LINE_COMMENT\n");
+          this->multi_line_comment();
         }
         break;
       default:
@@ -60,6 +64,25 @@ Preprocessor::peek_char() {
 void
 Preprocessor::single_line_comment() {
   while (this->cur_char != '\n') {
+    this->input[this->position] = ' ';
+    this->advance_char();
+  }
+}
+
+// Read a multi-line comment
+// replace each character with a ' ' until "*/" is read
+void
+Preprocessor::multi_line_comment() {
+  while (1) {
+    if (this->cur_char == '*') {
+      if (this->peek_char() == '/') {
+        // read "*/" -- end of comment
+        printf("expected: [/]. Replacing [%c]\n", this->input[this->read_position]);
+        this->input[this->position] = ' ';
+        this->advance_char();
+        break;
+      }
+    }
     this->input[this->position] = ' ';
     this->advance_char();
   }

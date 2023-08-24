@@ -1,8 +1,15 @@
 let int z = 2;
 // test comment
 
+/*
+multi line comment *
+*/
+
 define int main() {
   let int x = 0;
+  /*
+  this is a comment int main
+  */
   let float y = 4.0;
 
   if (x == 0) {
