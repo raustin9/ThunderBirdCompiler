@@ -2,8 +2,12 @@ let int z = 2;
 // test comment
 
 /*
-multi line comment *
+this is 
+a multi line
+comment
 */
+
+$alias
 
 define int main() {
   let int x = 0;

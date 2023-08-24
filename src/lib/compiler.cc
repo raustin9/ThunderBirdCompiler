@@ -13,7 +13,8 @@ Compiler::Compiler(std::string input_text) {
   this->error_handler = new ErrorHandler();
 
   this->preprocessor = new Preprocessor(this->input);
-  this->lexer = new Lexer(preprocessor->process());
+  printf("----\n%s\n-----\n", this->preprocessor->process().c_str());
+  this->lexer = new Lexer(this->preprocessor->process());
   // this->lexer = new Lexer(this->input);
 
   // Point the lexer's symbol table and error handler to the compiler's
