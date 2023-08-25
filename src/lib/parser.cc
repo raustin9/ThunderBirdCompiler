@@ -838,9 +838,11 @@ Parser::parse_program() {
 }
 
 // Parse the program and create the abstract syntax tree
-std::shared_ptr<Program>
+std::shared_ptr<AST>
 Parser::create_ast() {
-  auto ast = this->parse_program();
+  auto program = this->parse_program();
+  std::shared_ptr<AST> ast = std::make_shared<AST>();
+  ast->program_node = program;
 
   return ast;
 }

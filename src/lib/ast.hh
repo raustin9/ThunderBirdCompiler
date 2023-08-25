@@ -14,6 +14,13 @@
 #include <string>
 #include <memory>
 
+// The Abstract Syntax Tree itself
+class AST {
+  public:
+    std::shared_ptr<class Program> program_node;
+    bool syntax_analysis(); // iterates over the tree and performs syntax analysis
+};
+
 // Node in the AST
 class Node {
   public:
