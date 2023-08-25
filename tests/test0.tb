@@ -7,7 +7,7 @@ a multi line
 comment
 */
 
-define int main() {
+function int main() {
   let int x = 0;
   x += 2;
   return x;

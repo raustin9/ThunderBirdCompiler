@@ -143,10 +143,30 @@ Our entry point in the ```main``` function then does some basic arithmetic using
 
 To compile this program, we need to run ```thunder example.tb`` and then run the program using ```./example```
 
-### Compiling a basic example program
-Here is an example file
+### Philosphy
+ThunderBird is built as an exercise to better learn compiler development. However, there are still some guiding principles that influenced its design.
+1. Simplicity is powerful
+  - I come from a background in C, and the simplicity of the language is admirable. 
+  - The simplicity of C allows for the construction of complex types, and this is what is powerful. 
+  - Rather than being built into the langauge, it is necessary that the programmer build something specific to their case. This is extremely annoying. But it does mean that little is hidden from both the writer and reader of the code. 
+    - How does that queue work? It is likely in lib/queue.c and you can go look at it. 
+     - When your library fails, it is YOUR library, so you GET to debug it rather than trying to figure out what went wrong when using someone else's obscure code you'll never look at like in React.
+2. Explicicity
+  - This might be personal, but I find code that uses explicit type declarations to be nice and easy to read. This is likely from my C background
+  - While the ```auto``` keyword in C++ is very nice and I use it loosely in this compiler, I prefer code that declares the type along with the variable.
+  - This mainly comes from my experience in Go where the convention is type inference.
+    - There is nothing wrong with this and is one of the nicer features of Go, but this requires you to declare you variable and initialize it at the same time. This means that variable declarations/initializations are going on throughout the entire codebase, and it is hard to organize them to be all decalred at once, which is my prefered style.
+    - The other reason I want to prevent type inference like in Go is that I don't know what types my variables are in Go because I never have to figure them out to declare them. Then when I want to pass them into a function and I do have to declare a type there, I have to retroactively figure it out. This is not fun, and honestly kind of ruins the convenience of type inference since I have to spend the time figuring it out anyway. ThunderBird prevents this by enforcing all types to be declared at variable declaration with no type inference.
+  - I promise I know how to implement type inference pls believe me pls
+3. Fuck OOP but I fuck with member functions frfr
+  - So when using C, I would prefer to use member functions, but I also don't want to go into full OOP with polymorphism and inheritance.
+  - I think combining data structures with logic is a natural way to think, and the syntax of ```mystring.append("this")``` is nicer in my opinion that ```string_append(mystring, "this");```
+  - There is no ```private``` or ```public``` like in C++ despite having member functions.
+    - This is because I like the concept in C of all data being public.
+    - You CAN use member functions, or you could just do C-style programming like God intended. But for grug brains like me I like the ```.``` operator and it tingles my brain
 
 ## Potential Features in the Future
 * Type casting
      * ```let int x = 2 + 3.0;``` -- the ```3.0``` should be cast from ```float``` to ```int```. As of now, this is not supported and will flag an error
 * Strings
+    * strings will be implimented in the standard library as a class rather than an inherent data structure
