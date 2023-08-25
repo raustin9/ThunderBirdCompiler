@@ -118,7 +118,7 @@ class CodeBlock : public Statement {
   public:
     std::vector <std::unique_ptr<Statement> > body; // the body of code of this scope
     std::shared_ptr<SymbolTable> symbol_table;      // the symbol table of identifiers for this code block's scope
-    std::shared_ptr<Statement> parent_scope;        // the parent scope of this code block. Can be function or global scope
+    std::shared_ptr<Node> parent_scope;        // the parent scope of this code block. Can be function or global scope
     // add a field for an inner scope
 
     CodeBlock() {

@@ -65,9 +65,9 @@ FunctionDecl::print() {
     this->func_body->print();
 
   printf("\n} end [%s]\n", this->prototype->name.c_str());
-  printf("---- %s symbol table ----\n", this->prototype->name.c_str());
-  dynamic_cast<CodeBlock*>(this->func_body.get())->symbol_table->print_elements();
-  printf("------------------------\n");
+//  printf("---- %s symbol table ----\n", this->prototype->name.c_str());
+//  dynamic_cast<CodeBlock*>(this->func_body.get())->symbol_table->print_elements();
+//  printf("------------------------\n");
 }
 
 // Create symbol table entry from fields in the FunctionDecl class
@@ -165,9 +165,9 @@ Conditional::print() {
     printf("} ");
 
   
-  printf("\n---- if/else symbol table ----\n");
-  dynamic_cast<CodeBlock*>(this->consequence.get())->symbol_table->print_elements();
-  printf("------------------------\n");
+//  printf("\n---- if/else symbol table ----\n");
+//  dynamic_cast<CodeBlock*>(this->consequence.get())->symbol_table->print_elements();
+//  printf("------------------------\n");
 
   if (this->alternative) {
     this->alternative->print();
@@ -187,9 +187,9 @@ WhileLoop::print() {
 
   printf("} end [while]\n");
 
-  printf("\n---- while symbol table ----\n");
-  dynamic_cast<CodeBlock*>(this->loop_body.get())->symbol_table->print_elements();
-  printf("------------------------\n");
+//  printf("\n---- while symbol table ----\n");
+//  dynamic_cast<CodeBlock*>(this->loop_body.get())->symbol_table->print_elements();
+//  printf("------------------------\n");
 }
 
 void
@@ -207,9 +207,9 @@ ForLoop::print() {
   this->loop_body->print();
   printf("} end [for]\n");
   
-  printf("\n---- for symbol table ----\n");
-  dynamic_cast<CodeBlock*>(this->loop_body.get())->symbol_table->print_elements();
-  printf("------------------------\n");
+//  printf("\n---- for symbol table ----\n");
+//  dynamic_cast<CodeBlock*>(this->loop_body.get())->symbol_table->print_elements();
+//  printf("------------------------\n");
 }
 
 void
