@@ -109,9 +109,28 @@ Lexer::next_token() {
       tok.line_num = this->line_num;
       break;
     case '+':
-      tok.type = TOK_PLUS;
-      tok.literal = std::string(1, this->cur_char);
-      tok.line_num = this->line_num;
+      if (this->peek_char() == '=') {
+        this->read_char();
+        tok.type = TOK_PLUS_EQUAL;
+        tok.literal = "+=";
+        tok.line_num = this->line_num;
+      } else {
+        tok.type = TOK_PLUS;
+        tok.literal = std::string(1, this->cur_char);
+        tok.line_num = this->line_num;
+      }
+      break;
+    case '%':
+      if (this->peek_char() == '=') {
+        this->read_char();
+        tok.type = TOK_MOD_EQUAL;
+        tok.literal = "%=";
+        tok.line_num = this->line_num;
+      } else {
+        tok.type = TOK_MOD;
+        tok.literal = std::string(1, this->cur_char);
+        tok.line_num = this->line_num;
+      }
       break;
     case '<':
       // future: account for '<<' for bitshifting
@@ -152,19 +171,41 @@ Lexer::next_token() {
       }
       break;
     case '*':
-      tok.type = TOK_ASTERISK;
-      tok.literal = std::string(1, this->cur_char);
-      tok.line_num = this->line_num;
+      if (this->peek_char() == '=') {
+        // "*="
+        this->read_char();
+        tok.type = TOK_TIMES_EQUAL;
+        tok.literal = "*=";
+        tok.line_num = this->line_num;
+      } else {
+        tok.type = TOK_ASTERISK;
+        tok.literal = std::string(1, this->cur_char);
+        tok.line_num = this->line_num;
+      }
       break;
     case '/':
-      tok.type = TOK_SLASH;
-      tok.literal = std::string(1, this->cur_char);
-      tok.line_num = this->line_num;
+      if (this->peek_char() == '=') {
+        this->read_char();
+        tok.type = TOK_DIV_EQUAL;
+        tok.literal = "/=";
+        tok.line_num = this->line_num;
+      } else {
+        tok.type = TOK_SLASH;
+        tok.literal = std::string(1, this->cur_char);
+        tok.line_num = this->line_num;
+      }
       break;
     case '-':
-      tok.type = TOK_MINUS;
-      tok.literal = std::string(1, this->cur_char);
-      tok.line_num = this->line_num;
+      if (this->peek_char() == '=') {
+        this->read_char();
+        tok.type = TOK_MINUS_EQUAL;
+        tok.literal = "-=";
+        tok.line_num = this->line_num;
+      } else {
+        tok.type = TOK_MINUS;
+        tok.literal = std::string(1, this->cur_char);
+        tok.line_num = this->line_num;
+      }
       break;
     case '\0':
       tok.type = TOK_EOF;
