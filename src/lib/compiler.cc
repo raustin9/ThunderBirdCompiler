@@ -43,7 +43,7 @@ Compiler::test_parser() {
   this->parser = new Parser(tokens);
   this->parser->error_handler = this->error_handler;
   this->parser->symbol_table = this->symbol_table;
-  std::shared_ptr<Program> ast = this->parser->create_ast();
+  std::shared_ptr<AST> ast = this->parser->create_ast();
 
   this->error_handler->print_errors();
 }

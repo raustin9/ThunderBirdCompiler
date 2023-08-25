@@ -301,3 +301,8 @@ LetStmt::get_st_entry() {
                             );
   return symbol_table_entry;
 }
+
+bool
+AST::syntax_analysis() {
+  return true;
+}
