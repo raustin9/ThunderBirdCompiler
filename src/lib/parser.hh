@@ -32,6 +32,8 @@ public:
   size_t current_position;               // the current position we are at in the token stream
   std::shared_ptr<Program> program;
 
+  std::shared_ptr<Program> create_ast(); // create the abstract syntax tree
+
   // Parsing functions
   std::shared_ptr<Program> parse_program();                         // parse the top level program
   std::shared_ptr<Statement> parse_code_block();                    // parse a block of code

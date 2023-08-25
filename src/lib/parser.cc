@@ -836,3 +836,11 @@ Parser::parse_program() {
   program->symbol_table->print_elements();
   return program;
 }
+
+// Parse the program and create the abstract syntax tree
+std::shared_ptr<Program>
+Parser::create_ast() {
+  auto ast = this->parse_program();
+
+  return ast;
+}
