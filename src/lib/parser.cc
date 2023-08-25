@@ -26,6 +26,11 @@ Parser::Parser(std::vector<token_t> token_stream) {
   // Set operator precedences
   this->operator_precedences[TOK_EQUALS] = 1;
   this->operator_precedences[TOK_EQUALTO] = 2;
+  this->operator_precedences[TOK_PLUS_EQUAL] = 2;
+  this->operator_precedences[TOK_MINUS_EQUAL] = 2;
+  this->operator_precedences[TOK_TIMES_EQUAL] = 2;
+  this->operator_precedences[TOK_DIV_EQUAL] = 2;
+  this->operator_precedences[TOK_MOD_EQUAL] = 2;
   this->operator_precedences[TOK_LT] = 3;
   this->operator_precedences[TOK_GT] = 3;
   this->operator_precedences[TOK_LTEQUALTO] = 3;
@@ -33,6 +38,7 @@ Parser::Parser(std::vector<token_t> token_stream) {
   this->operator_precedences[TOK_PLUS] = 4;
   this->operator_precedences[TOK_MINUS] = 4;
   this->operator_precedences[TOK_ASTERISK] = 5;
+  this->operator_precedences[TOK_MOD] = 5;
   this->operator_precedences[TOK_SLASH] = 5;
   this->operator_precedences[TOK_BANG] = 6; // future: potentialy as bitwise not '~' prefix operator of SAME precedence as the bang operator
 

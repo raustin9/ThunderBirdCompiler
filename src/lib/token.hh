@@ -54,6 +54,12 @@ enum TokenType {
   TOK_BANG,       // "!"
   TOK_ASTERISK,   // "*"
   TOK_SLASH,      // "/"
+  TOK_MOD,        // "%"
+  TOK_PLUS_EQUAL,  // "+="
+  TOK_MINUS_EQUAL, // "-="
+  TOK_TIMES_EQUAL, // "*="
+  TOK_DIV_EQUAL,   // "/="
+  TOK_MOD_EQUAL,   // "%="
 
   TOK_GT,         // "<"
   TOK_LT,         // ">"
