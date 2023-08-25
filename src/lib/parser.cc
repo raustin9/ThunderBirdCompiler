@@ -390,8 +390,10 @@ Parser::parse_function_defn() {
 
   // FUNCTION BODY //
   auto func_body = this->parse_code_block();
+  dynamic_cast<CodeBlock*>(func_body.get())->parent_scope = this->program;
   auto proto = std::make_unique<Prototype>(proto_name, rt, params);
-  return std::make_shared<FunctionDecl>(is_entry, std::move(func_body), std::move(proto));
+  auto function = std::make_shared<FunctionDecl>(is_entry, std::move(func_body), std::move(proto));
+  return function;
 }
 
 // Parse a code block
@@ -424,19 +426,22 @@ Parser::parse_code_block() {
       case TOK_IF:
         printf("if token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_if_statement();
-        dynamic_cast<Conditional*>(stmt.get())->parent = code_block;
+        dynamic_cast<CodeBlock*>(dynamic_cast<Conditional*>(stmt.get())->consequence.get())->parent_scope = code_block;
+        // dynamic_cast<Conditional*>(stmt.get())->parent = code_block;
         body.push_back(std::move(stmt));
         break;
       case TOK_WHILE:
         printf("while token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_while_statement();
-        dynamic_cast<WhileLoop*>(stmt.get())->parent = code_block;
+        dynamic_cast<CodeBlock*>(dynamic_cast<WhileLoop*>(stmt.get())->loop_body.get())->parent_scope = code_block;
+        // dynamic_cast<WhileLoop*>(stmt.get())->parent = code_block;
         body.push_back(std::move(stmt));
         break;
       case TOK_FOR:
         printf("for token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_for_statement();
-        dynamic_cast<ForLoop*>(stmt.get())->parent = code_block;
+        dynamic_cast<CodeBlock*>(dynamic_cast<ForLoop*>(stmt.get())->loop_body.get())->parent_scope = code_block;
+        // dynamic_cast<ForLoop*>(stmt.get())->parent = code_block;
         body.push_back(std::move(stmt));
         break;
       case TOK_RETURN:
@@ -773,9 +778,10 @@ Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
 
 // parse the program
 // start at top level and cascade down the tree
-std::unique_ptr<Program>
+std::shared_ptr<Program>
 Parser::parse_program() {
-  auto program = std::make_unique<Program>();
+  auto program = std::make_shared<Program>();
+  this->program = program;
 
   // main loop
   while (this->current_token.type != TOK_EOF) {
@@ -793,6 +799,7 @@ Parser::parse_program() {
       case TOK_FUNCTION: // Top-level function definitions
         printf("matched function\n");
         stmt = this->parse_function_defn();
+        dynamic_cast<FunctionDecl*>(stmt.get())->parent = program;
         symbol_table_entry = dynamic_cast<FunctionDecl*>(stmt.get())->get_st_entry();
         program->symbol_table->add(std::move(symbol_table_entry));
         program->statements.push_back(std::move(stmt));
@@ -807,6 +814,7 @@ Parser::parse_program() {
           // change it so that it is not considered an entry point
           printf("error: program cannot contain more than one entry point");
           stmt = this->parse_function_defn();
+          dynamic_cast<FunctionDecl*>(stmt.get())->parent = program;
           // this->next_token();
         }
         break;

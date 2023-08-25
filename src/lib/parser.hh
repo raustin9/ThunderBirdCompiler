@@ -30,9 +30,10 @@ public:
   bool has_entry;             // true if there is an entry point false otherwise
   std::vector <token_t> token_stream; // token stream to parse
   size_t current_position;               // the current position we are at in the token stream
+  std::shared_ptr<Program> program;
 
   // Parsing functions
-  std::unique_ptr<Program> parse_program();                         // parse the top level program
+  std::shared_ptr<Program> parse_program();                         // parse the top level program
   std::shared_ptr<Statement> parse_code_block();                    // parse a block of code
   std::unique_ptr<Statement> parse_let_statement();                 // parse let statements
   std::unique_ptr<Statement> parse_return_statement();              // parse return statements
