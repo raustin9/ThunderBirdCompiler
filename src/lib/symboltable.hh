@@ -39,9 +39,9 @@ class SymbolTableEntry {
 // The symbol table itself
 class SymbolTable {
   public:
-    std::map <std::string, std::unique_ptr<SymbolTableEntry> > elements;
+    std::map <std::string, std::shared_ptr<SymbolTableEntry> > elements;
     bool find(std::string name); // find an element in the table, if it is in the table return true
-    void add(std::unique_ptr<SymbolTableEntry> entry); // add an element into the symbol table
+    void add(std::shared_ptr<SymbolTableEntry> entry); // add an element into the symbol table
     void print_elements();
 };
 

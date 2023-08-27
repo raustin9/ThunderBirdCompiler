@@ -44,6 +44,7 @@ Compiler::test_parser() {
   this->parser->error_handler = this->error_handler;
   this->parser->symbol_table = this->symbol_table;
   std::shared_ptr<AST> ast = this->parser->create_ast();
+  ast->syntax_analysis();
 
   this->error_handler->print_errors();
 }

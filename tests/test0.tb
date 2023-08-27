@@ -1,14 +1,8 @@
 let int z = 2;
-// test comment
-
-/*
-this is 
-a multi line
-comment
-*/
 
 function int main() {
   let int x = 0;
+  let int x = 2;
   x += 2;
   return x;
 }

@@ -67,7 +67,7 @@ Parser::next_token() {
 // This statement is where variables are declared and initialized
 // Variables are required to be initialized to a specific value
 // "let int x = 5;"
-std::unique_ptr<Statement>
+std::shared_ptr<Statement>
 Parser::parse_let_statement() {
   token_t let_tok = this->current_token;
   printf("parse_let: should be eating 'let'\n");
@@ -143,9 +143,9 @@ Parser::parse_let_statement() {
     printf("parse_let: should be eating '='\n");
     this->next_token(); // eat the '='
     auto expr_val = this->parse_expression_interior(); // get the expression being set to the variable
-    auto variable = std::make_unique<VariableExpr>(ident_tok.literal, data_type);
-    auto variable_for_assign = std::make_unique<VariableExpr>(ident_tok.literal, data_type);
-    auto assignment_expr = std::make_unique<VariableAssignment>(op, std::move(variable_for_assign), std::move(expr_val));
+    auto variable = std::make_shared<VariableExpr>(ident_tok.literal, data_type);
+    auto variable_for_assign = std::make_shared<VariableExpr>(ident_tok.literal, data_type);
+    auto assignment_expr = std::make_shared<VariableAssignment>(op, std::move(variable_for_assign), std::move(expr_val));
 
     if (this->current_token.type == TOK_SEMICOLON) {
       printf("parse_let: should be eating ';'\n");
@@ -154,21 +154,21 @@ Parser::parse_let_statement() {
     else
       printf("let_stmt: curtok = '%s'\n", this->current_token.literal.c_str());
 
-    return std::make_unique<LetStmt>(let_tok, std::move(variable), std::move(assignment_expr));
+    return std::make_shared<LetStmt>(let_tok, std::move(variable), std::move(assignment_expr));
   } else if (this->current_token.type == TOK_SEMICOLON) {
     // Variable declaration -- we do not allow declarations without initializations
     printf("parse_let: error: variable '%s' missing initialization\n", ident_tok.literal.c_str());
     token_t op;
     op.literal = "=";
     op.type = TOK_EQUALS;
-    auto expr = std::make_unique<Expression>();
-    auto variable = std::make_unique<VariableExpr>(ident_tok.literal, data_type);
-    auto variable_for_assign = std::make_unique<VariableExpr>(ident_tok.literal, data_type);
-    auto assignment_expr = std::make_unique<VariableAssignment>(op, std::move(variable), std::move(expr));
+    auto expr = std::make_shared<Expression>();
+    auto variable = std::make_shared<VariableExpr>(ident_tok.literal, data_type);
+    auto variable_for_assign = std::make_shared<VariableExpr>(ident_tok.literal, data_type);
+    auto assignment_expr = std::make_shared<VariableAssignment>(op, std::move(variable), std::move(expr));
 
     printf("parse_let: should be eating ';'\n");
     this->next_token();
-    return std::make_unique<LetStmt>(let_tok, std::move(variable_for_assign), std::move(assignment_expr));
+    return std::make_shared<LetStmt>(let_tok, std::move(variable_for_assign), std::move(assignment_expr));
   } else {
     printf("error: unexpected token |%s|. Expected |=|\n", this->current_token.literal.c_str());
     return nullptr;
@@ -177,7 +177,7 @@ Parser::parse_let_statement() {
 
 // Parse an integer expression -- really just an integer literal
 // "3" "700";
-std::unique_ptr<Expression>
+std::shared_ptr<Expression>
 Parser::parse_integer() {
   token_t tok = this->current_token;
   if (tok.type != TOK_INT) {
@@ -190,12 +190,12 @@ Parser::parse_integer() {
 
   printf("parse_int: should be eating int literal\n");
   this->next_token();
-  return std::make_unique<IntegerExpr>(val);
+  return std::make_shared<IntegerExpr>(val);
 }
 
 // Parse a float expression -- really just a float literal
 // "3.0" "700.29"
-std::unique_ptr<Expression>
+std::shared_ptr<Expression>
 Parser::parse_float() {
   token_t tok = this->current_token;
   if (tok.type != TOK_FLOAT) {
@@ -208,13 +208,13 @@ Parser::parse_float() {
 
   printf("parse_float: should be eating float literal\n");
   this->next_token();
-  auto rv = std::make_unique<FloatExpr>(val);
+  auto rv = std::make_shared<FloatExpr>(val);
   return rv;
 }
 
 // Parse a boolean expression -- boolean literal
 // "true" "false"
-std::unique_ptr<Expression>
+std::shared_ptr<Expression>
 Parser::parse_boolean() {
   token_t tok = this->current_token;
 
@@ -227,12 +227,12 @@ Parser::parse_boolean() {
   this->next_token();
 
   bool val = (tok.type == TOK_TRUE) ? true : false;
-  return std::make_unique<BooleanExpr>(val);
+  return std::make_shared<BooleanExpr>(val);
 }
 
 // Parse return statements from a function body
 // "return 0;"
-std::unique_ptr<Statement>
+std::shared_ptr<Statement>
 Parser::parse_return_statement() {
   token_t return_tok = this->current_token;
   printf("parse_return: should be eating 'return'\n");
@@ -241,12 +241,12 @@ Parser::parse_return_statement() {
   auto return_val = this->parse_expression_interior(); // get the expression it is returning
   printf("parse_return: should be eating ';'\n");
   this->next_token(); // eat the ';'
-  return std::make_unique<ReturnStmt>(return_tok, std::move(return_val));
+  return std::make_shared<ReturnStmt>(return_tok, std::move(return_val));
 }
 
 // Parse an else clause within an if statement
 // checks to see if there is an else followed by an if to chain them together
-std::unique_ptr<Statement>
+std::shared_ptr<Statement>
 Parser::parse_else_statement() {
   return nullptr;
 }
@@ -391,7 +391,7 @@ Parser::parse_function_defn() {
   // FUNCTION BODY //
   auto func_body = this->parse_code_block();
   dynamic_cast<CodeBlock*>(func_body.get())->parent_scope = this->program;
-  auto proto = std::make_unique<Prototype>(proto_name, rt, params);
+  auto proto = std::make_shared<Prototype>(proto_name, rt, params);
   auto function = std::make_shared<FunctionDecl>(is_entry, std::move(func_body), std::move(proto));
   return function;
 }
@@ -408,17 +408,23 @@ Parser::parse_code_block() {
   this->next_token();
 
   auto code_block = std::make_shared<CodeBlock>();
-  auto symbol_table = std::make_unique<SymbolTable>();
-  std::vector <std::unique_ptr<Statement> > body;
+  auto symbol_table = std::make_shared<SymbolTable>();
+  std::vector <std::shared_ptr<Statement> > body;
 
   while (this->current_token.type != TOK_RBRACE) {
     // for now: eat the body
-    std::unique_ptr<Statement> stmt;
-    std::unique_ptr<SymbolTableEntry> symbol_table_entry;
+    std::shared_ptr<Statement> stmt;
+    std::shared_ptr<SymbolTableEntry> symbol_table_entry;
     switch (this->current_token.type) {
       case TOK_LET:
         printf("let token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_let_statement();
+        // Check if variable has been declared already -- CLEAN UP -- ACTUALLY MAKE THIS ERRROR
+        if (symbol_table->find(dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name) == true) {
+          char buf[200];
+          sprintf(buf, "parse_code_block: error: redeclaration of |%s| in this scope", dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name.c_str());
+          this->error_handler->new_error(dynamic_cast<LetStmt*>(stmt.get())->token.line_num, buf);
+        }
         symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->get_st_entry();
         symbol_table->add(std::move(symbol_table_entry));
         body.push_back(std::move(stmt));
@@ -473,7 +479,7 @@ Parser::parse_code_block() {
 }
 
 // Parse a for loop statement
-std::unique_ptr<Statement>
+std::shared_ptr<Statement>
 Parser::parse_for_statement() {
   token_t for_token = this->current_token;
 
@@ -510,14 +516,14 @@ Parser::parse_for_statement() {
   auto initialization_ste = dynamic_cast<LetStmt*>(initialization.get())->get_st_entry();
   dynamic_cast<CodeBlock*>(loop_body.get())->symbol_table->add(std::move(initialization_ste));
 
-  auto for_stmt = std::make_unique<ForLoop>(for_token, std::move(initialization), std::move(condition), std::move(action), std::move(loop_body));
+  auto for_stmt = std::make_shared<ForLoop>(for_token, std::move(initialization), std::move(condition), std::move(action), std::move(loop_body));
 
   return for_stmt;
 }
 
 
 // Parse an while loop statement
-std::unique_ptr<Statement>
+std::shared_ptr<Statement>
 Parser::parse_while_statement() {
   token_t token = this->current_token;
   printf("while_stmt: should be eating 'while\n");
@@ -528,12 +534,12 @@ Parser::parse_while_statement() {
   // PARSE WHILE LOOP BODY //
   auto loop_body = this->parse_code_block();
   
-  auto while_stmt = std::make_unique<WhileLoop>(token, std::move(condition), std::move(loop_body));
+  auto while_stmt = std::make_shared<WhileLoop>(token, std::move(condition), std::move(loop_body));
   return while_stmt;
 }
 
 // Parse an if statement
-std::unique_ptr<Statement>
+std::shared_ptr<Statement>
 Parser::parse_if_statement() {
   token_t token = this->current_token;
   printf("if_stmt: should be eating 'if'\n");
@@ -557,31 +563,31 @@ Parser::parse_if_statement() {
       printf("if_stmt: matched else if\n");
       auto alternative = this->parse_if_statement();
 
-      auto if_stmt = std::make_unique<Conditional>(token, std::move(consequence), std::move(condition), std::move(alternative));
+      auto if_stmt = std::make_shared<Conditional>(token, std::move(consequence), std::move(condition), std::move(alternative));
       return if_stmt;
     } else if (this->current_token.type == TOK_LBRACE) {
       // just normal else clause
       printf("if_stmt: final else clause\n");
-      std::vector <std::unique_ptr<Statement> > else_body;
+      std::vector <std::shared_ptr<Statement> > else_body;
       auto else_block = this->parse_code_block();
 
-      auto else_condition = std::make_unique<BooleanExpr>(true);
-      auto else_stmt = std::make_unique<Conditional>(else_tok, std::move(else_block), std::move(else_condition), nullptr); 
+      auto else_condition = std::make_shared<BooleanExpr>(true);
+      auto else_stmt = std::make_shared<Conditional>(else_tok, std::move(else_block), std::move(else_condition), nullptr); 
       
       
-      auto if_stmt = std::make_unique<Conditional>(token, std::move(consequence), std::move(condition), std::move(else_stmt));
+      auto if_stmt = std::make_shared<Conditional>(token, std::move(consequence), std::move(condition), std::move(else_stmt));
       return if_stmt;
     }
   }
 
 
   // No else or else if clauses
-  auto if_stmt = std::make_unique<Conditional>(token, std::move(consequence), std::move(condition), nullptr);
+  auto if_stmt = std::make_shared<Conditional>(token, std::move(consequence), std::move(condition), nullptr);
   return if_stmt;
 }
 
 // Parse an identifier in an expression
-std::unique_ptr<Expression>
+std::shared_ptr<Expression>
 Parser::parse_identifier() {
   token_t ident_tok = this->current_token;
   printf("parse_identifier: should be eating identifier\n");
@@ -590,7 +596,7 @@ Parser::parse_identifier() {
 
   if (this->current_token.type != TOK_LPAREN) {
     // Normal variable reference not function call
-    auto ident = std::make_unique<IdentifierExpr>();
+    auto ident = std::make_shared<IdentifierExpr>();
     ident->name = ident_tok.literal;
     return ident;
   }
@@ -598,7 +604,7 @@ Parser::parse_identifier() {
   printf("parse_ident: should be eating '('\n");
   this->next_token();
 
-  std::vector <std::unique_ptr<Expression> > func_args;
+  std::vector <std::shared_ptr<Expression> > func_args;
   while (this->current_token.type != TOK_RPAREN) {
     if (auto arg = this->parse_expression_interior())
       func_args.push_back(std::move(arg));
@@ -622,11 +628,11 @@ Parser::parse_identifier() {
 
   printf("parse_ident: should be eating ')'\n");
   this->next_token();
-  return std::make_unique<FunctionCallExpr>(ident_tok.literal, std::move(func_args));
+  return std::make_shared<FunctionCallExpr>(ident_tok.literal, std::move(func_args));
 }
 
 // Parse parts in an expression
-std::unique_ptr<Expression>
+std::shared_ptr<Expression>
 Parser::parse_primary() {
   switch(this->current_token.type) {
     case TOK_INT:
@@ -655,7 +661,7 @@ Parser::parse_primary() {
 
 // Parse expressions within parentheses
 // x + (5 * 2)
-std::unique_ptr<Expression>
+std::shared_ptr<Expression>
 Parser::parse_parentheses_expr() {
   if (this->current_token.type != TOK_LPAREN) {
     printf("parse_paren: error -- first token '%s' != ')'\n", this->current_token.literal.c_str());
@@ -682,7 +688,7 @@ Parser::parse_parentheses_expr() {
 }
 
 // Parses expressions that are not top level
-std::unique_ptr<Expression>
+std::shared_ptr<Expression>
 Parser::parse_expression_interior() {
   auto LHS = this->parse_primary();
   if (!LHS) {
@@ -696,12 +702,12 @@ Parser::parse_expression_interior() {
 }
 
 // Parses the expression statement wrapper
-std::unique_ptr<Statement>
+std::shared_ptr<Statement>
 Parser::parse_expression_statement() {
   auto LHS = this->parse_primary();
   LHS = this->parse_expr(0, std::move(LHS));
 
-  auto stmt = std::make_unique<ExpressionStatement>(this->current_token, std::move(LHS));
+  auto stmt = std::make_shared<ExpressionStatement>(this->current_token, std::move(LHS));
 
   if (this->current_token.type == TOK_SEMICOLON) {
     printf("parse_expr_stmt: should be eating ';'\n");
@@ -722,8 +728,8 @@ Parser::get_token_precedence() {
   return tok_prec;
 }
 
-std::unique_ptr<Expression>
-Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
+std::shared_ptr<Expression>
+Parser::parse_expr(int precedence, std::shared_ptr<Expression> LHS) {
   while (1) {
     if (this->current_token.type == TOK_SEMICOLON || this->current_token.type == TOK_RPAREN) {
       if (this->current_token.type == TOK_SEMICOLON) printf("semicolon 1\n");
@@ -754,7 +760,7 @@ Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
       if (this->current_token.type == TOK_SEMICOLON) printf("semicolon 2\n");
       else printf("rparen2\n");
  
-      LHS = std::make_unique<BinaryExpr>(op, std::move(LHS), std::move(RHS));
+      LHS = std::make_shared<BinaryExpr>(op, std::move(LHS), std::move(RHS));
       return LHS;
     }
     int next_prec = this->get_token_precedence();
@@ -770,10 +776,10 @@ Parser::parse_expr(int precedence, std::unique_ptr<Expression> LHS) {
     }
 
     // LHS = std::make_unique<BinaryExpr>(op, std::move(LHS), std::move(RHS));
-    LHS = std::make_unique<BinaryExpr>(op, std::move(LHS), std::move(RHS));
+    LHS = std::make_shared<BinaryExpr>(op, std::move(LHS), std::move(RHS));
   }
 
-  return std::make_unique<Expression>();
+  return std::make_shared<Expression>();
 }
 
 // parse the program
@@ -786,7 +792,7 @@ Parser::parse_program() {
   // main loop
   while (this->current_token.type != TOK_EOF) {
     std::shared_ptr<Statement> stmt;
-    std::unique_ptr<SymbolTableEntry> symbol_table_entry;
+    std::shared_ptr<SymbolTableEntry> symbol_table_entry;
     switch(this->current_token.type) {
       case TOK_LET: // Top-level variable declarations;
         printf("matched let\n");

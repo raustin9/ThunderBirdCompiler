@@ -26,6 +26,7 @@ class Node {
   public:
     virtual ~Node() = default;
     virtual void print() {};
+    virtual void syntax_analysis();
 };
 
 // Statement Node
@@ -34,6 +35,7 @@ class Statement : public Node {
   public:
     virtual ~Statement() = default;
     void print() override;
+    void syntax_analysis() override;
 };
 
 // Expression node
@@ -43,6 +45,7 @@ class Expression : public Node {
     DataType data_type;
     virtual ~Expression() = default;
     void print() override;
+    void syntax_analysis() override;
 };
 
 // Statement node for an expression
@@ -50,27 +53,29 @@ class Expression : public Node {
 class ExpressionStatement : public Statement {
   public:
     token_t token;                    // first token of the expression
-    std::unique_ptr<Expression> expr; // holds the expression
+    std::shared_ptr<Expression> expr; // holds the expression
 
     ExpressionStatement(
       token_t token,
-      std::unique_ptr<Expression> expr
+      std::shared_ptr<Expression> expr
     ) : token(token) , expr(std::move(expr)) {}
     void print() override;
+    void syntax_analysis() override;
 };
 
 //// Expression with an infix operator
 class BinaryExpr : public Expression {
   public:
     token_t op;
-    std::unique_ptr<Expression> LHS;
-    std::unique_ptr<Expression> RHS;
+    std::shared_ptr<Expression> LHS;
+    std::shared_ptr<Expression> RHS;
     BinaryExpr(
         token_t op,
-        std::unique_ptr<Expression> LHS,
-        std::unique_ptr<Expression> RHS
+        std::shared_ptr<Expression> LHS,
+        std::shared_ptr<Expression> RHS
       ) : op(op), LHS(std::move(LHS)), RHS(std::move(RHS)) {}
     void print() override;
+    void syntax_analysis() override;
 };
 
 // Prefix or unary operator
@@ -78,7 +83,7 @@ class PrefixOperator {
   public:
     token_t token;
     std::string op;
-    std::unique_ptr<Expression> RHS;
+    std::shared_ptr<Expression> RHS;
 };
 
 // Node for assigning a variable
@@ -86,14 +91,15 @@ class PrefixOperator {
 class VariableAssignment : public Expression {
   public:
   token_t op; // "="
-  std::unique_ptr<Expression> variable;
-  std::unique_ptr<Expression> RHS;
+  std::shared_ptr<Expression> variable;
+  std::shared_ptr<Expression> RHS;
   VariableAssignment(
       token_t op,
-      std::unique_ptr<Expression> variable,
-      std::unique_ptr<Expression> RHS
+      std::shared_ptr<Expression> variable,
+      std::shared_ptr<Expression> RHS
     ) : op(op), variable(std::move(variable)), RHS(std::move(RHS)) {}
   void print() override;
+    void syntax_analysis() override;
 };
 
 // Integer Expression Node
@@ -104,6 +110,7 @@ class IntegerExpr : public Expression {
     DataType data_type = TYPE_INT;
     IntegerExpr(long long value) : value(value) {};
     void print() override;
+    void syntax_analysis() override;
 };
 
 // Float Expression Node
@@ -114,6 +121,7 @@ class FloatExpr : public Expression {
     DataType data_type = TYPE_FLOAT;
     FloatExpr(double value) : value(value) {};
     void print() override;
+    void syntax_analysis() override;
 };
 
 // Statement node for code block
@@ -123,7 +131,7 @@ class FloatExpr : public Expression {
 // }
 class CodeBlock : public Statement {
   public:
-    std::vector <std::unique_ptr<Statement> > body; // the body of code of this scope
+    std::vector <std::shared_ptr<Statement> > body; // the body of code of this scope
     std::shared_ptr<SymbolTable> symbol_table;      // the symbol table of identifiers for this code block's scope
     std::shared_ptr<Node> parent_scope;        // the parent scope of this code block. Can be function or global scope
     // add a field for an inner scope
@@ -132,6 +140,7 @@ class CodeBlock : public Statement {
       this->symbol_table = std::make_shared<SymbolTable>();
     }
     void print() override;
+    void syntax_analysis() override;
     void print_st();
 };
 
@@ -146,6 +155,7 @@ class BooleanExpr : public Expression {
       bool value
     ) : value(value) {}
     void print() override;
+    void syntax_analysis() override;
 };
 
 // Function Call Expression node
@@ -155,13 +165,14 @@ class BooleanExpr : public Expression {
 class FunctionCallExpr : public Expression {
   public:
     std::string name;
-    std::vector <std::unique_ptr<Expression> > args;
+    std::vector <std::shared_ptr<Expression> > args;
 
     FunctionCallExpr(
       std::string &name,
-      std::vector <std::unique_ptr<Expression> > args
+      std::vector <std::shared_ptr<Expression> > args
     ) : name(name), args(std::move(args)) {}
     void print() override;
+    void syntax_analysis() override;
 };
 
 // Identifier class that holds the name and data type of the identifier
@@ -172,6 +183,7 @@ class IdentifierExpr : public Expression {
     DataType data_type; // data type of the identifier (return type for function, stored type for variable)
 
     void print() override;
+    void syntax_analysis() override;
 };
 
 // Variable Expression node
@@ -183,6 +195,7 @@ class VariableExpr : public Expression {
 
     VariableExpr(const std::string &name, DataType data_type) : name(name), data_type(data_type) {}
     void print() override;
+    void syntax_analysis() override;
 };
 
 // Statement node for let statements for variable declaration
@@ -190,17 +203,18 @@ class VariableExpr : public Expression {
 class LetStmt : public Statement {
   public:
     token_t token;                          // "let" token
-    std::unique_ptr<Expression> variable;   // expression of the variable being declared
+    std::shared_ptr<Expression> variable;   // expression of the variable being declared
     unsigned decl_line;                     // the line of the statement
-    std::unique_ptr<Expression> var_assign; // expression that variable will be assigned to
+    std::shared_ptr<Expression> var_assign; // expression that variable will be assigned to
    
     LetStmt(
         token_t token,
-        std::unique_ptr<Expression> variable,
-        std::unique_ptr<Expression> var_assign
+        std::shared_ptr<Expression> variable,
+        std::shared_ptr<Expression> var_assign
       ) : token(token), variable(std::move(variable)), var_assign(std::move(var_assign)) {}
     void print() override;
-    std::unique_ptr<SymbolTableEntry> get_st_entry();
+    void syntax_analysis() override;
+    std::shared_ptr<SymbolTableEntry> get_st_entry();
 };
 
 // Statement node for return statements
@@ -208,13 +222,14 @@ class LetStmt : public Statement {
 class ReturnStmt : public Statement {
   public:
     token_t token;
-    std::unique_ptr<Expression> ret_val; // return value of the function
+    std::shared_ptr<Expression> ret_val; // return value of the function
     
     ReturnStmt(
       token_t token,
-      std::unique_ptr<Expression> ret_val
+      std::shared_ptr<Expression> ret_val
     ) : token(token), ret_val(std::move(ret_val)) {}
     void print() override;
+    void syntax_analysis() override;
 };
 
 // Statement node for if statements
@@ -234,14 +249,14 @@ class Conditional : public Statement {
   public:
     token_t token;
     std::shared_ptr<Statement> consequence;             // body of if statement
-    std::unique_ptr<Expression> condition;              // the condition to evaluate
+    std::shared_ptr<Expression> condition;              // the condition to evaluate
     std::shared_ptr<Statement> alternative;             // the conditional to evaluate if the condition is not true -- this is how we do else-if
     std::shared_ptr<Statement> parent;                  // parent scope of the conditional
 
     Conditional(
       token_t token,
       std::shared_ptr<Statement> consequence,
-      std::unique_ptr<Expression> condition,
+      std::shared_ptr<Expression> condition,
       std::shared_ptr<Statement> alternative
     ) : token(token), 
         consequence(std::move(consequence)),
@@ -249,6 +264,7 @@ class Conditional : public Statement {
         alternative(std::move(alternative))
       {}
     void print() override;
+    void syntax_analysis() override;
 };
 
 // Statement node for while loop
@@ -257,19 +273,20 @@ class Conditional : public Statement {
 class WhileLoop : public Statement {
   public:
     token_t token;
-    std::unique_ptr<Expression> condition;
+    std::shared_ptr<Expression> condition;
     std::shared_ptr<Statement> loop_body;
     std::shared_ptr<Statement> parent;    // symbol table of the loop 
 
     WhileLoop(
       token_t token,
-      std::unique_ptr<Expression> condition,
+      std::shared_ptr<Expression> condition,
       std::shared_ptr<Statement> loop_body
     ) : token(token), 
         condition(std::move(condition)),
         loop_body(std::move(loop_body))
       {}
     void print() override;
+    void syntax_analysis() override;
 };
 
 // Statement node for a for loop
@@ -280,20 +297,21 @@ class WhileLoop : public Statement {
 class ForLoop : public Statement {
   public:
     token_t token;                             // the token that represents the command
-    std::unique_ptr<Statement> initialization; // the initialization statement in the for loop
-    std::unique_ptr<Expression> condition;     // the condition that the loop runs until fulfilled
-    std::unique_ptr<Expression> action;        // the action that gets taken at the end of each iteration
+    std::shared_ptr<Statement> initialization; // the initialization statement in the for loop
+    std::shared_ptr<Expression> condition;     // the condition that the loop runs until fulfilled
+    std::shared_ptr<Expression> action;        // the action that gets taken at the end of each iteration
     std::shared_ptr<Statement> loop_body;      // the body of the for loop
     std::shared_ptr<Statement> parent;         // symbol table of the loop 
 
     ForLoop(
       token_t token,
-      std::unique_ptr<Statement> initialization,
-      std::unique_ptr<Expression> condition,
-      std::unique_ptr<Expression> action,
+      std::shared_ptr<Statement> initialization,
+      std::shared_ptr<Expression> condition,
+      std::shared_ptr<Expression> action,
       std::shared_ptr<Statement> loop_body
     ) : token(token) , initialization(std::move(initialization)), condition(std::move(condition)) , action(std::move(action)), loop_body(std::move(loop_body)) {}
     void print() override;
+    void syntax_analysis() override;
 };
 
 // Class for function prototypes
@@ -315,38 +333,29 @@ class FunctionDecl : public Statement {
   public:
     bool is_entry;                                 // true if it is the entry point to the program false otherwise
     std::shared_ptr<Statement> func_body;          // a CodeBlock that contains the body of the function
-    std::unique_ptr<Prototype> prototype;          // the prototype of the function
+    std::shared_ptr<Prototype> prototype;          // the prototype of the function
     std::shared_ptr<class Program> parent;         // parent scope of the function -- global scope
     
 
     FunctionDecl(
       bool is_entry,
       std::shared_ptr<Statement> func_body,
-      std::unique_ptr<Prototype> prototype
+      std::shared_ptr<Prototype> prototype
     ) : is_entry(is_entry), func_body(std::move(func_body)), prototype(std::move(prototype)) {}
     void print() override;
-    std::unique_ptr<SymbolTableEntry> get_st_entry();
+    void syntax_analysis() override;
+    std::shared_ptr<SymbolTableEntry> get_st_entry();
 };
-
-//class Function : public Node {
-//  public:
-//    std::unique_ptr<Prototype> prototype;           // function prototype
-//    std::vector <std::unique_ptr<Statement> > body; // list of statements that make up the function body
-//
-//    Function(
-//      std::unique_ptr<Prototype> prototype,
-//      std::vector <std::unique_ptr<Statement> > body
-//    ) : prototype(std::move(prototype)), body(std::move(body)) {}
-//};
 
 // Program Node in the AST
 // should be the root node of the tree
 class Program : public Node {
   public:
-    std::unique_ptr<Statement> entry_point; // Potentially use to define entry point of program
+    std::shared_ptr<Statement> entry_point; // Potentially use to define entry point of program
     std::vector<std::shared_ptr<Statement> > statements; // top level of the program is a list of statements
     std::shared_ptr<SymbolTable> symbol_table;           // the symbol table for the global scope
     void print() override;
+    void syntax_analysis() override;
 
     Program() {
       this->symbol_table = std::make_shared<SymbolTable>();
