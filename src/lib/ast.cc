@@ -111,6 +111,7 @@ FunctionDecl::print() {
 }
 void
 FunctionDecl::syntax_analysis() {
+  this->func_body->syntax_analysis();
 }
 
 // Create symbol table entry from fields in the FunctionDecl class
@@ -306,7 +307,14 @@ CodeBlock::print() {
 void
 CodeBlock::syntax_analysis() {
   for (size_t i = 0; i < this->body.size(); i++) {
-    // if (std::unique_ptr<LetStmt> let_stmt = dynamic_cast<LetStmt*>(this->body[i].get())) {}
+//    if (auto let_stmt = dynamic_cast<LetStmt*>(this->body[i].get())) {
+//      std::string name = dynamic_cast<VariableExpr*>(let_stmt->variable.get())->name;
+//      if (this->symbol_table->find(name)) {
+//        printf("error: |%s| is already declared in this scope\n", name.c_str());
+//      } else {
+//        printf("GOOD: |%s|\n", name.c_str());
+//      }
+//    }
   }
 }
 

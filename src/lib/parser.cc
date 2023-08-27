@@ -419,6 +419,12 @@ Parser::parse_code_block() {
       case TOK_LET:
         printf("let token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_let_statement();
+        // Check if variable has been declared already -- CLEAN UP -- ACTUALLY MAKE THIS ERRROR
+        if (symbol_table->find(dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name) == true) {
+          char buf[200];
+          sprintf(buf, "parse_code_block: error: redeclaration of |%s| in this scope", dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name.c_str());
+          this->error_handler->new_error(dynamic_cast<LetStmt*>(stmt.get())->token.line_num, buf);
+        }
         symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->get_st_entry();
         symbol_table->add(std::move(symbol_table_entry));
         body.push_back(std::move(stmt));
