@@ -35,13 +35,13 @@ SymbolTable::find(std::string name) {
 
 // Adds an element to the symbol table
 void
-SymbolTable::add(std::unique_ptr<SymbolTableEntry> entry) {
+SymbolTable::add(std::shared_ptr<SymbolTableEntry> entry) {
   this->elements[entry->name] = std::move(entry);
 }
 
 void
 SymbolTable::print_elements() {
-  std::map<std::string, std::unique_ptr<SymbolTableEntry> >::iterator it;
+  std::map<std::string, std::shared_ptr<SymbolTableEntry> >::iterator it;
   for (it = this->elements.begin(); it != this->elements.end(); it++) {
     it->second->print();
   }
