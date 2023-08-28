@@ -44,8 +44,8 @@ Expression::syntax_analysis() {}
 /// PROGRAM NODE ///
 void
 Program::print() {
-  for (unsigned i = 0; i < this->program_body->body.size(); i++) {
-    if (this->program_body->body[i]) this->program_body->body[i]->print();
+  for (unsigned i = 0; i < this->statements.size(); i++) {
+    if (this->statements[i]) this->statements[i]->print();
     printf("\n");
   }
 }
@@ -389,68 +389,40 @@ BinaryExpr::print() {
 void
 BinaryExpr::syntax_analysis() {
   printf("binary expr syn\n");
-  // std::shared_ptr<Node> scope; // = std::make_shared<Node>();
-  // auto code_block = dynamic_cast<CodeBlock*>(this->parent.get());
-  // auto program = dynamic_cast<Program*>(this->parent.get());
-  // auto scope = (program != nullptr) ? program : code_block;
-//  if (dynamic_cast<CodeBlock*>(this->parent.get())) {
-//    //scope = std::shared_ptr<CodeBlock>(dynamic_cast<CodeBlock*>(this->parent.get()));
-//    scope = std::dynamic_pointer_cast<Node>(this->parent);
-//  } else if (dynamic_cast<Program*>(this->parent.get())) {
-//    // scope = std::shared_ptr<Program>(dynamic_cast<Program*>(this->parent.get()));
-//    scope = std::make_shared<Node>(this->parent.get());
-//  }
-//  if (std::dynamic_pointer_cast<CodeBlock>(this->parent)) {
-//  } else {
-//    scope = std::dynamic_pointer_cast<Program>(this->parent);
-//  }
 
-  std::shared_ptr<Node> scope = this->parent;
+  std::shared_ptr<SymbolTable> scope = std::make_shared<SymbolTable>();
+  if (dynamic_cast<CodeBlock*>(this->parent.get())) {
+    scope = dynamic_cast<CodeBlock*>(this->parent.get())->symbol_table;
+  } else if (dynamic_cast<Program*>(this->parent.get())) {
+    scope = dynamic_cast<Program*>(this->parent.get())->symbol_table;
+  }
+
   
   if (this->LHS) {
-//    if (auto var = dynamic_cast<IdentifierExpr*>(this->LHS.get())) { // VARIABLE
-//      if (code_block) {
-//        if (code_block->symbol_table->find(var->name) == false) {
-//          printf("Error: unknown identifier |%s|\n", var->name.c_str());
-//        } else 
-//          printf("found |%s|\n", var->name.c_str());
-//      } else if (program) {
-//        printf("program?\n");
-//      } else 
-//        printf("BOTH NULL\n");
-//    } else {
-//      printf("NOT VAR EXPR\n");
-//    }
-//    if (auto var = std::dynamic_pointer_cast<IdentifierExpr>(this->LHS)) {
-//      if (scope->symbol_table->find(var->name) == false) {
-//        printf("found var\n");
-//      }
-//    }
+    if (auto var = std::dynamic_pointer_cast<IdentifierExpr>(this->LHS)) { // VARIABLE EXPR
+      if (scope->find(var->name) == false) {
+        // Variable name not found in this scope
+        printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
+      } else {
+        printf("Found: |%s|\n", var->name.c_str());
+      }
+    } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->LHS)) {
+
+    }
   }
 
   // RIGHT HAND SIDE
   if (this->RHS) {
-//    if (auto var = dynamic_cast<IdentifierExpr*>(this->RHS.get())) { // VARIABLE
-//      if (code_block) {
-//        if (code_block->symbol_table->find(var->name) == false) {
-//          printf("Error: unknown identifier |%s|\n", var->name.c_str());
-//        } else 
-//          printf("found |%s|\n", var->name.c_str());
-//      } else if (program) {
-//        printf("program?\n");
-//      } else 
-//        printf("BOTH NULL\n");
-//    } else if (auto func_call = dynamic_cast<FunctionCallExpr*>(this->RHS.get())) { // FUNCTION CALL
-//      if (code_block) {
-//        if (code_block->symbol_table->find(func_call->name) == false) {
-//          printf("Error: unknown identifier |%s|\n", func_call->name.c_str());
-//        } else {
-//          printf("found func call |%s|\n", func_call->name.c_str());
-//        }
-//      } else if (program) {
-//        printf("program?\n");
-//      } 
-//    }
+    if (auto var = std::dynamic_pointer_cast<IdentifierExpr>(this->RHS)) { // VARIABLE EXPR
+      if (scope->find(var->name) == false) {
+        // Variable name not found in this scope
+        printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
+      } else {
+        printf("Found: |%s|\n", var->name.c_str());
+      }
+    } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->RHS)) {
+
+    }
   } 
 
   /*

@@ -807,8 +807,6 @@ Parser::parse_program() {
   this->program = program;
 
   // main loop
-  std::shared_ptr<CodeBlock> body = std::make_shared<CodeBlock>();
-  std::vector<std::shared_ptr<Statement> > statements;
   while (this->current_token.type != TOK_EOF) {
     std::shared_ptr<Statement> stmt;
     std::shared_ptr<SymbolTableEntry> symbol_table_entry;
@@ -830,8 +828,7 @@ Parser::parse_program() {
 
         symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->get_st_entry();
         program->symbol_table->add(std::move(symbol_table_entry));
-        //program->statements.push_back(std::move(stmt));
-        statements.push_back(std::move(stmt));
+        program->statements.push_back(std::move(stmt));
 
         break;
       case TOK_FUNCTION: // Top-level function definitions
@@ -840,15 +837,13 @@ Parser::parse_program() {
         dynamic_cast<FunctionDecl*>(stmt.get())->parent = program;
         symbol_table_entry = dynamic_cast<FunctionDecl*>(stmt.get())->get_st_entry();
         program->symbol_table->add(std::move(symbol_table_entry));
-        // program->statements.push_back(std::move(stmt));
-        statements.push_back(std::move(stmt));
+        program->statements.push_back(std::move(stmt));
         break;
       case TOK_ENTRY: // Top-level function definition, but entry point to the program
         if (!this->has_entry) {
           printf("matched entry\n");
           stmt = this->parse_function_defn();
-          statements.push_back(std::move(stmt));
-          //program->statements.push_back(std::move(stmt));
+          program->statements.push_back(std::move(stmt));
         } else {
           // FUTURE: make it so that it will still parse the function correctly for error handling, but 
           // change it so that it is not considered an entry point
@@ -872,8 +867,6 @@ Parser::parse_program() {
   }
 
   printf(" -- Program --\n");
-  body->body = std::move(statements);
-  this->program->program_body = std::move(body);
   //program->statements = std::move(body->body);
   this->program->print();
   this->program->symbol_table->print_elements();
