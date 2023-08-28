@@ -190,7 +190,9 @@ Parser::parse_integer() {
 
   printf("parse_int: should be eating int literal\n");
   this->next_token();
-  return std::make_shared<IntegerExpr>(val);
+  auto int_expr = std::make_shared<IntegerExpr>(val);
+  int_expr->data_type = TYPE_INT;
+  return int_expr;
 }
 
 // Parse a float expression -- really just a float literal
@@ -208,8 +210,9 @@ Parser::parse_float() {
 
   printf("parse_float: should be eating float literal\n");
   this->next_token();
-  auto rv = std::make_shared<FloatExpr>(val);
-  return rv;
+  auto float_expr = std::make_shared<FloatExpr>(val);
+  float_expr->data_type = TYPE_FLOAT;
+  return float_expr;
 }
 
 // Parse a boolean expression -- boolean literal
@@ -609,6 +612,7 @@ Parser::parse_identifier() {
     // Normal variable reference not function call
     auto ident = std::make_shared<IdentifierExpr>();
     ident->name = ident_tok.literal;
+    ident->data_type = TYPE_VOID;
     return ident;
   }
 
@@ -639,7 +643,9 @@ Parser::parse_identifier() {
 
   printf("parse_ident: should be eating ')'\n");
   this->next_token();
-  return std::make_shared<FunctionCallExpr>(ident_tok.literal, std::move(func_args));
+  auto func_call = std::make_shared<FunctionCallExpr>(ident_tok.literal, std::move(func_args));
+  func_call->data_type = TYPE_VOID;
+  return func_call;
 }
 
 // Parse parts in an expression
@@ -861,9 +867,10 @@ Parser::parse_program() {
   }
 
   printf(" -- Program --\n");
-  program->print();
-  program->symbol_table->print_elements();
-  return program;
+  //program->statements = std::move(body->body);
+  this->program->print();
+  this->program->symbol_table->print_elements();
+  return this->program;
 }
 
 // Parse the program and create the abstract syntax tree

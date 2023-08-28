@@ -108,7 +108,7 @@ class VariableAssignment : public Expression {
 class IntegerExpr : public Expression {
   public:
     long long value;
-    DataType data_type = TYPE_INT;
+    // DataType data_type = TYPE_INT;
     IntegerExpr(long long value) : value(value) {};
     void print() override;
     void syntax_analysis() override;
@@ -119,7 +119,7 @@ class IntegerExpr : public Expression {
 class FloatExpr : public Expression {
   public:
     double value;
-    DataType data_type = TYPE_FLOAT;
+    // DataType data_type = TYPE_FLOAT;
     FloatExpr(double value) : value(value) {};
     void print() override;
     void syntax_analysis() override;
@@ -150,7 +150,7 @@ class CodeBlock : public Statement {
 class BooleanExpr : public Expression {
   public:
     bool value;
-    DataType data_type = TYPE_BOOL;
+    // DataType data_type = TYPE_BOOL;
 
     BooleanExpr(
       bool value
@@ -181,7 +181,7 @@ class FunctionCallExpr : public Expression {
 class IdentifierExpr : public Expression {
   public:
     std::string name;   // name of the identifie
-    DataType data_type; // data type of the identifier (return type for function, stored type for variable)
+    // DataType data_type; // data type of the identifier (return type for function, stored type for variable)
 
     void print() override;
     void syntax_analysis() override;

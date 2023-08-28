@@ -389,27 +389,57 @@ BinaryExpr::print() {
 void
 BinaryExpr::syntax_analysis() {
   printf("binary expr syn\n");
-  auto code_block = dynamic_cast<CodeBlock*>(this->parent.get());
-  auto program = dynamic_cast<Program*>(this->parent.get());
 
+  std::shared_ptr<SymbolTable> scope = std::make_shared<SymbolTable>();
+  if (dynamic_cast<CodeBlock*>(this->parent.get())) {
+    scope = dynamic_cast<CodeBlock*>(this->parent.get())->symbol_table;
+  } else if (dynamic_cast<Program*>(this->parent.get())) {
+    scope = dynamic_cast<Program*>(this->parent.get())->symbol_table;
+  }
+
+  
   if (this->LHS) {
-    if (auto var = dynamic_cast<IdentifierExpr*>(this->LHS.get())) {
-      if (code_block) {
-        if (code_block->symbol_table->find(var->name) == false) {
-          printf("Error: unknown identifier |%s|\n", var->name.c_str());
-        } else 
-          printf("found |%s|\n", var->name.c_str());
-      } else if (program) {
-        printf("program?\n");
-      } else 
-        printf("BOTH NULL\n");
-    } else {
-      printf("NOT VAR EXPR\n");
+    if (auto var = std::dynamic_pointer_cast<IdentifierExpr>(this->LHS)) { // VARIABLE EXPR
+      if (scope->find(var->name) == false) {
+        // Variable name not found in this scope
+        printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
+      } else {
+        printf("Found: |%s|\n", var->name.c_str());
+      }
+    } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->LHS)) {
+
     }
   }
 
+  // RIGHT HAND SIDE
   if (this->RHS) {
+    if (auto var = std::dynamic_pointer_cast<IdentifierExpr>(this->RHS)) { // VARIABLE EXPR
+      if (scope->find(var->name) == false) {
+        // Variable name not found in this scope
+        printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
+      } else {
+        printf("Found: |%s|\n", var->name.c_str());
+      }
+    } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->RHS)) {
+
+    }
+  } 
+
+  /*
+  // Check for compatible data types
+  if (this->LHS->data_type == TYPE_VOID) {
+    // identifier -- lookup in symbol table
   }
+  if (this->RHS->data_type == TYPE_VOID) {
+    // identifier -- lookup in symbol table
+  }
+
+  if (this->LHS->data_type != this->RHS->data_type) {
+    printf("ERROR: unmatched data types %s -- %s\n", get_data_type(this->LHS->data_type).c_str(), get_data_type(this->RHS->data_type).c_str());
+  } else {
+    printf("%s -- %s\n", get_data_type(this->LHS->data_type).c_str(), get_data_type(this->RHS->data_type).c_str());
+  }
+  */
 }
 
 
