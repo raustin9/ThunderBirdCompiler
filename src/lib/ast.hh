@@ -352,6 +352,7 @@ class FunctionDecl : public Statement {
 // should be the root node of the tree
 class Program : public Node {
   public:
+    std::shared_ptr<CodeBlock> program_body;
     std::shared_ptr<Statement> entry_point; // Potentially use to define entry point of program
     std::vector<std::shared_ptr<Statement> > statements; // top level of the program is a list of statements
     std::shared_ptr<SymbolTable> symbol_table;           // the symbol table for the global scope
