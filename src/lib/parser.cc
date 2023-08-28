@@ -612,6 +612,7 @@ Parser::parse_identifier() {
     // Normal variable reference not function call
     auto ident = std::make_shared<IdentifierExpr>();
     ident->name = ident_tok.literal;
+    ident->data_type = TYPE_VOID;
     return ident;
   }
 
@@ -642,7 +643,9 @@ Parser::parse_identifier() {
 
   printf("parse_ident: should be eating ')'\n");
   this->next_token();
-  return std::make_shared<FunctionCallExpr>(ident_tok.literal, std::move(func_args));
+  auto func_call = std::make_shared<FunctionCallExpr>(ident_tok.literal, std::move(func_args));
+  func_call->data_type = TYPE_VOID;
+  return func_call;
 }
 
 // Parse parts in an expression

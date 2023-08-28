@@ -391,6 +391,7 @@ BinaryExpr::syntax_analysis() {
   printf("binary expr syn\n");
   auto code_block = dynamic_cast<CodeBlock*>(this->parent.get());
   auto program = dynamic_cast<Program*>(this->parent.get());
+  // auto scope = (program != nullptr) ? program : code_block;
 
   if (this->LHS) {
     if (auto var = dynamic_cast<IdentifierExpr*>(this->LHS.get())) { // VARIABLE
@@ -432,6 +433,14 @@ BinaryExpr::syntax_analysis() {
       } 
     }
   } 
+
+  // Check for compatible data types
+  if (this->LHS->data_type == TYPE_VOID) {
+    // identifier -- lookup in symbol table
+  }
+  if (this->RHS->data_type == TYPE_VOID) {
+    // identifier -- lookup in symbol table
+  }
 
   if (this->LHS->data_type != this->RHS->data_type) {
     printf("ERROR: unmatched data types %s -- %s\n", get_data_type(this->LHS->data_type).c_str(), get_data_type(this->RHS->data_type).c_str());

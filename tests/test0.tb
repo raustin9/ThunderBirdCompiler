@@ -1,7 +1,7 @@
 let int z = 2;
 
 function int main() {
-  let float y = 1.0;
+  // let float y = 1.0;
   let int x = y + 1;
   return x;
 }
