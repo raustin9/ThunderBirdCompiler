@@ -1,4 +1,5 @@
 #include "ast.hh"
+#include "symboltable.hh"
 #include "token.hh"
 
 #include <locale>
@@ -55,6 +56,15 @@ Program::syntax_analysis() {
     if (this->statements[i]) this->statements[i]->syntax_analysis();
     printf("\n");
   }
+}
+
+// Search for the identifier in the program's symbol table
+std::shared_ptr<SymbolTableEntry>
+Program::scope_lookup(std::string name) {
+  if (this->symbol_table->find(name) == false)
+    return nullptr;
+
+  return this->symbol_table->elements[name];
 }
 
 
@@ -318,6 +328,41 @@ CodeBlock::syntax_analysis() {
   }
 }
 
+// Lookup the name in the symbol table of this scope 
+// if name is found, return the entry corresponding to it
+// otherwise, search the symbol table of the parent
+std::shared_ptr<SymbolTableEntry>
+CodeBlock::scope_lookup(std::string name) {
+  CodeBlock* current_block = this;                                 // current block we are looking at
+  std::shared_ptr<SymbolTable> current_table = this->symbol_table; // table of the current scope we are examining
+
+  // Loop until we either find the identifier or exhaust all scopes
+  while (1) {
+    if (current_table->find(name)) {
+      // Found the identifier
+      return current_table->elements[name];
+    } else {
+      if(std::dynamic_pointer_cast<Program>(this->parent_scope)) {
+        // Parent scope is the Program Scope
+        auto final_scope = std::dynamic_pointer_cast<Program>(this->parent_scope);
+        current_table = final_scope->symbol_table;
+        if (current_table->find(name)) {
+          // Found identifier in program scope
+          return current_table->elements[name];
+        } else {
+          // Identifier is not in any scopes or program scope
+          return nullptr;
+        }
+
+      } else {
+        // Set the current scope to its parents scope
+        current_block = dynamic_cast<CodeBlock*>(current_block->parent_scope.get());
+        current_table = current_block->symbol_table;
+      }
+    }
+  }
+}
+
 
 /// VARIABLE EXPRESSION ///
 void
@@ -400,29 +445,35 @@ BinaryExpr::syntax_analysis() {
   
   if (this->LHS) {
     if (auto var = std::dynamic_pointer_cast<IdentifierExpr>(this->LHS)) { // VARIABLE EXPR
-      if (scope->find(var->name) == false) {
+      if (this->parent->scope_lookup(var->name) == nullptr) {
         // Variable name not found in this scope
         printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
       } else {
-        printf("Found: |%s|\n", var->name.c_str());
+        printf("Found: var |%s|\n", var->name.c_str());
       }
     } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->LHS)) {
-
+      if (this->parent->scope_lookup(func_call->name) == nullptr) {
+        printf("Error: Undefined function |%s|\n", func_call->name.c_str());
+      } else {
+        printf("Found: function |%s|\n", func_call->name.c_str());
+      } 
     }
   }
 
   // RIGHT HAND SIDE
   if (this->RHS) {
     if (auto var = std::dynamic_pointer_cast<IdentifierExpr>(this->RHS)) { // VARIABLE EXPR
-      if (scope->find(var->name) == false) {
+      if (this->parent->scope_lookup(var->name) == nullptr) {
         // Variable name not found in this scope
         printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
       } else {
-        printf("Found: |%s|\n", var->name.c_str());
+        printf("Found: var |%s|\n", var->name.c_str());
       }
     } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->RHS)) {
-      if (scope->find(func_call->name) == false) {
+      if (this->parent->scope_lookup(func_call->name) == nullptr) {
         printf("Error: undefined function |%s|\n", func_call->name.c_str());
+      } else {
+        printf("Found: function |%s|\n", func_call->name.c_str());
       }
     }
   } 
