@@ -421,7 +421,9 @@ BinaryExpr::syntax_analysis() {
         printf("Found: |%s|\n", var->name.c_str());
       }
     } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->RHS)) {
-
+      if (scope->find(func_call->name) == false) {
+        printf("Error: undefined function |%s|\n", func_call->name.c_str());
+      }
     }
   } 
 
