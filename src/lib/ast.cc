@@ -52,7 +52,7 @@ Program::print() {
 void
 Program::syntax_analysis() {
   for (unsigned i = 0; i < this->statements.size(); i++) {
-    if (this->statements[i]) this->statements[i]->print();
+    if (this->statements[i]) this->statements[i]->syntax_analysis();
     printf("\n");
   }
 }
@@ -66,8 +66,7 @@ ReturnStmt::print() {
 }
 void
 ReturnStmt::syntax_analysis() {
-  printf("%s ", this->token.literal.c_str());
-  this->ret_val->print();
+  printf("return syn");
 }
 
 
@@ -82,11 +81,7 @@ ExpressionStatement::print() {
 }
 void
 ExpressionStatement::syntax_analysis() {
-  if (!this->expr) {
-    printf("null expr\n");
-  } else {
-    this->expr->print();
-  }
+  printf("expr statement syn\n");
 }
 
 
@@ -111,6 +106,7 @@ FunctionDecl::print() {
 }
 void
 FunctionDecl::syntax_analysis() {
+  printf("func decl syn\n");
   this->func_body->syntax_analysis();
 }
 
@@ -142,6 +138,7 @@ FunctionCallExpr::print() {
 }
 void
 FunctionCallExpr::syntax_analysis() {
+  printf("func call syn\n");
 }
 
 
@@ -168,6 +165,7 @@ IntegerExpr::print() {
 }
 void
 IntegerExpr::syntax_analysis() {
+  printf("int expr syn\n");
 }
 
 
@@ -179,6 +177,7 @@ BooleanExpr::print() {
 }
 void
 BooleanExpr::syntax_analysis() {
+  printf("bool expr syn\n");
 }
 
 
@@ -189,6 +188,7 @@ IdentifierExpr::print() {
 }
 void
 IdentifierExpr::syntax_analysis() {
+  printf("ident expr syn\n");
 }
 
 
@@ -215,6 +215,7 @@ FloatExpr::print() {
 }
 void
 FloatExpr::syntax_analysis() {
+  printf("float expr syn\n");
 }
 
 
@@ -245,6 +246,7 @@ Conditional::print() {
 }
 void
 Conditional::syntax_analysis() {
+  printf("conditional syn\n");
 }
 
 
@@ -268,6 +270,7 @@ WhileLoop::print() {
 }
 void
 WhileLoop::syntax_analysis() {
+  printf("while syn\n");
 }
 
 
@@ -293,6 +296,7 @@ ForLoop::print() {
 }
 void
 ForLoop::syntax_analysis() {
+  printf("for syn\n");
 }
 
 
@@ -306,15 +310,11 @@ CodeBlock::print() {
 }
 void
 CodeBlock::syntax_analysis() {
+  printf("code block syn\n");
   for (size_t i = 0; i < this->body.size(); i++) {
-//    if (auto let_stmt = dynamic_cast<LetStmt*>(this->body[i].get())) {
-//      std::string name = dynamic_cast<VariableExpr*>(let_stmt->variable.get())->name;
-//      if (this->symbol_table->find(name)) {
-//        printf("error: |%s| is already declared in this scope\n", name.c_str());
-//      } else {
-//        printf("GOOD: |%s|\n", name.c_str());
-//      }
-//    }
+    if (auto let_stmt = dynamic_cast<LetStmt*>(this->body[i].get())) {
+      let_stmt->syntax_analysis();
+    }
   }
 }
 
@@ -349,6 +349,7 @@ VariableExpr::print() {
 }
 void
 VariableExpr::syntax_analysis() {
+  printf("var expr syn\n");
 }
 
 
@@ -362,6 +363,10 @@ VariableAssignment::print() {
 }
 void
 VariableAssignment::syntax_analysis() {
+  printf("var assign syn\n");
+  if (this->RHS) {
+    this->RHS->syntax_analysis();
+  }
 }
 
 
@@ -380,8 +385,31 @@ BinaryExpr::print() {
   this->RHS->print();
   printf(" ]");
 }
+
 void
 BinaryExpr::syntax_analysis() {
+  printf("binary expr syn\n");
+  auto code_block = dynamic_cast<CodeBlock*>(this->parent.get());
+  auto program = dynamic_cast<Program*>(this->parent.get());
+
+  if (this->LHS) {
+    if (auto var = dynamic_cast<IdentifierExpr*>(this->LHS.get())) {
+      if (code_block) {
+        if (code_block->symbol_table->find(var->name) == false) {
+          printf("Error: unknown identifier |%s|\n", var->name.c_str());
+        } else 
+          printf("found |%s|\n", var->name.c_str());
+      } else if (program) {
+        printf("program?\n");
+      } else 
+        printf("BOTH NULL\n");
+    } else {
+      printf("NOT VAR EXPR\n");
+    }
+  }
+
+  if (this->RHS) {
+  }
 }
 
 
@@ -398,6 +426,8 @@ LetStmt::print() {
 // Perform syntax analysis on the variable declaration
 void
 LetStmt::syntax_analysis() {
+  printf("let syn\n");
+  this->var_assign->syntax_analysis();
 }
 
 // Creates and returns a symbol table entry from the values in the statement

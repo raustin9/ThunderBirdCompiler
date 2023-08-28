@@ -42,6 +42,7 @@ class Statement : public Node {
 // Evaluates to a value that will be held
 class Expression : public Node {
   public:
+    std::shared_ptr<Node> parent;
     DataType data_type;
     virtual ~Expression() = default;
     void print() override;
