@@ -419,6 +419,9 @@ Parser::parse_code_block() {
       case TOK_LET:
         printf("let token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_let_statement();
+        dynamic_cast<LetStmt*>(stmt.get())->variable->parent = code_block;
+        dynamic_cast<LetStmt*>(stmt.get())->var_assign->parent = code_block;
+        dynamic_cast<VariableAssignment*>(dynamic_cast<LetStmt*>(stmt.get())->var_assign.get())->RHS->parent = code_block;
 
         // Check if variable has been declared already -- CLEAN UP -- ACTUALLY MAKE THIS ERROR
         if (symbol_table->find(dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name) == true) {
@@ -428,6 +431,8 @@ Parser::parse_code_block() {
           this->error_handler->new_error(dynamic_cast<LetStmt*>(stmt.get())->token.line_num, buf);
           break;
         }
+
+        // Variable is being properly declared, add to ast
         symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->get_st_entry();
         symbol_table->add(std::move(symbol_table_entry));
         body.push_back(std::move(stmt));
@@ -435,13 +440,14 @@ Parser::parse_code_block() {
       case TOK_IF:
         printf("if token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_if_statement();
+        dynamic_cast<Conditional*>(stmt.get())->condition->parent = code_block;
         dynamic_cast<CodeBlock*>(dynamic_cast<Conditional*>(stmt.get())->consequence.get())->parent_scope = code_block;
-        // dynamic_cast<Conditional*>(stmt.get())->parent = code_block;
         body.push_back(std::move(stmt));
         break;
       case TOK_WHILE:
         printf("while token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_while_statement();
+        dynamic_cast<WhileLoop*>(stmt.get())->condition->parent = code_block;
         dynamic_cast<CodeBlock*>(dynamic_cast<WhileLoop*>(stmt.get())->loop_body.get())->parent_scope = code_block;
         // dynamic_cast<WhileLoop*>(stmt.get())->parent = code_block;
         body.push_back(std::move(stmt));
@@ -449,19 +455,21 @@ Parser::parse_code_block() {
       case TOK_FOR:
         printf("for token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_for_statement();
+        // LATER -- SET PARENT SCOPE OF THE INITIALIZATION TO THIS CODE BLOCL. RN IT ONLY ALLOWS FOR DECLARATIONS WHICH ARE STATEMENTS
         dynamic_cast<CodeBlock*>(dynamic_cast<ForLoop*>(stmt.get())->loop_body.get())->parent_scope = code_block;
-        // dynamic_cast<ForLoop*>(stmt.get())->parent = code_block;
         body.push_back(std::move(stmt));
         break;
       case TOK_RETURN:
         // parse return statements
         printf("retur token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_return_statement();
+        dynamic_cast<ReturnStmt*>(stmt.get())->ret_val->parent = code_block;
         body.push_back(std::move(stmt));
         break;
       default:
         printf("default token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_expression_statement();
+        dynamic_cast<ExpressionStatement*>(stmt.get())->expr->parent = code_block;
         body.push_back(std::move(stmt));
         break;
     }
@@ -800,6 +808,18 @@ Parser::parse_program() {
       case TOK_LET: // Top-level variable declarations;
         printf("matched let\n");
         stmt = this->parse_let_statement();
+        dynamic_cast<LetStmt*>(stmt.get())->variable->parent = program;
+        dynamic_cast<LetStmt*>(stmt.get())->var_assign->parent = program;
+
+        // Check if variable has been declared already -- CLEAN UP -- ACTUALLY MAKE THIS ERROR
+        if (symbol_table->find(dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name) == true) {
+          std::string name = dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name;
+          char buf[200];
+          sprintf(buf, "parse_program: error: redeclaration of |%s| in this scope", name.c_str());
+          this->error_handler->new_error(dynamic_cast<LetStmt*>(stmt.get())->token.line_num, buf);
+          break;
+        }
+
         symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->get_st_entry();
         program->symbol_table->add(std::move(symbol_table_entry));
         program->statements.push_back(std::move(stmt));

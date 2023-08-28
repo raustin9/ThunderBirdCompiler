@@ -1,8 +1,7 @@
 let int z = 2;
 
 function int main() {
-  let int x = 0;
-  let int x = 2;
-  x += 2;
+  let int x = y + 2;
+  x = y + 1;
   return x;
 }
