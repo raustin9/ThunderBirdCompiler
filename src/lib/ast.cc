@@ -393,7 +393,7 @@ BinaryExpr::syntax_analysis() {
   auto program = dynamic_cast<Program*>(this->parent.get());
 
   if (this->LHS) {
-    if (auto var = dynamic_cast<IdentifierExpr*>(this->LHS.get())) {
+    if (auto var = dynamic_cast<IdentifierExpr*>(this->LHS.get())) { // VARIABLE
       if (code_block) {
         if (code_block->symbol_table->find(var->name) == false) {
           printf("Error: unknown identifier |%s|\n", var->name.c_str());
@@ -408,7 +408,35 @@ BinaryExpr::syntax_analysis() {
     }
   }
 
+  // RIGHT HAND SIDE
   if (this->RHS) {
+    if (auto var = dynamic_cast<IdentifierExpr*>(this->RHS.get())) { // VARIABLE
+      if (code_block) {
+        if (code_block->symbol_table->find(var->name) == false) {
+          printf("Error: unknown identifier |%s|\n", var->name.c_str());
+        } else 
+          printf("found |%s|\n", var->name.c_str());
+      } else if (program) {
+        printf("program?\n");
+      } else 
+        printf("BOTH NULL\n");
+    } else if (auto func_call = dynamic_cast<FunctionCallExpr*>(this->RHS.get())) { // FUNCTION CALL
+      if (code_block) {
+        if (code_block->symbol_table->find(func_call->name) == false) {
+          printf("Error: unknown identifier |%s|\n", func_call->name.c_str());
+        } else {
+          printf("found func call |%s|\n", func_call->name.c_str());
+        }
+      } else if (program) {
+        printf("program?\n");
+      } 
+    }
+  } 
+
+  if (this->LHS->data_type != this->RHS->data_type) {
+    printf("ERROR: unmatched data types %s -- %s\n", get_data_type(this->LHS->data_type).c_str(), get_data_type(this->RHS->data_type).c_str());
+  } else {
+    printf("%s -- %s\n", get_data_type(this->LHS->data_type).c_str(), get_data_type(this->RHS->data_type).c_str());
   }
 }
 

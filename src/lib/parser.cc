@@ -190,7 +190,9 @@ Parser::parse_integer() {
 
   printf("parse_int: should be eating int literal\n");
   this->next_token();
-  return std::make_shared<IntegerExpr>(val);
+  auto int_expr = std::make_shared<IntegerExpr>(val);
+  int_expr->data_type = TYPE_INT;
+  return int_expr;
 }
 
 // Parse a float expression -- really just a float literal
@@ -208,8 +210,9 @@ Parser::parse_float() {
 
   printf("parse_float: should be eating float literal\n");
   this->next_token();
-  auto rv = std::make_shared<FloatExpr>(val);
-  return rv;
+  auto float_expr = std::make_shared<FloatExpr>(val);
+  float_expr->data_type = TYPE_FLOAT;
+  return float_expr;
 }
 
 // Parse a boolean expression -- boolean literal
