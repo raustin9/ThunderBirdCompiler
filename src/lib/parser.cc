@@ -803,8 +803,8 @@ Parser::parse_expr(int precedence, std::shared_ptr<Expression> LHS) {
 // start at top level and cascade down the tree
 std::shared_ptr<Program>
 Parser::parse_program() {
-  auto program = std::make_shared<Program>();
-  this->program = program;
+  this->program = std::make_shared<Program>();
+  this->program->parent = nullptr;
 
   // main loop
   while (this->current_token.type != TOK_EOF) {
