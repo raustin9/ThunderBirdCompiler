@@ -442,20 +442,24 @@ BinaryExpr::syntax_analysis() {
     scope = dynamic_cast<Program*>(this->parent.get())->symbol_table;
   }
 
-  
+  std::shared_ptr<SymbolTableEntry> ident;
   if (this->LHS) {
     if (auto var = std::dynamic_pointer_cast<IdentifierExpr>(this->LHS)) { // VARIABLE EXPR
-      if (this->parent->scope_lookup(var->name) == nullptr) {
+      if (!(ident = this->parent->scope_lookup(var->name))) {
         // Variable name not found in this scope
         printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
       } else {
         printf("Found: var |%s|\n", var->name.c_str());
+        this->LHS->data_type = ident->data_type;
+        printf("lhs dt: %s\n", get_data_type(ident->data_type).c_str());
       }
     } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->LHS)) {
-      if (this->parent->scope_lookup(func_call->name) == nullptr) {
+      if (!(ident = this->parent->scope_lookup(func_call->name))) {
         printf("Error: Undefined function |%s|\n", func_call->name.c_str());
       } else {
         printf("Found: function |%s|\n", func_call->name.c_str());
+        this->LHS->data_type = ident->data_type;
+        printf("lhs dt: %s\n", get_data_type(ident->data_type).c_str());
       } 
     }
   }
@@ -463,36 +467,31 @@ BinaryExpr::syntax_analysis() {
   // RIGHT HAND SIDE
   if (this->RHS) {
     if (auto var = std::dynamic_pointer_cast<IdentifierExpr>(this->RHS)) { // VARIABLE EXPR
-      if (this->parent->scope_lookup(var->name) == nullptr) {
+      if (!(ident = this->parent->scope_lookup(var->name))) {
         // Variable name not found in this scope
         printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
       } else {
         printf("Found: var |%s|\n", var->name.c_str());
+        this->LHS->data_type = ident->data_type;
+        printf("lhs dt: %s\n", get_data_type(ident->data_type).c_str());
       }
     } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->RHS)) {
-      if (this->parent->scope_lookup(func_call->name) == nullptr) {
-        printf("Error: undefined function |%s|\n", func_call->name.c_str());
+      if (!(ident = this->parent->scope_lookup(func_call->name))) {
+        printf("Error: Undefined function |%s|\n", func_call->name.c_str());
       } else {
         printf("Found: function |%s|\n", func_call->name.c_str());
-      }
+        this->RHS->data_type = ident->data_type;
+        printf("lhs dt: %s\n", get_data_type(func_call->data_type).c_str());
+      } 
     }
   } 
 
-  /*
   // Check for compatible data types
-  if (this->LHS->data_type == TYPE_VOID) {
-    // identifier -- lookup in symbol table
-  }
-  if (this->RHS->data_type == TYPE_VOID) {
-    // identifier -- lookup in symbol table
-  }
-
   if (this->LHS->data_type != this->RHS->data_type) {
     printf("ERROR: unmatched data types %s -- %s\n", get_data_type(this->LHS->data_type).c_str(), get_data_type(this->RHS->data_type).c_str());
   } else {
     printf("%s -- %s\n", get_data_type(this->LHS->data_type).c_str(), get_data_type(this->RHS->data_type).c_str());
   }
-  */
 }
 
 
