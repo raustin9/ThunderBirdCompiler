@@ -76,7 +76,7 @@ ReturnStmt::print() {
 }
 void
 ReturnStmt::syntax_analysis() {
-  printf("return syn");
+  printf("return syn\n");
 }
 
 
@@ -92,6 +92,7 @@ ExpressionStatement::print() {
 void
 ExpressionStatement::syntax_analysis() {
   printf("expr statement syn\n");
+  this->expr->syntax_analysis();
 }
 
 
@@ -257,6 +258,8 @@ Conditional::print() {
 void
 Conditional::syntax_analysis() {
   printf("conditional syn\n");
+  this->condition->syntax_analysis();
+  this->consequence->syntax_analysis();
 }
 
 
@@ -322,9 +325,10 @@ void
 CodeBlock::syntax_analysis() {
   printf("code block syn\n");
   for (size_t i = 0; i < this->body.size(); i++) {
-    if (auto let_stmt = dynamic_cast<LetStmt*>(this->body[i].get())) {
-      let_stmt->syntax_analysis();
-    }
+//    if (auto let_stmt = dynamic_cast<LetStmt*>(this->body[i].get())) {
+//      let_stmt->syntax_analysis();
+//    }
+    this->body[i]->syntax_analysis();
   }
 }
 
@@ -472,8 +476,8 @@ BinaryExpr::syntax_analysis() {
         printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
       } else {
         printf("Found: var |%s|\n", var->name.c_str());
-        this->LHS->data_type = ident->data_type;
-        printf("lhs dt: %s\n", get_data_type(ident->data_type).c_str());
+        this->RHS->data_type = ident->data_type;
+        printf("rhs dt: %s\n", get_data_type(ident->data_type).c_str());
       }
     } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->RHS)) {
       if (!(ident = this->parent->scope_lookup(func_call->name))) {
@@ -481,7 +485,7 @@ BinaryExpr::syntax_analysis() {
       } else {
         printf("Found: function |%s|\n", func_call->name.c_str());
         this->RHS->data_type = ident->data_type;
-        printf("lhs dt: %s\n", get_data_type(func_call->data_type).c_str());
+        printf("rhs dt: %s\n", get_data_type(func_call->data_type).c_str());
       } 
     }
   } 
@@ -490,7 +494,7 @@ BinaryExpr::syntax_analysis() {
   if (this->LHS->data_type != this->RHS->data_type) {
     printf("ERROR: unmatched data types %s -- %s\n", get_data_type(this->LHS->data_type).c_str(), get_data_type(this->RHS->data_type).c_str());
   } else {
-    printf("%s -- %s\n", get_data_type(this->LHS->data_type).c_str(), get_data_type(this->RHS->data_type).c_str());
+    printf("TYPEMATCH: %s -- %s\n", get_data_type(this->LHS->data_type).c_str(), get_data_type(this->RHS->data_type).c_str());
   }
 }
 

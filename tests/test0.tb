@@ -4,8 +4,12 @@ define int func() {
   return 0;
 }
 
-function int main() {
+define int main() {
   let float y = 1.0;
   let int x = z + func();
+
+  if (x == 0) {
+    x = y;
+  }
   return x;
 }
