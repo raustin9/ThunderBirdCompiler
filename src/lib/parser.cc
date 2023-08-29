@@ -108,7 +108,7 @@ Parser::parse_let_statement() {
       printf("error: unexpected token |%s|. Expected |TOK_IDENT|\n", ident_tok.literal.c_str());
       return nullptr;
     }
-  } else {
+  } else { /// ERRORS ///
     // We got invalid data type, either mispelled type spec or forgotten type spec
     if (this->peek_token.type == TOK_EQUALS) {
       // read identifier then an equals -> assume they forgot to put type spec
@@ -163,12 +163,13 @@ Parser::parse_let_statement() {
     op.type = TOK_EQUALS;
     auto expr = std::make_shared<Expression>();
     auto variable = std::make_shared<VariableExpr>(ident_tok.literal, data_type);
-    auto variable_for_assign = std::make_shared<VariableExpr>(ident_tok.literal, data_type);
-    auto assignment_expr = std::make_shared<VariableAssignment>(op, std::move(variable), std::move(expr));
+    // auto variable_for_assign = std::make_shared<VariableExpr>(ident_tok.literal, data_type);
+    // auto assignment_expr = std::make_shared<VariableAssignment>(op, std::move(variable), std::move(expr));
+    auto assignment_expr = std::make_shared<VariableAssignment>(op, variable, expr);
 
     printf("parse_let: should be eating ';'\n");
     this->next_token();
-    return std::make_shared<LetStmt>(let_tok, std::move(variable_for_assign), std::move(assignment_expr));
+    return std::make_shared<LetStmt>(let_tok, variable, std::move(assignment_expr));
   } else {
     printf("error: unexpected token |%s|. Expected |=|\n", this->current_token.literal.c_str());
     return nullptr;
