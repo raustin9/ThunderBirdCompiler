@@ -9,6 +9,7 @@
 // Constructor for the compiler
 Compiler::Compiler(std::string input_text) {
   this->input = input_text;
+  printf("--- INPUT ---\n%s\n------------\n", this->input.c_str());
   this->symbol_table = new SymbolTable();
   this->error_handler = new ErrorHandler();
 

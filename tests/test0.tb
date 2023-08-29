@@ -6,10 +6,10 @@ define int func() {
 
 define int main() {
   let float y = 1.0;
-  let int x = z + func();
+  let int x = y + z;
 
-  if (x == 0) {
-    x = y;
+  while (x == 0) {
+
   }
   return x;
 }

@@ -81,6 +81,7 @@ ReturnStmt::print() {
 void
 ReturnStmt::set_parent(std::shared_ptr<Node> p) {
   this->parent_func = std::dynamic_pointer_cast<FunctionDecl>(p);
+  this->ret_val->set_parent(p);
 }
 
 void
@@ -101,6 +102,7 @@ ExpressionStatement::print() {
 
 void
 ExpressionStatement::set_parent(std::shared_ptr<Node> p) {
+  this->expr->set_parent(p);
   // this->parent = p;
 }
 
@@ -310,6 +312,7 @@ Conditional::print() {
 void
 Conditional::set_parent(std::shared_ptr<Node> p) {
   Conditional *cur = this;
+  this->condition->set_parent(p);
   while (cur->alternative) {
     cur->parent = std::dynamic_pointer_cast<Statement>(p);
     cur = dynamic_cast<Conditional*>(cur->alternative.get());
@@ -345,6 +348,8 @@ WhileLoop::print() {
 
 void
 WhileLoop::set_parent(std::shared_ptr<Node> p) {
+  this->condition->set_parent(p);
+  this->loop_body->set_parent(p);
   this->parent = std::dynamic_pointer_cast<Statement>(p);
 }
 
@@ -375,9 +380,16 @@ ForLoop::print() {
 //  printf("------------------------\n");
 }
 
+// NOTE: determine later what the parent should be for the children of a for loop
+//       the initialization's parent should be the scope the for loop is in
+//       the conditional's parent should be the scope the for loop is in
+//       the action's parent should be ...
 void
 ForLoop::set_parent(std::shared_ptr<Node> p) {
   this->parent = std::dynamic_pointer_cast<Statement>(p);
+  this->initialization->set_parent(p);
+  this->condition->set_parent(p);
+  this->action->set_parent(p);
 }
 
 void
@@ -398,6 +410,7 @@ CodeBlock::print() {
 void
 CodeBlock::set_parent(std::shared_ptr<Node> p) {
   // this->parent = p;
+  this->parent_scope = p;
 }
 
 void
@@ -607,6 +620,13 @@ LetStmt::print() {
   else 
     printf("invalid variable assignment\n");
 }
+
+void
+LetStmt::set_parent(std::shared_ptr<Node> p) {
+  this->variable->set_parent(p);
+  this->var_assign->set_parent(p);
+}
+
 
 // Perform syntax analysis on the variable declaration
 void

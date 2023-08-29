@@ -243,7 +243,7 @@ class LetStmt : public Statement {
     void syntax_analysis() override;
     std::shared_ptr<SymbolTableEntry> get_st_entry();
     std::shared_ptr<SymbolTableEntry> scope_lookup(std::string name) override {return nullptr;}
-    void set_parent(std::shared_ptr<Node> p) override {}
+    void set_parent(std::shared_ptr<Node> p) override;
 };
 
 // Statement node for return statements
