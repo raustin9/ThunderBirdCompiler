@@ -1,4 +1,6 @@
 #include <iostream>
+#include <sstream>
+#include <fstream>
 #include <string>
 #include <cstdio>
 #include <vector>
@@ -44,41 +46,48 @@ main(int argc, char** argv) {
 // read input from file
 std::string
 read_file(char *file_name) {
-  std::string rv;
-  FILE* fp;
-  char *file_content;
-  size_t file_size;
-  struct stat st;
+  std::ifstream fin(file_name);
 
-  if (access(file_name, F_OK) != 0) {
-    perror("read_file (access)");
-    return "";
-  }
+  std::stringstream buf;
+  buf << fin.rdbuf();
+  std::string rv = buf.str();
 
-  fp = fopen(file_name, "r");
-  if (fp == NULL) {
-    fclose(fp);
-    perror("read_file (fopen)");
-    return "";
-  }
-
-  // Get size of the file and read it all in
-  stat(file_name, &st);
-  file_size = st.st_size;
-
-  file_content = (char*)calloc(file_size, sizeof(char));
-  if (fread(file_content, file_size, 1, fp) != 1) {
-    fclose(fp);
-    perror("read_file (fread)");
-    free(file_content);
-    return "";
-  }
-
-  // file read successfully
-  fclose(fp);
-  rv = file_content;
-  free(file_content);
   return rv;
+//  std::string rv;
+//  FILE* fp;
+//  char *file_content;
+//  size_t file_size;
+//  struct stat st;
+//
+//  if (access(file_name, F_OK) != 0) {
+//    perror("read_file (access)");
+//    return "";
+//  }
+//
+//  fp = fopen(file_name, "r");
+//  if (fp == NULL) {
+//    fclose(fp);
+//    perror("read_file (fopen)");
+//    return "";
+//  }
+//
+//  // Get size of the file and read it all in
+//  stat(file_name, &st);
+//  file_size = st.st_size;
+//
+//  file_content = (char*)calloc(file_size, sizeof(char));
+//  if (fread(file_content, file_size, 1, fp) != 1) {
+//    fclose(fp);
+//    perror("read_file (fread)");
+//    free(file_content);
+//    return "";
+//  }
+//
+//  // file read successfully
+//  fclose(fp);
+//  rv = file_content;
+//  free(file_content);
+//  return rv;
 }
 
 bool

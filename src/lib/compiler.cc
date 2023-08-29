@@ -9,6 +9,7 @@
 // Constructor for the compiler
 Compiler::Compiler(std::string input_text) {
   this->input = input_text;
+  printf("--- INPUT ---\n%s\n------------\n", this->input.c_str());
   this->symbol_table = new SymbolTable();
   this->error_handler = new ErrorHandler();
 
@@ -17,7 +18,7 @@ Compiler::Compiler(std::string input_text) {
   this->lexer = new Lexer(this->preprocessor->process());
   // this->lexer = new Lexer(this->input);
 
-  // Point the lexer's symbol table and error handler to the compiler's
+  // Point the lexer's error handler to the compiler's
   this->lexer->error_handler = this->error_handler;
 }
 
