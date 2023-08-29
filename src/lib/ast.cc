@@ -30,6 +30,9 @@ get_data_type(DataType dt) {
 void
 Node::syntax_analysis() {}
 
+void
+Node::set_parent(std::shared_ptr<Node> p) {}
+
 /// STATEMENT BASE CLASS ///
 void
 Statement::print() {}
@@ -74,6 +77,12 @@ ReturnStmt::print() {
   printf("%s ", this->token.literal.c_str());
   this->ret_val->print();
 }
+
+void
+ReturnStmt::set_parent(std::shared_ptr<Node> p) {
+  this->parent_func = std::dynamic_pointer_cast<FunctionDecl>(p);
+}
+
 void
 ReturnStmt::syntax_analysis() {
   printf("return syn\n");
@@ -89,6 +98,12 @@ ExpressionStatement::print() {
     this->expr->print();
   }
 }
+
+void
+ExpressionStatement::set_parent(std::shared_ptr<Node> p) {
+  // this->parent = p;
+}
+
 void
 ExpressionStatement::syntax_analysis() {
   printf("expr statement syn\n");
@@ -115,6 +130,12 @@ FunctionDecl::print() {
 
   printf("\n} end [%s]\n", this->prototype->name.c_str());
 }
+
+void
+FunctionDecl::set_parent(std::shared_ptr<Node> p) {
+  this->parent = std::dynamic_pointer_cast<Program>(p);
+}
+
 void
 FunctionDecl::syntax_analysis() {
   printf("func decl syn\n");
@@ -147,6 +168,12 @@ FunctionCallExpr::print() {
   }
   printf(") ");
 }
+
+void
+FunctionCallExpr::set_parent(std::shared_ptr<Node> p) {
+  this->parent = p;
+}
+
 void
 FunctionCallExpr::syntax_analysis() {
   printf("func call syn\n");
@@ -174,6 +201,12 @@ IntegerExpr::print() {
 
   printf("[[ intexpr val: %lld type: %s ]]", this->value, dt.c_str());
 }
+
+void
+IntegerExpr::set_parent(std::shared_ptr<Node> p) {
+  this->parent = p;
+}
+
 void
 IntegerExpr::syntax_analysis() {
   printf("int expr syn\n");
@@ -186,6 +219,12 @@ BooleanExpr::print() {
   std::string val = (this->value == true) ? "true" : "false";
   printf("[[ boolean val: %s ]]", val.c_str());
 }
+
+void
+BooleanExpr::set_parent(std::shared_ptr<Node> p) {
+  this->parent = p;
+}
+
 void
 BooleanExpr::syntax_analysis() {
   printf("bool expr syn\n");
@@ -197,6 +236,12 @@ void
 IdentifierExpr::print() {
   printf("%s", this->name.c_str());
 }
+
+void
+IdentifierExpr::set_parent(std::shared_ptr<Node> p) {
+  this->parent = p;
+}
+
 void
 IdentifierExpr::syntax_analysis() {
   printf("ident expr syn\n");
@@ -224,6 +269,12 @@ FloatExpr::print() {
 
   printf("[[ floatexpr val: %lf type: %s ]]", this->value, dt.c_str());
 }
+
+void
+FloatExpr::set_parent(std::shared_ptr<Node> p) {
+  this->parent = p;
+}
+
 void
 FloatExpr::syntax_analysis() {
   printf("float expr syn\n");
@@ -255,6 +306,16 @@ Conditional::print() {
     this->alternative->print();
   }
 }
+
+void
+Conditional::set_parent(std::shared_ptr<Node> p) {
+  Conditional *cur = this;
+  while (cur->alternative) {
+    cur->parent = std::dynamic_pointer_cast<Statement>(p);
+    cur = dynamic_cast<Conditional*>(cur->alternative.get());
+  }
+}
+
 void
 Conditional::syntax_analysis() {
   printf("conditional syn\n");
@@ -281,6 +342,12 @@ WhileLoop::print() {
 //  dynamic_cast<CodeBlock*>(this->loop_body.get())->symbol_table->print_elements();
 //  printf("------------------------\n");
 }
+
+void
+WhileLoop::set_parent(std::shared_ptr<Node> p) {
+  this->parent = std::dynamic_pointer_cast<Statement>(p);
+}
+
 void
 WhileLoop::syntax_analysis() {
   printf("while syn\n");
@@ -307,6 +374,12 @@ ForLoop::print() {
 //  dynamic_cast<CodeBlock*>(this->loop_body.get())->symbol_table->print_elements();
 //  printf("------------------------\n");
 }
+
+void
+ForLoop::set_parent(std::shared_ptr<Node> p) {
+  this->parent = std::dynamic_pointer_cast<Statement>(p);
+}
+
 void
 ForLoop::syntax_analysis() {
   printf("for syn\n");
@@ -321,6 +394,12 @@ CodeBlock::print() {
     printf("\n");
   }
 }
+
+void
+CodeBlock::set_parent(std::shared_ptr<Node> p) {
+  // this->parent = p;
+}
+
 void
 CodeBlock::syntax_analysis() {
   printf("code block syn\n");
@@ -396,6 +475,12 @@ VariableExpr::print() {
   }
 
 }
+
+void
+VariableExpr::set_parent(std::shared_ptr<Node> p) {
+  this->parent = p;
+}
+
 void
 VariableExpr::syntax_analysis() {
   printf("var expr syn\n");
@@ -410,6 +495,13 @@ VariableAssignment::print() {
   if (this->RHS)
     this->RHS->print();
 }
+
+void
+VariableAssignment::set_parent(std::shared_ptr<Node> p) {
+  this->parent = p;
+  this->RHS->set_parent(p);
+}
+
 void
 VariableAssignment::syntax_analysis() {
   printf("var assign syn\n");
@@ -433,6 +525,13 @@ BinaryExpr::print() {
   printf("[ ");
   this->RHS->print();
   printf(" ]");
+}
+
+void
+BinaryExpr::set_parent(std::shared_ptr<Node> p) {
+  this->parent = p;
+  this->LHS->parent = p;
+  this->RHS->parent = p;
 }
 
 void
