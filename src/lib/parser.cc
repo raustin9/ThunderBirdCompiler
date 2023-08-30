@@ -137,6 +137,8 @@ Parser::parse_let_statement() {
 
   printf("parse_let: should be eating identifier\n");
   this->next_token(); // eat the identifier
+
+  // Parse the expression the variable is being initialized to
   if (this->current_token.type == TOK_EQUALS) {
     // Variable declaration and assignment
     token_t op = this->current_token;
@@ -194,6 +196,25 @@ Parser::parse_integer() {
   auto int_expr = std::make_shared<IntegerExpr>(val);
   int_expr->data_type = TYPE_INT;
   return int_expr;
+}
+
+// Parse a byte expression -- a byte literal [char in C]
+std::shared_ptr<Expression>
+Parser::parse_byte() {
+  token_t tok = this->current_token;
+  if (tok.type != TOK_INT) {
+    printf("error: unexpected token |%s|\n", tok.literal.c_str());
+    return nullptr;
+  }
+
+  long long val = atoi(tok.literal.c_str());
+  printf("matched int: val = %lld\n", val);
+
+  printf("parse_int: should be eating int literal\n");
+  this->next_token();
+  auto byte_expr = std::make_shared<ByteExpr>(val);
+  byte_expr->data_type = TYPE_BYTE;
+  return byte_expr;
 }
 
 // Parse a float expression -- really just a float literal
@@ -663,6 +684,9 @@ Parser::parse_primary() {
     case TOK_INT:
       printf("primary matched %s\n", this->current_token.literal.c_str());
       return this->parse_integer();
+    case TOK_BYTE:
+      printf("primary matched %s\n", this->current_token.literal.c_str());
+      return this->parse_byte();
     case TOK_FLOAT:
       printf("primary matched %s\n", this->current_token.literal.c_str());
       return this->parse_float();

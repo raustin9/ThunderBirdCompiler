@@ -211,7 +211,41 @@ IntegerExpr::set_parent(std::shared_ptr<Node> p) {
 
 void
 IntegerExpr::syntax_analysis() {
-  printf("int expr syn\n");
+  printf("byte expr syn\n");
+}
+
+/// BYTE EXPRESSION ///
+void
+ByteExpr::print() {
+  std::string dt;
+  switch (this->data_type) {
+    case TYPE_INT:
+      dt = "int";
+      break;
+    case TYPE_BYTE:
+      dt = "byte";
+      break;
+    case TYPE_FLOAT:
+      dt = "float";
+      break;
+    case TYPE_STRING:
+      dt = "string";
+      break;
+    default:
+      dt = "invalid";
+      break;
+  }
+
+  printf("[[ byte val: %lld type: %s ]]", this->value, dt.c_str());
+}
+void
+ByteExpr::set_parent(std::shared_ptr<Node> p) {
+  this->parent = p;
+}
+
+void
+ByteExpr::syntax_analysis() {
+  printf("byte expr syn\n");
 }
 
 
@@ -470,8 +504,18 @@ VariableExpr::print() {
       printf("[name: '%s' type: '%s'] ",
           this->name.c_str(), dt.c_str());
       break;
+    case TYPE_BYTE:
+      dt = "byte";
+      printf("[name: '%s' type: '%s'] ",
+          this->name.c_str(), dt.c_str());
+      break;
     case TYPE_FLOAT:
       dt = "float";
+      printf("[name: '%s' type: '%s'] ",
+          this->name.c_str(), dt.c_str());
+      break;
+    case TYPE_BOOL:
+      dt = "bool";
       printf("[name: '%s' type: '%s'] ",
           this->name.c_str(), dt.c_str());
       break;

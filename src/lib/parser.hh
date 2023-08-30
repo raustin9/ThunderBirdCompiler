@@ -45,6 +45,7 @@ public:
   std::shared_ptr<Statement> parse_for_statement();                 // parse for loop statements
   std::shared_ptr<Statement> parse_function_defn();                 // parse function prototypes
   std::shared_ptr<Expression> parse_integer();                      // parse an integer literal
+  std::shared_ptr<Expression> parse_byte();                         // parse an byte literal
   std::shared_ptr<Expression> parse_float();                        // parse floating point literal
   std::shared_ptr<Expression> parse_identifier();                   // parse an identifier expression
   std::shared_ptr<Expression> parse_boolean();                      // parse a boolean literal
