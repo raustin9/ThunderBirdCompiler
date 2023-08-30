@@ -49,6 +49,7 @@ class Expression : public Node {
     std::shared_ptr<Node> parent;
     DataType data_type;
     virtual ~Expression() = default;
+    virtual DataType get_type() {return TYPE_VOID;};
     void print() override;
     void syntax_analysis() override;
     void set_parent(std::shared_ptr<Node> p) override {}
@@ -87,6 +88,7 @@ class BinaryExpr : public Expression {
     void syntax_analysis() override;
     std::shared_ptr<SymbolTableEntry> scope_lookup(std::string name) override {return nullptr;}
     void set_parent(std::shared_ptr<Node> p) override;
+    DataType get_type() override;
 };
 
 // Prefix or unary operator
@@ -113,6 +115,7 @@ class VariableAssignment : public Expression {
     void syntax_analysis() override;
     std::shared_ptr<SymbolTableEntry> scope_lookup(std::string name) override {return nullptr;}
     void set_parent(std::shared_ptr<Node> p) override;
+    DataType get_type() override;
 };
 
 // Integer Expression Node
@@ -126,6 +129,7 @@ class IntegerExpr : public Expression {
     void syntax_analysis() override;
     std::shared_ptr<SymbolTableEntry> scope_lookup(std::string name) override {return nullptr;}
     void set_parent(std::shared_ptr<Node> p) override;
+    DataType get_type() override;
 };
 
 // Byte Expression Node
@@ -140,6 +144,7 @@ class ByteExpr : public Expression {
     void syntax_analysis() override;
     std::shared_ptr<SymbolTableEntry> scope_lookup(std::string name) override {return nullptr;}
     void set_parent(std::shared_ptr<Node> p) override;
+    DataType get_type() override;
 };
 
 // Float Expression Node
@@ -153,6 +158,7 @@ class FloatExpr : public Expression {
     void syntax_analysis() override;
     std::shared_ptr<SymbolTableEntry> scope_lookup(std::string name) override {return nullptr;}
     void set_parent(std::shared_ptr<Node> p) override;
+    DataType get_type() override;
 };
 
 // Statement node for code block
@@ -191,6 +197,7 @@ class BooleanExpr : public Expression {
     void syntax_analysis() override;
     std::shared_ptr<SymbolTableEntry> scope_lookup(std::string name) override {return nullptr;}
     void set_parent(std::shared_ptr<Node> p) override;
+    DataType get_type() override;
 };
 
 // Function Call Expression node
@@ -210,6 +217,7 @@ class FunctionCallExpr : public Expression {
     void syntax_analysis() override;
     std::shared_ptr<SymbolTableEntry> scope_lookup(std::string name) override {return nullptr;}
     void set_parent(std::shared_ptr<Node> p) override;
+    DataType get_type() override;
 };
 
 // Identifier class that holds the name and data type of the identifier
@@ -223,6 +231,7 @@ class IdentifierExpr : public Expression {
     void syntax_analysis() override;
     std::shared_ptr<SymbolTableEntry> scope_lookup(std::string name) override {return nullptr;}
     void set_parent(std::shared_ptr<Node> p) override;
+    DataType get_type() override;
 };
 
 // Variable Expression node
@@ -237,6 +246,7 @@ class VariableExpr : public Expression {
     void syntax_analysis() override;
     std::shared_ptr<SymbolTableEntry> scope_lookup(std::string name) override {return nullptr;}
     void set_parent(std::shared_ptr<Node> p) override;
+    DataType get_type() override;
 };
 
 // Statement node for let statements for variable declaration

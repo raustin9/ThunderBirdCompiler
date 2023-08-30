@@ -5,6 +5,6 @@ define bool test(byte param1, bool param2) {
 }
 
 define byte main() {
-  let byte y = 1 + 2 % 4;
+  let int y = 1 * 2 % 4.0;
   return y;
 }

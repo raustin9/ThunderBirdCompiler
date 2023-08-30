@@ -176,6 +176,11 @@ FunctionCallExpr::set_parent(std::shared_ptr<Node> p) {
   this->parent = p;
 }
 
+DataType
+FunctionCallExpr::get_type() {
+  return this->data_type;
+}
+
 void
 FunctionCallExpr::syntax_analysis() {
   printf("func call syn\n");
@@ -202,6 +207,11 @@ IntegerExpr::print() {
   }
 
   printf("[[ intexpr val: %lld type: %s ]]", this->value, dt.c_str());
+}
+
+DataType
+IntegerExpr::get_type() {
+  return this->data_type;
 }
 
 void
@@ -238,6 +248,11 @@ ByteExpr::print() {
 
   printf("[[ byte val: %lld type: %s ]]", this->value, dt.c_str());
 }
+
+DataType
+ByteExpr::get_type() {
+  return this->data_type;
+}
 void
 ByteExpr::set_parent(std::shared_ptr<Node> p) {
   this->parent = p;
@@ -256,6 +271,11 @@ BooleanExpr::print() {
   printf("[[ boolean val: %s ]]", val.c_str());
 }
 
+DataType
+BooleanExpr::get_type() {
+  return this->data_type;
+}
+
 void
 BooleanExpr::set_parent(std::shared_ptr<Node> p) {
   this->parent = p;
@@ -271,6 +291,11 @@ BooleanExpr::syntax_analysis() {
 void
 IdentifierExpr::print() {
   printf("%s", this->name.c_str());
+}
+
+DataType
+IdentifierExpr::get_type() {
+  return this->data_type;
 }
 
 void
@@ -304,6 +329,11 @@ FloatExpr::print() {
   }
 
   printf("[[ floatexpr val: %lf type: %s ]]", this->value, dt.c_str());
+}
+
+DataType
+FloatExpr::get_type() {
+  return this->data_type;
 }
 
 void
@@ -533,6 +563,11 @@ VariableExpr::print() {
 
 }
 
+DataType
+VariableExpr::get_type() {
+  return this->data_type;
+}
+
 void
 VariableExpr::set_parent(std::shared_ptr<Node> p) {
   this->parent = p;
@@ -564,7 +599,15 @@ VariableAssignment::syntax_analysis() {
   printf("var assign syn\n");
   if (this->RHS) {
     this->RHS->syntax_analysis();
+    if (this->variable->get_type() != this->RHS->get_type()) {
+      printf("Error: invalid variable assignment: type incompatibility %s != %s\n", get_data_type(this->variable->get_type()).c_str(), get_data_type(this->RHS->get_type()).c_str());
+    }
   }
+}
+
+DataType
+VariableAssignment::get_type() {
+  return this->data_type;
 }
 
 
@@ -582,6 +625,24 @@ BinaryExpr::print() {
   printf("[ ");
   this->RHS->print();
   printf(" ]");
+}
+
+DataType
+BinaryExpr::get_type() {
+  DataType rhs_type = TYPE_VOID, lhs_type = TYPE_VOID;
+
+  if (this->LHS)
+    lhs_type = this->LHS->get_type();
+
+  if (this->RHS)
+    rhs_type = this->RHS->get_type();
+
+  if (rhs_type == lhs_type) {
+    return rhs_type;
+  } else {
+    printf("Error: BinaryExpr::get_type(): %s != %s\n", get_data_type(lhs_type).c_str(), get_data_type(rhs_type).c_str());
+    return TYPE_VOID;
+  }
 }
 
 void
@@ -603,54 +664,60 @@ BinaryExpr::syntax_analysis() {
   }
 
   std::shared_ptr<SymbolTableEntry> ident;
+
+  // bool rhs_check = false, lhs_check = false;
   if (this->LHS) {
-    if (auto var = std::dynamic_pointer_cast<IdentifierExpr>(this->LHS)) { // VARIABLE EXPR
-      if (!(ident = this->parent->scope_lookup(var->name))) {
-        // Variable name not found in this scope
-        printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
-      } else {
-        printf("Found: var |%s|\n", var->name.c_str());
-        this->LHS->data_type = ident->data_type;
-        printf("lhs dt: %s\n", get_data_type(ident->data_type).c_str());
-      }
-    } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->LHS)) {
-      if (!(ident = this->parent->scope_lookup(func_call->name))) {
-        printf("Error: Undefined function |%s|\n", func_call->name.c_str());
-      } else {
-        printf("Found: function |%s|\n", func_call->name.c_str());
-        this->LHS->data_type = ident->data_type;
-        printf("lhs dt: %s\n", get_data_type(ident->data_type).c_str());
-      } 
-    }
+    this->LHS->syntax_analysis();
+//    if (auto var = std::dynamic_pointer_cast<IdentifierExpr>(this->LHS)) { // VARIABLE EXPR
+//      if (!(ident = this->parent->scope_lookup(var->name))) {
+//        // Variable name not found in this scope
+//        printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
+//      } else {
+//        printf("Found: var |%s|\n", var->name.c_str());
+//        this->LHS->data_type = ident->data_type;
+//        printf("lhs dt: %s\n", get_data_type(ident->data_type).c_str());
+//      }
+//    } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->LHS)) {
+//      if (!(ident = this->parent->scope_lookup(func_call->name))) {
+//        printf("Error: Undefined function |%s|\n", func_call->name.c_str());
+//      } else {
+//        printf("Found: function |%s|\n", func_call->name.c_str());
+//        this->LHS->data_type = ident->data_type;
+//        printf("lhs dt: %s\n", get_data_type(ident->data_type).c_str());
+//      } 
+//    }
   }
 
   // RIGHT HAND SIDE
   if (this->RHS) {
-    if (auto var = std::dynamic_pointer_cast<IdentifierExpr>(this->RHS)) { // VARIABLE EXPR
-      if (!(ident = this->parent->scope_lookup(var->name))) {
-        // Variable name not found in this scope
-        printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
-      } else {
-        printf("Found: var |%s|\n", var->name.c_str());
-        this->RHS->data_type = ident->data_type;
-        printf("rhs dt: %s\n", get_data_type(ident->data_type).c_str());
-      }
-    } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->RHS)) {
-      if (!(ident = this->parent->scope_lookup(func_call->name))) {
-        printf("Error: Undefined function |%s|\n", func_call->name.c_str());
-      } else {
-        printf("Found: function |%s|\n", func_call->name.c_str());
-        this->RHS->data_type = ident->data_type;
-        printf("rhs dt: %s\n", get_data_type(func_call->data_type).c_str());
-      } 
-    }
+    this->RHS->syntax_analysis();
+//    if (auto var = std::dynamic_pointer_cast<IdentifierExpr>(this->RHS)) { // VARIABLE EXPR
+//      if (!(ident = this->parent->scope_lookup(var->name))) {
+//        // Variable name not found in this scope
+//        printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
+//      } else {
+//        printf("Found: var |%s|\n", var->name.c_str());
+//        this->RHS->data_type = ident->data_type;
+//        printf("rhs dt: %s\n", get_data_type(ident->data_type).c_str());
+//      }
+//    } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->RHS)) {
+//      if (!(ident = this->parent->scope_lookup(func_call->name))) {
+//        printf("Error: Undefined function |%s|\n", func_call->name.c_str());
+//      } else {
+//        printf("Found: function |%s|\n", func_call->name.c_str());
+//        this->RHS->data_type = ident->data_type;
+//        printf("rhs dt: %s\n", get_data_type(func_call->data_type).c_str());
+//      } 
+//    }
   } 
 
   // Check for compatible data types
-  if (this->LHS->data_type != this->RHS->data_type) {
-    printf("ERROR: unmatched data types %s -- %s\n", get_data_type(this->LHS->data_type).c_str(), get_data_type(this->RHS->data_type).c_str());
-  } else {
-    printf("TYPEMATCH: %s -- %s\n", get_data_type(this->LHS->data_type).c_str(), get_data_type(this->RHS->data_type).c_str());
+  if (this->LHS && this->RHS) {
+    if (this->LHS->get_type() != this->RHS->get_type()) {
+      printf("Error: BinaryExpr::syntax_analysis() -- %s != %s\n", get_data_type(this->LHS->get_type()).c_str(), get_data_type(this->RHS->get_type()).c_str());
+    } else {
+      printf("typematch %s == %s\n", get_data_type(this->LHS->get_type()).c_str(), get_data_type(this->RHS->get_type()).c_str());
+    }
   }
 }
 
