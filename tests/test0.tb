@@ -1,21 +1,6 @@
-let int z = 2;
+let byte z = 2;
 
-define int func() {
-  return 0;
-}
-
-// test comment
-
-/*
-multi line test comment
-*/
-
-define int main() {
-  let float y = 1.0;
-  let int x = y + z;
-
-  while (x == 0) {
-
-  }
-  return x;
+define byte main() {
+  let byte y = 1;
+  return y;
 }

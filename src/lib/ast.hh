@@ -128,6 +128,20 @@ class IntegerExpr : public Expression {
     void set_parent(std::shared_ptr<Node> p) override;
 };
 
+// Byte Expression Node
+// Node that is a byte literal -- this is something like 'a' in the future
+//                                but will just be a 8 bit number for now
+class ByteExpr : public Expression {
+  public:
+    long long value;
+    // DataType data_type = TYPE_INT;
+    ByteExpr(long long value) : value(value) {};
+    void print() override;
+    void syntax_analysis() override;
+    std::shared_ptr<SymbolTableEntry> scope_lookup(std::string name) override {return nullptr;}
+    void set_parent(std::shared_ptr<Node> p) override;
+};
+
 // Float Expression Node
 // Node that is a floating point literal like "1.0" or "3.14"
 class FloatExpr : public Expression {

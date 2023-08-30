@@ -196,6 +196,25 @@ Parser::parse_integer() {
   return int_expr;
 }
 
+// Parse a byte expression -- a byte literal [char in C]
+std::shared_ptr<Expression>
+Parser::parse_byte() {
+  token_t tok = this->current_token;
+  if (tok.type != TOK_INT) {
+    printf("error: unexpected token |%s|\n", tok.literal.c_str());
+    return nullptr;
+  }
+
+  long long val = atoi(tok.literal.c_str());
+  printf("matched int: val = %lld\n", val);
+
+  printf("parse_int: should be eating int literal\n");
+  this->next_token();
+  auto byte_expr = std::make_shared<ByteExpr>(val);
+  byte_expr->data_type = TYPE_BYTE;
+  return byte_expr;
+}
+
 // Parse a float expression -- really just a float literal
 // "3.0" "700.29"
 std::shared_ptr<Expression>
@@ -663,6 +682,9 @@ Parser::parse_primary() {
     case TOK_INT:
       printf("primary matched %s\n", this->current_token.literal.c_str());
       return this->parse_integer();
+    case TOK_BYTE:
+      printf("primary matched %s\n", this->current_token.literal.c_str());
+      return this->parse_byte();
     case TOK_FLOAT:
       printf("primary matched %s\n", this->current_token.literal.c_str());
       return this->parse_float();
