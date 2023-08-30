@@ -176,6 +176,11 @@ FunctionCallExpr::set_parent(std::shared_ptr<Node> p) {
   this->parent = p;
 }
 
+DataType
+FunctionCallExpr::get_type() {
+  return this->data_type;
+}
+
 void
 FunctionCallExpr::syntax_analysis() {
   printf("func call syn\n");
@@ -202,6 +207,11 @@ IntegerExpr::print() {
   }
 
   printf("[[ intexpr val: %lld type: %s ]]", this->value, dt.c_str());
+}
+
+DataType
+IntegerExpr::get_type() {
+  return this->data_type;
 }
 
 void
@@ -238,6 +248,11 @@ ByteExpr::print() {
 
   printf("[[ byte val: %lld type: %s ]]", this->value, dt.c_str());
 }
+
+DataType
+ByteExpr::get_type() {
+  return this->data_type;
+}
 void
 ByteExpr::set_parent(std::shared_ptr<Node> p) {
   this->parent = p;
@@ -256,6 +271,11 @@ BooleanExpr::print() {
   printf("[[ boolean val: %s ]]", val.c_str());
 }
 
+DataType
+BooleanExpr::get_type() {
+  return this->data_type;
+}
+
 void
 BooleanExpr::set_parent(std::shared_ptr<Node> p) {
   this->parent = p;
@@ -271,6 +291,11 @@ BooleanExpr::syntax_analysis() {
 void
 IdentifierExpr::print() {
   printf("%s", this->name.c_str());
+}
+
+DataType
+IdentifierExpr::get_type() {
+  return this->data_type;
 }
 
 void
@@ -304,6 +329,11 @@ FloatExpr::print() {
   }
 
   printf("[[ floatexpr val: %lf type: %s ]]", this->value, dt.c_str());
+}
+
+DataType
+FloatExpr::get_type() {
+  return this->data_type;
 }
 
 void
@@ -533,6 +563,11 @@ VariableExpr::print() {
 
 }
 
+DataType
+VariableExpr::get_type() {
+  return this->data_type;
+}
+
 void
 VariableExpr::set_parent(std::shared_ptr<Node> p) {
   this->parent = p;
@@ -567,6 +602,11 @@ VariableAssignment::syntax_analysis() {
   }
 }
 
+DataType
+VariableAssignment::get_type() {
+  return this->data_type;
+}
+
 
 /// BINARY EXPRESSION ///
 void
@@ -582,6 +622,11 @@ BinaryExpr::print() {
   printf("[ ");
   this->RHS->print();
   printf(" ]");
+}
+
+DataType
+BinaryExpr::get_type() {
+  return this->data_type;
 }
 
 void
