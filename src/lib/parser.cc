@@ -137,6 +137,8 @@ Parser::parse_let_statement() {
 
   printf("parse_let: should be eating identifier\n");
   this->next_token(); // eat the identifier
+
+  // Parse the expression the variable is being initialized to
   if (this->current_token.type == TOK_EQUALS) {
     // Variable declaration and assignment
     token_t op = this->current_token;

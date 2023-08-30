@@ -514,6 +514,11 @@ VariableExpr::print() {
       printf("[name: '%s' type: '%s'] ",
           this->name.c_str(), dt.c_str());
       break;
+    case TYPE_BOOL:
+      dt = "bool";
+      printf("[name: '%s' type: '%s'] ",
+          this->name.c_str(), dt.c_str());
+      break;
     case TYPE_STRING:
       dt = "string";
       break;

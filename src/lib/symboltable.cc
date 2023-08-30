@@ -13,6 +13,12 @@ get_dt(DataType dt) {
     case TYPE_INT:
       rv = "int";
       break;
+    case TYPE_BYTE:
+      rv = "byte";
+      break;
+    case TYPE_BOOL:
+      rv = "bool";
+      break;
     default:
       rv = "invalid";
       break;
