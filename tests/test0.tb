@@ -1,4 +1,4 @@
-define int main() {
+function int main() {
   let int y = 1 * 2 % 4;
 
   for (let int i = 0; i < 10; i += 1) {
