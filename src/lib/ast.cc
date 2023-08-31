@@ -432,11 +432,11 @@ Conditional::set_parent(Node* p) {
 
   while (cur->alternative) {
     printf("got alt\n");
+    cur = dynamic_cast<Conditional*>(cur->alternative.get());
     cur->parent = p;
     cur->condition->set_parent(p);
     cur->consequence->parent = this;
     cur->consequence->set_parent(p);
-    cur = dynamic_cast<Conditional*>(cur->alternative.get());
   }
 }
 
@@ -449,9 +449,9 @@ Conditional::syntax_analysis() {
   // this->alternative->syntax_analysis();
   Conditional* cur = this;
   while (cur->alternative) {
+    cur = dynamic_cast<Conditional*>(cur->alternative.get());
     cur->condition->syntax_analysis();
     cur->consequence->syntax_analysis();
-    cur = dynamic_cast<Conditional*>(cur->alternative.get());
   }
 }
 
