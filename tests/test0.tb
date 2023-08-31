@@ -2,11 +2,15 @@ function int func() [
   return 0;
 }
 
-function int main(int x) {
+entry int main(int x) {
   let int y = 0;
 
-  for (let int z = 0; z < 10; z += 1) {
-    z = func();
+  while (y == 0) {
+    let int x2 = 0;
+  }
+
+  for (let int i = 0; i < 10; i += 1;) {
+    func();
   }
 
   return y;

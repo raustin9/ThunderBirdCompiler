@@ -44,8 +44,8 @@ Parser::Parser(std::vector<token_t> token_stream) {
 
 
   // fill in the first two tokens
-  this->next_token();
-  this->next_token();
+  this->_next_token();
+  this->_next_token();
 }
 
 // Destructor -- delete the lexical analyzer
@@ -54,13 +54,14 @@ Parser::~Parser() {
 
 // Advance the current token to the next one
 void
-Parser::next_token() {
-  printf("next_token: eating '%s'\n", this->current_token.literal.c_str());
+Parser::_next_token() {
+  printf("_next_token: eating '%s'\n", this->current_token.literal.c_str());
   this->current_token = this->peek_token;
+ 
   if (this->current_position < this->token_stream.size())
     this->peek_token = this->token_stream[this->current_position];
+
   this->current_position++;
-  // this->peek_token = this->lex->next_token();
 }
 
 // Parse let statements
@@ -68,10 +69,10 @@ Parser::next_token() {
 // Variables are required to be initialized to a specific value
 // "let int x = 5;"
 std::shared_ptr<Statement>
-Parser::parse_let_statement() {
+Parser::_parse_let_statement() {
   token_t let_tok = this->current_token;
   printf("parse_let: should be eating 'let'\n");
-  this->next_token(); // eat the TOK_LET token
+  this->_next_token(); // eat the TOK_LET token
   token_t type_spec = this->current_token;
   DataType data_type;
   
@@ -99,20 +100,23 @@ Parser::parse_let_statement() {
 
   // Parse the identifier
   token_t ident_tok;
-  if (data_type != TYPE_VOID) {
-    // We got a valid type specifier, we can parse normally
+  if (data_type != TYPE_VOID) { /// NO ERROR ///
     printf("parse_let: should be eating type specifier\n");
-    this->next_token(); // eat the type specifier
+    this->_next_token(); // eat the type specifier
+
     ident_tok = this->current_token; // grab the identifier
     if (ident_tok.type != TOK_IDENT) {
       printf("error: unexpected token |%s|. Expected |TOK_IDENT|\n", ident_tok.literal.c_str());
       return nullptr;
     }
+
   } else { /// ERRORS ///
     // We got invalid data type, either mispelled type spec or forgotten type spec
     if (this->peek_token.type == TOK_EQUALS) {
-      // read identifier then an equals -> assume they forgot to put type spec
-      // because they forgot it, we have one less token, and we are already at the variable identifier
+      /*
+         read identifier then an equals -> assume they forgot to put type spec
+         because they forgot it, we have one less token, and we are already at the variable identifier
+      */
       char msg[100];
       sprintf(msg, "parse_let: error on line %d: missing type specifier for '%s'\n", type_spec.line_num, type_spec.literal.c_str());
       std::string errmsg = msg;
@@ -120,13 +124,15 @@ Parser::parse_let_statement() {
       ident_tok = type_spec;
 
     } else if (this->peek_token.type == TOK_IDENT) {
-      // read identifier then another identifier, assume they mispelled type spec
-      // we should still have correct number of tokens, so we can continue
-      // keep the data type as VOID for now
+      /* 
+         read identifier then another identifier, assume they mispelled type spec
+         we should still have correct number of tokens, so we can continue
+         keep the data type as VOID for now
+      */
       printf("parse_let: error on line %d: misspelled type specifier '%s'\n", type_spec.line_num, type_spec.literal.c_str());
 
       printf("parse_let: should be eating type specifier\n");
-      this->next_token(); // eat the type specifier
+      this->_next_token(); // eat the type specifier
       ident_tok = this->current_token; // grab the identifier
       if (ident_tok.type != TOK_IDENT) {
         printf("error: unexpected token |%s|. Expected |TOK_IDENT|\n", ident_tok.literal.c_str());
@@ -136,22 +142,22 @@ Parser::parse_let_statement() {
   }
 
   printf("parse_let: should be eating identifier\n");
-  this->next_token(); // eat the identifier
+  this->_next_token(); // eat the identifier
 
   // Parse the expression the variable is being initialized to
   if (this->current_token.type == TOK_EQUALS) {
     // Variable declaration and assignment
     token_t op = this->current_token;
     printf("parse_let: should be eating '='\n");
-    this->next_token(); // eat the '='
-    auto expr_val = this->parse_expression_interior(); // get the expression being set to the variable
+    this->_next_token(); // eat the '='
+
+    auto expr_val = this->_parse_expression_interior(); // get the expression being set to the variable
     auto variable = std::make_shared<VariableExpr>(ident_tok.literal, data_type);
-    auto variable_for_assign = std::make_shared<VariableExpr>(ident_tok.literal, data_type);
-    auto assignment_expr = std::make_shared<VariableAssignment>(op, std::move(variable_for_assign), std::move(expr_val));
+    auto assignment_expr = std::make_shared<VariableAssignment>(op, variable, std::move(expr_val));
 
     if (this->current_token.type == TOK_SEMICOLON) {
       printf("parse_let: should be eating ';'\n");
-      this->next_token();
+      this->_next_token();
     }
     else
       printf("let_stmt: curtok = '%s'\n", this->current_token.literal.c_str());
@@ -160,17 +166,17 @@ Parser::parse_let_statement() {
   } else if (this->current_token.type == TOK_SEMICOLON) {
     // Variable declaration -- we do not allow declarations without initializations
     printf("parse_let: error: variable '%s' missing initialization\n", ident_tok.literal.c_str());
+
     token_t op;
     op.literal = "=";
     op.type = TOK_EQUALS;
+
     auto expr = std::make_shared<Expression>();
     auto variable = std::make_shared<VariableExpr>(ident_tok.literal, data_type);
-    // auto variable_for_assign = std::make_shared<VariableExpr>(ident_tok.literal, data_type);
-    // auto assignment_expr = std::make_shared<VariableAssignment>(op, std::move(variable), std::move(expr));
     auto assignment_expr = std::make_shared<VariableAssignment>(op, variable, expr);
 
     printf("parse_let: should be eating ';'\n");
-    this->next_token();
+    this->_next_token();
     return std::make_shared<LetStmt>(let_tok, variable, std::move(assignment_expr));
   } else {
     printf("error: unexpected token |%s|. Expected |=|\n", this->current_token.literal.c_str());
@@ -181,7 +187,7 @@ Parser::parse_let_statement() {
 // Parse an integer expression -- really just an integer literal
 // "3" "700";
 std::shared_ptr<Expression>
-Parser::parse_integer() {
+Parser::_parse_integer() {
   token_t tok = this->current_token;
   if (tok.type != TOK_INT) {
     printf("error: unexpected token |%s|\n", tok.literal.c_str());
@@ -192,15 +198,17 @@ Parser::parse_integer() {
   printf("matched int: val = %lld\n", val);
 
   printf("parse_int: should be eating int literal\n");
-  this->next_token();
+  this->_next_token();
+
   auto int_expr = std::make_shared<IntegerExpr>(val);
   int_expr->data_type = TYPE_INT;
+
   return int_expr;
 }
 
 // Parse a byte expression -- a byte literal [char in C]
 std::shared_ptr<Expression>
-Parser::parse_byte() {
+Parser::_parse_byte() {
   token_t tok = this->current_token;
   if (tok.type != TOK_INT) {
     printf("error: unexpected token |%s|\n", tok.literal.c_str());
@@ -211,16 +219,18 @@ Parser::parse_byte() {
   printf("matched int: val = %lld\n", val);
 
   printf("parse_int: should be eating int literal\n");
-  this->next_token();
+  this->_next_token();
+
   auto byte_expr = std::make_shared<ByteExpr>(val);
   byte_expr->data_type = TYPE_BYTE;
+
   return byte_expr;
 }
 
 // Parse a float expression -- really just a float literal
 // "3.0" "700.29"
 std::shared_ptr<Expression>
-Parser::parse_float() {
+Parser::_parse_float() {
   token_t tok = this->current_token;
   if (tok.type != TOK_FLOAT) {
     printf("error: unexpected token |%s|. Expected TOK_FLOAT\n", tok.literal.c_str());
@@ -230,26 +240,28 @@ Parser::parse_float() {
   double val = atof(tok.literal.c_str());
   printf("matched float: val %lf\n", val);
 
-  printf("parse_float: should be eating float literal\n");
-  this->next_token();
+  printf("_parse_float: should be eating float literal\n");
+  this->_next_token();
+
   auto float_expr = std::make_shared<FloatExpr>(val);
   float_expr->data_type = TYPE_FLOAT;
+
   return float_expr;
 }
 
 // Parse a boolean expression -- boolean literal
 // "true" "false"
 std::shared_ptr<Expression>
-Parser::parse_boolean() {
+Parser::_parse_boolean() {
   token_t tok = this->current_token;
 
   if (tok.type != TOK_TRUE && tok.type != TOK_FALSE) {
-    printf("parse_boolean: error: unexepected token '%s'. Expected 'true' or 'false'\n", tok.literal.c_str());
+    printf("_parse_boolean: error: unexepected token '%s'. Expected 'true' or 'false'\n", tok.literal.c_str());
     return nullptr;
   }
 
-  printf("parse_boolean: should be eating 'true' or 'false'\n");
-  this->next_token();
+  printf("_parse_boolean: should be eating 'true' or 'false'\n");
+  this->_next_token();
 
   bool val = (tok.type == TOK_TRUE) ? true : false;
   return std::make_shared<BooleanExpr>(val);
@@ -258,21 +270,24 @@ Parser::parse_boolean() {
 // Parse return statements from a function body
 // "return 0;"
 std::shared_ptr<Statement>
-Parser::parse_return_statement() {
+Parser::_parse_return_statement() {
   token_t return_tok = this->current_token;
+
   printf("parse_return: should be eating 'return'\n");
-  this->next_token(); // eat return token
+  this->_next_token(); // eat return token
                       
-  auto return_val = this->parse_expression_interior(); // get the expression it is returning
+  auto return_val = this->_parse_expression_interior(); // get the expression it is returning
+
   printf("parse_return: should be eating ';'\n");
-  this->next_token(); // eat the ';'
+  this->_next_token(); // eat the ';'
+                       
   return std::make_shared<ReturnStmt>(return_tok, return_val);
 }
 
 // Parse an else clause within an if statement
 // checks to see if there is an else followed by an if to chain them together
 std::shared_ptr<Statement>
-Parser::parse_else_statement() {
+Parser::_parse_else_statement() {
   return nullptr;
 }
 
@@ -280,7 +295,7 @@ Parser::parse_else_statement() {
 // functions are required to be defined where they are declared,
 // so when we parse the prototype, the rest of the definition must follow
 std::shared_ptr<Statement>
-Parser::parse_function_defn() {
+Parser::_parse_function_defn() {
   bool is_entry = false;
   token_t decl_keyword = this->current_token;
 
@@ -293,11 +308,7 @@ Parser::parse_function_defn() {
   }
 
   printf("parse_func: should be eating 'function' or 'define' or 'entry'\n");
-  this->next_token(); // eat the "function" or "define" or "entry" keyword
-
-  // Check if entry point already exists if this function is entry point
-  if (decl_keyword.type == TOK_ENTRY && this->has_entry == false)
-    is_entry = true;
+  this->_next_token(); // eat the "function" or "define" or "entry" keyword
 
   // GET TYPE SPECIFIER //
   token_t tok = this->current_token;
@@ -318,14 +329,14 @@ Parser::parse_function_defn() {
     rt = TYPE_VOID;
   }
 
-              
   // GET IDENTIFIER //
   std::string proto_name;
   token_t ident;
   if (rt != TYPE_VOID) {
     // Function has valid return type specification
     printf("parse_func: should be eating type spec\n");
-    this->next_token(); // eat the type specifier
+    this->_next_token(); // eat the type specifier
+
     ident = this->current_token;
     if (ident.type != TOK_IDENT) {
       printf("error: unexpected token '%s'. Expected IDENT\n", ident.literal.c_str());
@@ -340,7 +351,7 @@ Parser::parse_function_defn() {
       // next token is identifier after missed type_spec
       // assume they mispelled it
       printf("parse_func: should be eating type spec\n");
-      this->next_token(); // eat the type specifer
+      this->_next_token(); // eat the type specifer
 
       printf("parse_func_defn: error on line %d: mispelled return type specifier '%s'\n", tok.line_num, tok.literal.c_str());
       ident = this->current_token;
@@ -348,6 +359,7 @@ Parser::parse_function_defn() {
         printf("parse_func_defn: error on line %d: unexpected token '%s'. Expected 'IDENT'\n", tok.line_num, ident.literal.c_str());
         return nullptr;
       }
+
       proto_name = ident.literal;
     } else if (this->peek_token.type == TOK_LPAREN) {
       // next token is opening parentheses
@@ -359,16 +371,18 @@ Parser::parse_function_defn() {
   }
 
   printf("parse_func: should be eating identifier\n");
-  this->next_token(); // eat the identifier
+  this->_next_token(); // eat the identifier
                       
   // PARSE FUNCTION PARAMETERS //
   if (this->current_token.type != TOK_LPAREN) {
     printf("error: unexpected token '%s'. Expected '('\n", this->current_token.literal.c_str());
   }
+
   printf("parse_func: should be eating '('\n");
-  this->next_token(); // eat the '('
+  this->_next_token(); // eat the '('
                       
   auto func_body = std::make_shared<CodeBlock>(); // code block of the function body
+
   std::vector<IdentifierExpr> params;
   while(this->current_token.type != TOK_RPAREN) {
     token_t param_type = this->current_token;
@@ -376,7 +390,8 @@ Parser::parse_function_defn() {
       break;
 
     printf("parse_func: should be eating param type spec\n");
-    this->next_token(); // eat the parameter's type spec
+    this->_next_token(); // eat the parameter's type spec
+
     token_t param_name = this->current_token;
     if (param_name.type != TOK_IDENT) {
       printf("error: unexpected token '%s'. Expected IDENT\n", param_name.literal.c_str());
@@ -396,13 +411,18 @@ Parser::parse_function_defn() {
     } else {
       printf("error: unexpected token '%s'\n. Expected 'int' or 'float'", tok.literal.c_str());
     }
-    // identifier.data_type = (param_type.type == TOK_TYPEINT) ? (TYPE_INT) : (TYPE_FLOAT);
+
+    // Add the parameter to the list
     params.push_back(identifier);
-    auto param_ste = identifier.get_st_entry();
+    auto param_ste = identifier._get_st_entry();
     func_body->symbol_table->add(param_ste);
 
     printf("parse_func: should be eating param identifier\n");
-    this->next_token(); // eat the identifier
+    this->_next_token(); // eat the identifier
+
+    // If there is a comma, assume there is another param
+    // and continue the loop. If not a comma, see if we have 
+    // a right-paren and if not we have an error
     if (this->current_token.type != TOK_COMMA) {
       if (this->current_token.type == TOK_RPAREN)
         break;
@@ -410,31 +430,32 @@ Parser::parse_function_defn() {
       printf("error: unexpected token '%s'. Expected ','\n", this->current_token.literal.c_str());
     } else {
       printf("parse_func: should be eating ','\n");
-      this->next_token(); // eat the ','
+      this->_next_token(); // eat the ','
     }
   }
+
   printf("parse_func: should be eating ')'\n");
-  this->next_token(); // eat the ')' at end of parameter list
+  this->_next_token(); // eat the ')' at end of parameter list
 
   // FUNCTION BODY //
-  this->parse_code_block(func_body);
-  // func_body->set_parent(this->program);
-  //dynamic_cast<CodeBlock*>(func_body.get())->parent_scope = this->program;
+  this->_parse_code_block(func_body);
+
   auto proto = std::make_shared<Prototype>(proto_name, rt, params);
   auto function = std::make_shared<FunctionDecl>(is_entry, std::move(func_body), std::move(proto));
+
   return function;
 }
 
 // Parse a code block
 std::shared_ptr<Statement>
-Parser::parse_code_block() {
+Parser::_parse_code_block() {
   token_t tok = this->current_token;
   if (tok.type != TOK_LBRACE) {
     printf("parse_code_block: error: unexpected token '%s'. Expected '{'\n", tok.literal.c_str());
   }
 
   printf("parse_code_block: should be eating '{'\n");
-  this->next_token();
+  this->_next_token();
 
   auto code_block = std::make_shared<CodeBlock>();
   auto symbol_table = std::make_shared<SymbolTable>();
@@ -447,7 +468,7 @@ Parser::parse_code_block() {
     switch (this->current_token.type) {
       case TOK_LET:
         printf("let token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_let_statement();
+        stmt = this->_parse_let_statement();
 
         // Check if variable has been declared already -- CLEAN UP -- ACTUALLY MAKE THIS ERROR
         if (code_block->symbol_table->find(dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name) == true) {
@@ -459,63 +480,48 @@ Parser::parse_code_block() {
         }
 
         // Variable is being properly declared, add to ast
-        symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->get_st_entry();
+        symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->_get_st_entry();
         code_block->symbol_table->add(std::move(symbol_table_entry));
         body.push_back(std::move(stmt));
         break;
+
       case TOK_IF:
         printf("if token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_if_statement();
-        // stmt->set_parent(code_block);
-//        dynamic_cast<Conditional*>(stmt.get())->condition->parent = code_block;
-//        dynamic_cast<CodeBlock*>(dynamic_cast<Conditional*>(stmt.get())->consequence.get())->parent_scope = code_block;
+        stmt = this->_parse_if_statement();
         body.push_back(std::move(stmt));
         break;
+
       case TOK_WHILE:
         printf("while token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_while_statement();
-        // stmt->set_parent(code_block);
-//        dynamic_cast<WhileLoop*>(stmt.get())->condition->parent = code_block;
-//        dynamic_cast<CodeBlock*>(dynamic_cast<WhileLoop*>(stmt.get())->loop_body.get())->parent_scope = code_block;
-        // dynamic_cast<WhileLoop*>(stmt.get())->parent = code_block;
+        stmt = this->_parse_while_statement();
         body.push_back(std::move(stmt));
         break;
+
       case TOK_FOR:
         printf("for token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_for_statement();
-        // stmt->set_parent(code_block);
-        // LATER -- SET PARENT SCOPE OF THE INITIALIZATION TO THIS CODE BLOCL. RN IT ONLY ALLOWS FOR DECLARATIONS WHICH ARE STATEMENTS
-        // dynamic_cast<CodeBlock*>(dynamic_cast<ForLoop*>(stmt.get())->loop_body.get())->parent_scope = code_block;
+        stmt = this->_parse_for_statement();
         body.push_back(std::move(stmt));
         break;
+
       case TOK_RETURN:
-        // parse return statements
         printf("return token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_return_statement();
-        // stmt->set_parent(code_block);
-//        dynamic_cast<ReturnStmt*>(stmt.get())->ret_val->parent = code_block;
+        stmt = this->_parse_return_statement();
         body.push_back(std::move(stmt));
         break;
+
       default:
         printf("default token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_expression_statement();
-        // stmt->set_parent(code_block);
-        // dynamic_cast<ExpressionStatement*>(stmt.get())->expr->parent = code_block;
+        stmt = this->_parse_expression_statement();
         body.push_back(std::move(stmt));
         break;
     }
     
   }
 
-  // code_block->symbol_table = std::move(symbol_table);
   code_block->body = std::move(body);
 
   printf("parse_code_block: should be eating '}'\n");
-  this->next_token();
-
-//  auto code_block = std::make_shared<CodeBlock>(std::move(body));
-//  auto symbol_table = std::make_unique<SymbolTable>();
-//  code_block->symbol_table = std::move(symbol_table);
+  this->_next_token();
 
   return code_block; 
 }
@@ -523,17 +529,15 @@ Parser::parse_code_block() {
 
 // Parse a code block
 std::shared_ptr<Statement>
-Parser::parse_code_block(std::shared_ptr<CodeBlock> scope) {
+Parser::_parse_code_block(std::shared_ptr<CodeBlock> scope) {
   token_t tok = this->current_token;
   if (tok.type != TOK_LBRACE) {
     printf("parse_code_block: error: unexpected token '%s'. Expected '{'\n", tok.literal.c_str());
   }
 
   printf("parse_code_block: should be eating '{'\n");
-  this->next_token();
+  this->_next_token();
 
-//  auto code_block = std::make_shared<CodeBlock>();
-//  auto symbol_table = std::make_shared<SymbolTable>();
   std::vector <std::shared_ptr<Statement> > body;
 
   while (this->current_token.type != TOK_RBRACE) {
@@ -543,7 +547,7 @@ Parser::parse_code_block(std::shared_ptr<CodeBlock> scope) {
     switch (this->current_token.type) {
       case TOK_LET:
         printf("let token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_let_statement();
+        stmt = this->_parse_let_statement();
 
         // Check if variable has been declared already -- CLEAN UP -- ACTUALLY MAKE THIS ERROR
         if (scope->symbol_table->find(dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name) == true) {
@@ -555,75 +559,62 @@ Parser::parse_code_block(std::shared_ptr<CodeBlock> scope) {
         }
 
         // Variable is being properly declared, add to ast
-        symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->get_st_entry();
+        symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->_get_st_entry();
         scope->symbol_table->add(std::move(symbol_table_entry));
         body.push_back(std::move(stmt));
         break;
+      
       case TOK_IF:
         printf("if token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_if_statement();
-        // stmt->set_parent(code_block);
-//        dynamic_cast<Conditional*>(stmt.get())->condition->parent = code_block;
-//        dynamic_cast<CodeBlock*>(dynamic_cast<Conditional*>(stmt.get())->consequence.get())->parent_scope = code_block;
+        stmt = this->_parse_if_statement();
         body.push_back(std::move(stmt));
         break;
+      
       case TOK_WHILE:
         printf("while token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_while_statement();
-        // stmt->set_parent(code_block);
-//        dynamic_cast<WhileLoop*>(stmt.get())->condition->parent = code_block;
-//        dynamic_cast<CodeBlock*>(dynamic_cast<WhileLoop*>(stmt.get())->loop_body.get())->parent_scope = code_block;
-        // dynamic_cast<WhileLoop*>(stmt.get())->parent = code_block;
+        stmt = this->_parse_while_statement();
         body.push_back(std::move(stmt));
         break;
+      
       case TOK_FOR:
         printf("for token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_for_statement();
-        // stmt->set_parent(code_block);
-        // LATER -- SET PARENT SCOPE OF THE INITIALIZATION TO THIS CODE BLOCL. RN IT ONLY ALLOWS FOR DECLARATIONS WHICH ARE STATEMENTS
-        // dynamic_cast<CodeBlock*>(dynamic_cast<ForLoop*>(stmt.get())->loop_body.get())->parent_scope = code_block;
+        stmt = this->_parse_for_statement();
         body.push_back(std::move(stmt));
         break;
+
       case TOK_RETURN:
-        // parse return statements
         printf("return token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_return_statement();
-        // stmt->set_parent(code_block);
-//        dynamic_cast<ReturnStmt*>(stmt.get())->ret_val->parent = code_block;
+        stmt = this->_parse_return_statement();
         body.push_back(std::move(stmt));
         break;
+
       default:
         printf("default token: ||%s||\n", this->current_token.literal.c_str());
-        stmt = this->parse_expression_statement();
-        // stmt->set_parent(code_block);
-        // dynamic_cast<ExpressionStatement*>(stmt.get())->expr->parent = code_block;
+        stmt = this->_parse_expression_statement();
         body.push_back(std::move(stmt));
         break;
     }
     
   }
 
-  // code_block->symbol_table = std::move(symbol_table);
   scope->body = std::move(body);
 
   printf("parse_code_block: should be eating '}'\n");
-  this->next_token();
-
-//  auto code_block = std::make_shared<CodeBlock>(std::move(body));
-//  auto symbol_table = std::make_unique<SymbolTable>();
-//  code_block->symbol_table = std::move(symbol_table);
+  this->_next_token();
 
   return scope; 
 }
 
 // Parse a for loop statement
 std::shared_ptr<Statement>
-Parser::parse_for_statement() {
+Parser::_parse_for_statement() {
   token_t for_token = this->current_token;
+  auto loop_body = std::make_shared<CodeBlock>();
 
   printf("for_stmt: should be eating 'for'\n");
-  this->next_token(); // eat the 'for'
+  this->_next_token(); // eat the 'for'
 
+  // FOR LOOP INIT, CONDITION, AND ACTION //
   if (this->current_token.type != TOK_LPAREN) {
     char err[60];
     sprintf(err, "invalid token '%s'. Expected '('\n", this->current_token.literal.c_str());
@@ -633,33 +624,35 @@ Parser::parse_for_statement() {
   }  else {
     // Successfully found '('
     printf("for_stmt: should be eating '('\n");
-    this->next_token(); // eat the '('
+    this->_next_token(); // eat the '('
   }
 
-  auto loop_body = std::make_shared<CodeBlock>();
-  auto initialization = this->parse_let_statement(); // FOR NOW: only parse let_stmts. in the future, use a function that can parse any low-level statements
-  auto init_ste = std::dynamic_pointer_cast<LetStmt>(initialization)->get_st_entry();
+  // Parse the initialization and add it to the scope of the for loop
+  // [FOR NOW] we only allow LetStmt.
+  // [FUTURE]  allow other forms of initializations like setting other variables
+  auto initialization = this->_parse_let_statement(); 
+  auto init_ste = std::dynamic_pointer_cast<LetStmt>(initialization)->_get_st_entry();
+  loop_body->symbol_table->add(init_ste); 
+  
+  auto condition = this->_parse_expression_interior();
 
-  loop_body->symbol_table->add(init_ste);
-  
-  auto condition = this->parse_expression_interior();
   printf("for_stmt: should be eating ';'\n");
-  this->next_token();
+  this->_next_token();
   
-  auto action = this->parse_expression_interior();
+  auto action = this->_parse_expression_interior();
   if (this->current_token.type == TOK_SEMICOLON) { // optional semicolon at end of action
     printf("for_stmt: should be eating ';'\n");
-    this->next_token();
+    this->_next_token();
   }
 
   printf("for_stmt: should be eating ')'\n");
-  this->next_token();
-  this->parse_code_block();
+  this->_next_token();
+  this->_parse_code_block(loop_body);
 
-  auto initialization_ste = dynamic_cast<LetStmt*>(initialization.get())->get_st_entry();
+  auto initialization_ste = dynamic_cast<LetStmt*>(initialization.get())->_get_st_entry();
   dynamic_cast<CodeBlock*>(loop_body.get())->symbol_table->add(std::move(initialization_ste));
 
-  auto symbol_table_entry = std::dynamic_pointer_cast<LetStmt>(initialization)->get_st_entry();
+  auto symbol_table_entry = std::dynamic_pointer_cast<LetStmt>(initialization)->_get_st_entry();
   std::dynamic_pointer_cast<CodeBlock>(loop_body)->symbol_table->add(std::move(symbol_table_entry));
 
   auto for_stmt = std::make_shared<ForLoop>(for_token, std::move(initialization), std::move(condition), std::move(action), std::move(loop_body));
@@ -670,15 +663,16 @@ Parser::parse_for_statement() {
 
 // Parse an while loop statement
 std::shared_ptr<Statement>
-Parser::parse_while_statement() {
+Parser::_parse_while_statement() {
   token_t token = this->current_token;
   printf("while_stmt: should be eating 'while\n");
-  this->next_token(); // eat the 'while'
+  this->_next_token(); // eat the 'while'
 
-  auto condition = this->parse_expression_interior();
+  auto condition = this->_parse_expression_interior();
 
   // PARSE WHILE LOOP BODY //
-  auto loop_body = this->parse_code_block();
+  auto loop_body = std::make_shared<CodeBlock>();
+  this->_parse_code_block(loop_body);
   
   auto while_stmt = std::make_shared<WhileLoop>(token, std::move(condition), std::move(loop_body));
   return while_stmt;
@@ -686,16 +680,16 @@ Parser::parse_while_statement() {
 
 // Parse an if statement
 std::shared_ptr<Statement>
-Parser::parse_if_statement() {
+Parser::_parse_if_statement() {
   token_t token = this->current_token;
   printf("if_stmt: should be eating 'if'\n");
-  this->next_token(); // eat the 'if'
+  this->_next_token(); // eat the 'if'
 
-  auto condition = this->parse_expression_interior();
+  auto condition = this->_parse_expression_interior();
 
   // PARSE IF STATEMENT BODY //
   auto consequence = std::make_shared<CodeBlock>();
-  this->parse_code_block(consequence);
+  this->_parse_code_block(consequence);
   
   // PARSE ELSE CLAUSE //
   if (this->current_token.type == TOK_ELSE) {
@@ -703,12 +697,12 @@ Parser::parse_if_statement() {
 
     token_t else_tok = this->current_token;
     printf("if_stmt: should be eating 'else'\n");
-    this->next_token(); // eat the 'else'
+    this->_next_token(); // eat the 'else'
 
     if (this->current_token.type == TOK_IF) {
       // else if...
       printf("if_stmt: matched else if\n");
-      auto alternative = this->parse_if_statement();
+      auto alternative = this->_parse_if_statement();
 
       auto if_stmt = std::make_shared<Conditional>(token, std::move(consequence), std::move(condition), std::move(alternative));
       return if_stmt;
@@ -716,7 +710,7 @@ Parser::parse_if_statement() {
       // just normal else clause
       printf("if_stmt: final else clause\n");
       std::vector <std::shared_ptr<Statement> > else_body;
-      auto else_block = this->parse_code_block();
+      auto else_block = this->_parse_code_block();
 
       auto else_condition = std::make_shared<BooleanExpr>(true);
       auto else_stmt = std::make_shared<Conditional>(else_tok, std::move(else_block), std::move(else_condition), nullptr); 
@@ -735,10 +729,10 @@ Parser::parse_if_statement() {
 
 // Parse an identifier in an expression
 std::shared_ptr<Expression>
-Parser::parse_identifier() {
+Parser::_parse_identifier() {
   token_t ident_tok = this->current_token;
   printf("parse_identifier: should be eating identifier\n");
-  this->next_token(); // eat the identifier
+  this->_next_token(); // eat the identifier
 
 
   if (this->current_token.type != TOK_LPAREN) {
@@ -750,11 +744,11 @@ Parser::parse_identifier() {
   }
 
   printf("parse_ident: should be eating '('\n");
-  this->next_token();
+  this->_next_token();
 
   std::vector <std::shared_ptr<Expression> > func_args;
   while (this->current_token.type != TOK_RPAREN) {
-    if (auto arg = this->parse_expression_interior())
+    if (auto arg = this->_parse_expression_interior())
       func_args.push_back(std::move(arg));
     else {
       // function arg invalid
@@ -771,11 +765,11 @@ Parser::parse_identifier() {
     }
 
     printf("parse_ident: should be eating ','\n");
-    this->next_token();
+    this->_next_token();
   }
 
   printf("parse_ident: should be eating ')'\n");
-  this->next_token();
+  this->_next_token();
   auto func_call = std::make_shared<FunctionCallExpr>(ident_tok.literal, std::move(func_args));
   func_call->data_type = TYPE_VOID;
   return func_call;
@@ -783,29 +777,29 @@ Parser::parse_identifier() {
 
 // Parse parts in an expression
 std::shared_ptr<Expression>
-Parser::parse_primary() {
+Parser::_parse_primary() {
   switch(this->current_token.type) {
     case TOK_INT:
       printf("primary matched %s\n", this->current_token.literal.c_str());
-      return this->parse_integer();
+      return this->_parse_integer();
     case TOK_BYTE:
       printf("primary matched %s\n", this->current_token.literal.c_str());
-      return this->parse_byte();
+      return this->_parse_byte();
     case TOK_FLOAT:
       printf("primary matched %s\n", this->current_token.literal.c_str());
-      return this->parse_float();
+      return this->_parse_float();
     case TOK_TRUE:
       printf("primary matched %s\n", this->current_token.literal.c_str());
-      return this->parse_boolean();
+      return this->_parse_boolean();
     case TOK_FALSE:
       printf("primary matched %s\n", this->current_token.literal.c_str());
-      return this->parse_boolean();
+      return this->_parse_boolean();
     case TOK_IDENT:
       printf("primary matched %s\n", this->current_token.literal.c_str());
-      return this->parse_identifier();
+      return this->_parse_identifier();
     case TOK_LPAREN:
       printf("primary matched %s\n", this->current_token.literal.c_str());
-      return this->parse_parentheses_expr();
+      return this->_parse_parentheses_expr();
     default:
       printf("primary null\n");
       return nullptr;
@@ -815,14 +809,14 @@ Parser::parse_primary() {
 // Parse expressions within parentheses
 // x + (5 * 2)
 std::shared_ptr<Expression>
-Parser::parse_parentheses_expr() {
+Parser::_parse_parentheses_expr() {
   if (this->current_token.type != TOK_LPAREN) {
     printf("parse_paren: error -- first token '%s' != ')'\n", this->current_token.literal.c_str());
   }
   printf("parse_paren: should be eating '('\n");
-  this->next_token(); // eat the '('
+  this->_next_token(); // eat the '('
 
-  auto expr = this->parse_expression_interior();
+  auto expr = this->_parse_expression_interior();
 
   if (!expr) {
     printf("parse_paren: null\n");
@@ -834,7 +828,7 @@ Parser::parse_parentheses_expr() {
     return nullptr;
   } else {
     printf("parse_paren: matched ')'\n");
-    this->next_token(); // eat the ')'
+    this->_next_token(); // eat the ')'
   }
 
   return expr;
@@ -842,29 +836,29 @@ Parser::parse_parentheses_expr() {
 
 // Parses expressions that are not top level
 std::shared_ptr<Expression>
-Parser::parse_expression_interior() {
-  auto LHS = this->parse_primary();
+Parser::_parse_expression_interior() {
+  auto LHS = this->_parse_primary();
   if (!LHS) {
     printf("parse_expr_interior: LHS null\n");
     return nullptr;
   }
 
-  LHS = this->parse_expr(0, std::move(LHS));
+  LHS = this->_parse_expr(0, std::move(LHS));
   
   return LHS;
 }
 
 // Parses the expression statement wrapper
 std::shared_ptr<Statement>
-Parser::parse_expression_statement() {
-  auto LHS = this->parse_primary();
-  LHS = this->parse_expr(0, std::move(LHS));
+Parser::_parse_expression_statement() {
+  auto LHS = this->_parse_primary();
+  LHS = this->_parse_expr(0, std::move(LHS));
 
   auto stmt = std::make_shared<ExpressionStatement>(this->current_token, std::move(LHS));
 
   if (this->current_token.type == TOK_SEMICOLON) {
     printf("parse_expr_stmt: should be eating ';'\n");
-    this->next_token();
+    this->_next_token();
   }
 
   return stmt;
@@ -873,7 +867,7 @@ Parser::parse_expression_statement() {
 // Get the precedence of the current token
 // if it is not a valid operator it returns -1
 int
-Parser::get_token_precedence() {
+Parser::_get_token_precedence() {
   int tok_prec = this->operator_precedences[this->current_token.type];
   if (tok_prec <= 0) 
     return -1;
@@ -881,8 +875,9 @@ Parser::get_token_precedence() {
   return tok_prec;
 }
 
+// Parse expression until we reach a semicolon
 std::shared_ptr<Expression>
-Parser::parse_expr(int precedence, std::shared_ptr<Expression> LHS) {
+Parser::_parse_expr(int precedence, std::shared_ptr<Expression> LHS) {
   while (1) {
     if (this->current_token.type == TOK_SEMICOLON || this->current_token.type == TOK_RPAREN) {
       if (this->current_token.type == TOK_SEMICOLON) printf("semicolon 1\n");
@@ -890,7 +885,7 @@ Parser::parse_expr(int precedence, std::shared_ptr<Expression> LHS) {
       return LHS;
     }
 
-    int prec = this->get_token_precedence();
+    int prec = this->_get_token_precedence();
     if (prec < precedence) {
       printf("prec1 '%s' = %d\n", this->current_token.literal.c_str(), prec);
       return LHS;
@@ -901,9 +896,9 @@ Parser::parse_expr(int precedence, std::shared_ptr<Expression> LHS) {
     printf("op %s\n", op.literal.c_str());
 
     printf("parse_expr: should be eating operator\n");
-    this->next_token();
+    this->_next_token();
   
-    auto RHS = this->parse_primary();
+    auto RHS = this->_parse_primary();
     if (!RHS) {
       printf("null\n");
       return nullptr;
@@ -916,19 +911,19 @@ Parser::parse_expr(int precedence, std::shared_ptr<Expression> LHS) {
       LHS = std::make_shared<BinaryExpr>(op, std::move(LHS), std::move(RHS));
       return LHS;
     }
-    int next_prec = this->get_token_precedence();
-    // int next_prec = this->operator_precedences[this->current_token.type];
+
+    int next_prec = this->_get_token_precedence();
+
     printf("next prec: '%s' %d\n", this->current_token.literal.c_str(), next_prec);
     if (prec < next_prec) {
       printf("prec < next_prec\n");
-      RHS = this->parse_expr(prec+1, std::move(RHS));
+      RHS = this->_parse_expr(prec+1, std::move(RHS));
       if (!RHS) {
         printf("rhs null\n");
         return nullptr;
       }
     }
 
-    // LHS = std::make_unique<BinaryExpr>(op, std::move(LHS), std::move(RHS));
     LHS = std::make_shared<BinaryExpr>(op, std::move(LHS), std::move(RHS));
   }
 
@@ -938,7 +933,7 @@ Parser::parse_expr(int precedence, std::shared_ptr<Expression> LHS) {
 // parse the program
 // start at top level and cascade down the tree
 std::shared_ptr<Program>
-Parser::parse_program() {
+Parser::_parse_program() {
   this->program = std::make_shared<Program>();
   this->program->parent = nullptr;
 
@@ -949,10 +944,7 @@ Parser::parse_program() {
     switch(this->current_token.type) {
       case TOK_LET: // Top-level variable declarations;
         printf("matched let\n");
-        stmt = this->parse_let_statement();
-        // stmt->set_parent(program);
-//        dynamic_cast<LetStmt*>(stmt.get())->variable->parent = program;
-//        dynamic_cast<LetStmt*>(stmt.get())->var_assign->parent = program;
+        stmt = this->_parse_let_statement();
 
         // Check if variable has been declared already -- CLEAN UP -- ACTUALLY MAKE THIS ERROR
         if (symbol_table->find(dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name) == true) {
@@ -963,51 +955,42 @@ Parser::parse_program() {
           break;
         }
 
-        symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->get_st_entry();
+        symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->_get_st_entry();
         program->symbol_table->add(std::move(symbol_table_entry));
         program->statements.push_back(std::move(stmt));
 
         break;
+      
       case TOK_FUNCTION: // Top-level function definitions
         printf("matched function\n");
-        stmt = this->parse_function_defn();
-        // stmt->set_parent(this->program);
-        // dynamic_cast<FunctionDecl*>(stmt.get())->parent = program;
-        symbol_table_entry = dynamic_cast<FunctionDecl*>(stmt.get())->get_st_entry();
+
+        stmt = this->_parse_function_defn();
+        symbol_table_entry = dynamic_cast<FunctionDecl*>(stmt.get())->_get_st_entry();
         program->symbol_table->add(std::move(symbol_table_entry));
         this->program->statements.push_back(std::move(stmt));
         break;
+      
       case TOK_ENTRY: // Top-level function definition, but entry point to the program
-        if (!this->has_entry) {
-          printf("matched entry\n");
-          stmt = this->parse_function_defn();
-          this->program->statements.push_back(std::move(stmt));
-        } else {
-          // FUTURE: make it so that it will still parse the function correctly for error handling, but 
-          // change it so that it is not considered an entry point
-          printf("error: program cannot contain more than one entry point");
-          stmt = this->parse_function_defn();
-          // stmt->set_parent(this->program);
-          // dynamic_cast<FunctionDecl*>(stmt.get())->parent = program;
-          // this->next_token();
-        }
+        printf("matched entry\n");
+        stmt = this->_parse_function_defn();
+        this->program->statements.push_back(std::move(stmt));
         break;
+      
       case TOK_EOF: // End of the program
         // low key shouldn't ever reach this unless I fucked up the parsing
         printf("parse_program: TOK_EOF in switch ending program\n");
         break;
+      
       default:
-        // invalid top level statement
-        // error recovery: panic mode
-        printf("error: invalid token '%s' at top level\n", this->current_token.literal.c_str());
-        this->parse_expression_statement();
+        // Assume it is an expression statement
+        this->_parse_expression_statement();
         break;
     }
   }
 
   printf(" -- Program --\n");
-  //program->statements = std::move(body->body);
-  this->program->print();
+
+  this->program->_print();
   this->program->symbol_table->print_elements();
 
   this->program->assign_parents(); // assign all the parents in the AST
@@ -1017,8 +1000,8 @@ Parser::parse_program() {
 
 // Parse the program and create the abstract syntax tree
 std::shared_ptr<AST>
-Parser::create_ast() {
-  auto program = this->parse_program();
+Parser::_create_ast() {
+  auto program = this->_parse_program();
   std::shared_ptr<AST> ast = std::make_shared<AST>();
   ast->program_node = program;
 

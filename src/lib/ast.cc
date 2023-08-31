@@ -28,28 +28,28 @@ get_data_type(DataType dt) {
 
 /// AST NODE BASE CLASS ///
 void
-Node::syntax_analysis() {}
+Node::_syntax_analysis() {}
 
 void
-Node::set_parent(Node* p) {}
+Node::_set_parent(Node* p) {}
 
 /// STATEMENT BASE CLASS ///
 void
-Statement::print() {}
+Statement::_print() {}
 void
-Statement::syntax_analysis() {}
+Statement::_syntax_analysis() {}
 
 /// EXPRESSION BASE CLASS ///
 void
-Expression::print() {}
+Expression::_print() {}
 void
-Expression::syntax_analysis() {}
+Expression::_syntax_analysis() {}
 
 /// PROGRAM NODE ///
 void
-Program::print() {
+Program::_print() {
   for (unsigned i = 0; i < this->statements.size(); i++) {
-    if (this->statements[i]) this->statements[i]->print();
+    if (this->statements[i]) this->statements[i]->_print();
     printf("\n");
   }
 }
@@ -60,22 +60,22 @@ void
 Program::assign_parents() {
   this->parent = nullptr;
   for (size_t i = 0; i < this->statements.size(); i++) {
-    this->statements[i]->set_parent(this);
+    this->statements[i]->_set_parent(this);
   }
 }
 
 // Recurse down the AST and perform syntax analysis on
 // the AST nodes
 void
-Program::syntax_analysis() {
+Program::_syntax_analysis() {
   for (unsigned i = 0; i < this->statements.size(); i++) {
-    if (this->statements[i]) this->statements[i]->syntax_analysis();
+    if (this->statements[i]) this->statements[i]->_syntax_analysis();
   }
 }
 
 // Search for the identifier in the program's symbol table
 std::shared_ptr<SymbolTableEntry>
-Program::scope_lookup(std::string name) {
+Program::_scope_lookup(std::string name) {
   if (this->symbol_table->find(name) == false)
     return nullptr;
 
@@ -85,18 +85,18 @@ Program::scope_lookup(std::string name) {
 
 /// RETURN STATEMENT ///
 void
-ReturnStmt::print() {
+ReturnStmt::_print() {
   printf("%s ", this->token.literal.c_str());
-  this->ret_val->print();
+  this->ret_val->_print();
 }
 
 // Set the parent of the return statement to the parameter
 // Set the parent of the return statement's return value to the parameter as well
 // Set the parent function that the return statement corresponds to
 void
-ReturnStmt::set_parent(Node* p) {
+ReturnStmt::_set_parent(Node* p) {
   this->parent = p;
-  this->ret_val->set_parent(p);
+  this->ret_val->_set_parent(p);
 
 
   // Go up the parent chain until
@@ -118,54 +118,54 @@ ReturnStmt::set_parent(Node* p) {
 // Check that the data type of this return statement's expression
 // is the same as the function that it returns to
 void
-ReturnStmt::syntax_analysis() {
+ReturnStmt::_syntax_analysis() {
   printf("return syn\n");
 
-  this->ret_val->syntax_analysis();
+  this->ret_val->_syntax_analysis();
 
   if (
-    this->ret_val->get_type()
+    this->ret_val->_get_type()
     != this->parent_func->prototype->ret_type
   ) {
     printf("Error: return type '%s' does not match declared return type '%s'\n",
-            get_data_type(this->ret_val->get_type()).c_str(),
+            get_data_type(this->ret_val->_get_type()).c_str(),
             get_data_type(this->parent_func->prototype->ret_type).c_str());
   } else
     printf("Return Match: '%s' == '%s'\n",
-            get_data_type(this->ret_val->get_type()).c_str(),
+            get_data_type(this->ret_val->_get_type()).c_str(),
             get_data_type(this->parent_func->prototype->ret_type).c_str());
 }
 
 
 /// EXPRESSION STATEMENT ///
 void
-ExpressionStatement::print() {
+ExpressionStatement::_print() {
   if (!this->expr) {
     printf("null expr\n");
   } else {
-    this->expr->print();
+    this->expr->_print();
   }
 }
 
 // Set the parent of the expression statement to the parameter
 // This parameter should be a CodeBlock
 void
-ExpressionStatement::set_parent(Node* p) {
-  this->expr->set_parent(p);
+ExpressionStatement::_set_parent(Node* p) {
+  this->expr->_set_parent(p);
   // this->parent = p;
 }
 
 // Perform syntax analysis on the statement's expression value
 void
-ExpressionStatement::syntax_analysis() {
+ExpressionStatement::_syntax_analysis() {
   printf("expr statement syn\n");
-  this->expr->syntax_analysis();
+  this->expr->_syntax_analysis();
 }
 
 
 /// FUNCTION ///
 void
-FunctionDecl::print() {
+FunctionDecl::_print() {
   if (this->is_entry)
     printf("\nentry %s %s (", get_data_type(this->prototype->ret_type).c_str(), this->prototype->name.c_str());
   else
@@ -178,32 +178,32 @@ FunctionDecl::print() {
   }
   printf(") {\n\n");
   if (this->func_body)
-    this->func_body->print();
+    this->func_body->_print();
 
   printf("\n} end [%s]\n", this->prototype->name.c_str());
 }
 
 // Set the parent of the function [should be the program]
 // Set the parent of the function's body to the function itself
-// Perform the set_parent on the body of the function
+// Perform the _set_parent on the body of the function
 void
-FunctionDecl::set_parent(Node* p) {
+FunctionDecl::_set_parent(Node* p) {
   this->parent = dynamic_cast<Program*>(p);
   this->func_body->parent = this;
-  this->func_body->set_parent(p);
+  this->func_body->_set_parent(p);
 }
 
 // Perform syntax analysis on the function body
 // [FUTURE]: perform syntax check on the function prototype
 void
-FunctionDecl::syntax_analysis() {
+FunctionDecl::_syntax_analysis() {
   printf("func decl syn\n");
-  this->func_body->syntax_analysis();
+  this->func_body->_syntax_analysis();
 }
 
 // Create symbol table entry from fields in the FunctionDecl class
 std::shared_ptr<SymbolTableEntry>
-FunctionDecl::get_st_entry() {
+FunctionDecl::_get_st_entry() {
   auto symbol_table_entry = std::make_shared<SymbolTableEntry>(
                               this->prototype->name,
                               this->prototype->ret_type,
@@ -218,10 +218,10 @@ FunctionDecl::get_st_entry() {
 
 /// FUNCTION CALL EXPRESSION ///
 void
-FunctionCallExpr::print() {
+FunctionCallExpr::_print() {
   printf("%s(", this->name.c_str());
   for (size_t i = 0; i < this->args.size(); i++) {
-    this->args[i]->print();
+    this->args[i]->_print();
     if (i < this->args.size()-1)
       printf(", ");
   }
@@ -230,27 +230,27 @@ FunctionCallExpr::print() {
 
 // Set the parent of this expression to the set parameter
 void
-FunctionCallExpr::set_parent(Node* p) {
+FunctionCallExpr::_set_parent(Node* p) {
   this->parent = p;
 }
 
 // Get the data type of the function call
 // [THIS MIGHT NEED TO BE SYMBOL TABLE LOOKUP -- TEST]
 DataType
-FunctionCallExpr::get_type() {
+FunctionCallExpr::_get_type() {
   return this->data_type;
 }
 
 // [FUTURE: PERFORM SYNTAX CHECK ON FUNCTION CALL]
 void
-FunctionCallExpr::syntax_analysis() {
+FunctionCallExpr::_syntax_analysis() {
   printf("func call syn\n");
 }
 
 
 /// INTEGER EXPRESSION ///
 void
-IntegerExpr::print() {
+IntegerExpr::_print() {
   std::string dt;
   switch (this->data_type) {
     case TYPE_INT:
@@ -273,26 +273,26 @@ IntegerExpr::print() {
 // Return the data type of this expression
 // [should always be TYPE_INT]
 DataType
-IntegerExpr::get_type() {
+IntegerExpr::_get_type() {
   return this->data_type;
 }
 
 // Set the parent of the integer expression [should be a CodeBlock]
 void
-IntegerExpr::set_parent(Node* p) {
+IntegerExpr::_set_parent(Node* p) {
   this->parent = p;
 }
 
 // Integer expr syntax check
 void
-IntegerExpr::syntax_analysis() {
+IntegerExpr::_syntax_analysis() {
   printf("int expr syn\n");
 }
 
 
 /// FLOAT EXPRESSION ///
 void
-FloatExpr::print() {
+FloatExpr::_print() {
   std::string dt;
   switch (this->data_type) {
     case TYPE_INT:
@@ -315,25 +315,25 @@ FloatExpr::print() {
 // Return the data type of the expression
 // [should always be TYPE_FLOAT]
 DataType
-FloatExpr::get_type() {
+FloatExpr::_get_type() {
   return this->data_type;
 }
 
 // Set the parent of the expression
 void
-FloatExpr::set_parent(Node* p) {
+FloatExpr::_set_parent(Node* p) {
   this->parent = p;
 }
 
 // Perform syntax check on the expression
 void
-FloatExpr::syntax_analysis() {
+FloatExpr::_syntax_analysis() {
   printf("float expr syn\n");
 }
 
 /// BYTE EXPRESSION ///
 void
-ByteExpr::print() {
+ByteExpr::_print() {
   std::string dt;
   switch (this->data_type) {
     case TYPE_INT:
@@ -359,27 +359,27 @@ ByteExpr::print() {
 // Get the data type of this expression
 // [should always be TYPE_BYTE]
 DataType
-ByteExpr::get_type() {
+ByteExpr::_get_type() {
   return this->data_type;
 }
 
 // Set the parent of the byte expression
 // [should always be CodeBlock]
 void
-ByteExpr::set_parent(Node* p) {
+ByteExpr::_set_parent(Node* p) {
   this->parent = p;
 }
 
 // Perform syntax check on the expression
 void
-ByteExpr::syntax_analysis() {
+ByteExpr::_syntax_analysis() {
   printf("byte expr syn\n");
 }
 
 
 /// BOOLEAN EXPRESSION ///
 void
-BooleanExpr::print() {
+BooleanExpr::_print() {
   std::string val = (this->value == true) ? "true" : "false";
   printf("[[ boolean val: %s ]]", val.c_str());
 }
@@ -387,27 +387,27 @@ BooleanExpr::print() {
 // Return data type of the expression
 // [should always be TYPE_BOOL]
 DataType
-BooleanExpr::get_type() {
+BooleanExpr::_get_type() {
   return this->data_type;
 }
 
 // Set the parent of the expression
 // [should always be CodeBlock]
 void
-BooleanExpr::set_parent(Node* p) {
+BooleanExpr::_set_parent(Node* p) {
   this->parent = p;
 }
 
 // Perform syntax check on the expression
 void
-BooleanExpr::syntax_analysis() {
+BooleanExpr::_syntax_analysis() {
   printf("bool expr syn\n");
 }
 
 
 /// IDENTIFIER EXPRESSION ///
 void
-IdentifierExpr::print() {
+IdentifierExpr::_print() {
   printf("%s", this->name.c_str());
 }
 
@@ -415,7 +415,7 @@ IdentifierExpr::print() {
 // using its fields
 // This will be used to insert into a symbol table
 std::shared_ptr<SymbolTableEntry>
-IdentifierExpr::get_st_entry() {
+IdentifierExpr::_get_st_entry() {
   auto ste = std::make_shared<SymbolTableEntry>(
     this->name,
     this->data_type,
@@ -432,11 +432,11 @@ IdentifierExpr::get_st_entry() {
 // symbol table and go upwards to the program scope.
 // If it is found, return the data type, if not, return TYPE_VOID
 DataType
-IdentifierExpr::get_type() {
+IdentifierExpr::_get_type() {
   // Find the identifier in symbol table and 
   // return its data type
 
-  std::shared_ptr<SymbolTableEntry> ident = this->parent->scope_lookup(this->name);
+  std::shared_ptr<SymbolTableEntry> ident = this->parent->_scope_lookup(this->name);
   if (ident == nullptr) {
     return TYPE_VOID;
   }
@@ -445,7 +445,7 @@ IdentifierExpr::get_type() {
 
 // Sets the parent of the identifier
 void
-IdentifierExpr::set_parent(Node* p) {
+IdentifierExpr::_set_parent(Node* p) {
   this->parent = p;
 }
 
@@ -453,10 +453,10 @@ IdentifierExpr::set_parent(Node* p) {
 // This is done by doing a lookup of the identifier in its scope's
 // symbol table, and seeing if it is there or not
 void
-IdentifierExpr::syntax_analysis() {
+IdentifierExpr::_syntax_analysis() {
   printf("ident expr syn\n");
   // lookup identifier in symbol table to see if it is there
-  auto ident_ste = this->parent->scope_lookup(this->name);
+  auto ident_ste = this->parent->_scope_lookup(this->name);
   if (!ident_ste) {
     printf("Error: identifier |%s| not found in this scope\n", this->name.c_str());
   } else {
@@ -467,14 +467,14 @@ IdentifierExpr::syntax_analysis() {
 
 /// CONDITIONAL STATEMENT ///
 void
-Conditional::print() {
+Conditional::_print() {
   printf("%s ", this->token.literal.c_str());
   printf("(");
-  this->condition->print();
+  this->condition->_print();
   printf(") {\n");
 
   if (this->consequence)
-    this->consequence->print();
+    this->consequence->_print();
 
   if (!this->alternative)
     printf("} end [if]");
@@ -482,30 +482,30 @@ Conditional::print() {
     printf("} ");
 
   if (this->alternative) {
-    this->alternative->print();
+    this->alternative->_print();
   }
 }
 
 // Set the parent of the Conditional [should be either Program or CodeBlock]
 // Set the parent of the condition   [should be either Program or CodeBlock]
 // Set the parent of the consuence to the Conditional
-// Perform the set_parent logic down the chain on the body
+// Perform the _set_parent logic down the chain on the body
 // Loop until there is not alternative clause in the chain and do the same for each
 void
-Conditional::set_parent(Node* p) {
+Conditional::_set_parent(Node* p) {
   Conditional *cur = this;
   this->parent = p;
-  this->condition->set_parent(p);
+  this->condition->_set_parent(p);
   this->consequence->parent = this;
-  this->consequence->set_parent(p);
+  this->consequence->_set_parent(p);
 
   while (cur->alternative) {
     printf("got alt\n");
     cur = dynamic_cast<Conditional*>(cur->alternative.get());
     cur->parent = p;
-    cur->condition->set_parent(p);
+    cur->condition->_set_parent(p);
     cur->consequence->parent = this;
-    cur->consequence->set_parent(p);
+    cur->consequence->_set_parent(p);
   }
 }
 
@@ -513,31 +513,31 @@ Conditional::set_parent(Node* p) {
 // Check the condition, consequence, and all 
 // other clauses in the chain
 void
-Conditional::syntax_analysis() {
+Conditional::_syntax_analysis() {
   printf("conditional syn\n");
-  this->condition->syntax_analysis();
-  this->consequence->syntax_analysis();
+  this->condition->_syntax_analysis();
+  this->consequence->_syntax_analysis();
 
-  // this->alternative->syntax_analysis();
+  // this->alternative->_syntax_analysis();
   Conditional* cur = this;
   while (cur->alternative) {
     cur = dynamic_cast<Conditional*>(cur->alternative.get());
-    cur->condition->syntax_analysis();
-    cur->consequence->syntax_analysis();
+    cur->condition->_syntax_analysis();
+    cur->consequence->_syntax_analysis();
   }
 }
 
 
 /// WHILE LOOP STATEMENT ///
 void
-WhileLoop::print() {
+WhileLoop::_print() {
   printf("%s ", this->token.literal.c_str());
   printf("(");
-  this->condition->print();
+  this->condition->_print();
   printf(") {\n");
 
   if (this->loop_body) {
-    this->loop_body->print();
+    this->loop_body->_print();
   }
 
   printf("} end [while]\n");
@@ -546,39 +546,39 @@ WhileLoop::print() {
 // Set the parent of the while loop [should be CodeBlock]
 // Set the parent of the condition  [should be CodeBlock]
 // Set the parent of the loop_body to the WhileLoop itself
-// Continue set_parent chain through the body
+// Continue _set_parent chain through the body
 void
-WhileLoop::set_parent(Node* p) {
+WhileLoop::_set_parent(Node* p) {
   this->parent = p;
-  this->condition->set_parent(p);
+  this->condition->_set_parent(p);
   this->loop_body->parent = this;
-  this->loop_body->set_parent(p);
+  this->loop_body->_set_parent(p);
 }
 
 // Perform syntax check on the condition
 // and body of the while loop
 void
-WhileLoop::syntax_analysis() {
+WhileLoop::_syntax_analysis() {
   printf("while syn\n");
-  this->condition->syntax_analysis();
-  this->loop_body->syntax_analysis();
+  this->condition->_syntax_analysis();
+  this->loop_body->_syntax_analysis();
 }
 
 
 /// FOR LOOP STATEMENT ///
 void
-ForLoop::print() {
+ForLoop::_print() {
   printf("%s (\n", this->token.literal.c_str());
 
   printf("\t");
-  this->initialization->print();
+  this->initialization->_print();
   printf("\n\t");
-  this->condition->print();
+  this->condition->_print();
   printf("\n\t");
-  this->action->print();
+  this->action->_print();
 
   printf("\n) {\n");
-  this->loop_body->print();
+  this->loop_body->_print();
   printf("} end [for]\n");
 }
 
@@ -587,55 +587,55 @@ ForLoop::print() {
 // Set the parent of the condition to the body of the for loop
 // Set the parent of the action to the body of the for loop
 // Set the parent of the body to the ForLoop itself
-// Continue set_parent chain through the body
+// Continue _set_parent chain through the body
 void
-ForLoop::set_parent(Node* p) {
+ForLoop::_set_parent(Node* p) {
   this->parent = p;
-  this->initialization->set_parent(p);
-  this->condition->set_parent(dynamic_cast<Node*>(this->loop_body.get()));
-  this->action->set_parent(dynamic_cast<Node*>(this->loop_body.get()));
+  this->initialization->_set_parent(p);
+  this->condition->_set_parent(dynamic_cast<Node*>(this->loop_body.get()));
+  this->action->_set_parent(dynamic_cast<Node*>(this->loop_body.get()));
   this->loop_body->parent = this;
-  this->loop_body->set_parent(p);
+  this->loop_body->_set_parent(p);
 }
 
 // Perform syntax check on the initialization,
 // condition, action, and body of the loop
 void
-ForLoop::syntax_analysis() {
+ForLoop::_syntax_analysis() {
   printf("for syn\n");
-  this->initialization->syntax_analysis();
-  this->condition->syntax_analysis();
-  this->action->syntax_analysis();
-  this->loop_body->syntax_analysis();
+  this->initialization->_syntax_analysis();
+  this->condition->_syntax_analysis();
+  this->action->_syntax_analysis();
+  this->loop_body->_syntax_analysis();
 }
 
 
 /// CODE BLOCK STATEMENT ///
 void
-CodeBlock::print() {
+CodeBlock::_print() {
   for (size_t i = 0; i < this->body.size(); i++) {
-    this->body[i]->print();
+    this->body[i]->_print();
     printf("\n");
   }
 }
 
 // Set the parent scope of the code block [either CodeBlock or Program]
-// Perform set_parent chain on all contained statements
+// Perform _set_parent chain on all contained statements
 void
-CodeBlock::set_parent(Node* p) {
+CodeBlock::_set_parent(Node* p) {
   this->parent_scope = p;
   for (size_t i = 0; i < this->body.size(); i++) {
-    this->body[i]->set_parent(this);
+    this->body[i]->_set_parent(this);
   }
 }
 
 // Perform syntax check on all contained statements in
 // its body
 void
-CodeBlock::syntax_analysis() {
+CodeBlock::_syntax_analysis() {
   printf("code block syn\n");
   for (size_t i = 0; i < this->body.size(); i++) {
-    this->body[i]->syntax_analysis();
+    this->body[i]->_syntax_analysis();
   }
 }
 
@@ -643,7 +643,7 @@ CodeBlock::syntax_analysis() {
 // if name is found, return the entry corresponding to it
 // otherwise, search the symbol table of the parent
 std::shared_ptr<SymbolTableEntry>
-CodeBlock::scope_lookup(std::string name) {
+CodeBlock::_scope_lookup(std::string name) {
   CodeBlock* current_block = this;                                 // current block we are looking at
   std::shared_ptr<SymbolTable> current_table = this->symbol_table; // table of the current scope we are examining
 
@@ -677,7 +677,7 @@ CodeBlock::scope_lookup(std::string name) {
 
 /// VARIABLE EXPRESSION ///
 void
-VariableExpr::print() {
+VariableExpr::_print() {
   std::string dt;
   switch (this->data_type) {
     case TYPE_INT:
@@ -716,74 +716,74 @@ VariableExpr::print() {
 
 // Get the data type of the variable
 DataType
-VariableExpr::get_type() {
+VariableExpr::_get_type() {
   return this->data_type;
 }
 
 // Set the parent of the variable
 void
-VariableExpr::set_parent(Node* p) {
+VariableExpr::_set_parent(Node* p) {
   this->parent = p;
 }
 
 // [FUTURE: perform syntax check on variable]
 void
-VariableExpr::syntax_analysis() {
+VariableExpr::_syntax_analysis() {
   printf("var expr syn\n");
 }
 
 
 /// VARIABLE ASSIGNMENT EXPRESSION ///
 void
-VariableAssignment::print() {
-  this->variable->print();
+VariableAssignment::_print() {
+  this->variable->_print();
   printf(" %s ", this->op.literal.c_str());
   if (this->RHS)
-    this->RHS->print();
+    this->RHS->_print();
 }
 
 // Set the parent of the variable [should be either CodeBlock or Program]
 // Set the parent of the assigned expression [should be either CodeBlock or Program]
 void
-VariableAssignment::set_parent(Node* p) {
+VariableAssignment::_set_parent(Node* p) {
   this->parent = p;
-  this->RHS->set_parent(p);
+  this->RHS->_set_parent(p);
 }
 
 // Perform syntax check on the assignment
 // Check that the type of the assigned expression 
 // matches the declared data type of the variable
 void
-VariableAssignment::syntax_analysis() {
+VariableAssignment::_syntax_analysis() {
   printf("var assign syn\n");
   if (this->RHS) {
-    this->RHS->syntax_analysis();
-    if (this->variable->get_type() != this->RHS->get_type()) {
-      printf("Error: invalid variable assignment: type incompatibility %s != %s\n", get_data_type(this->variable->get_type()).c_str(), get_data_type(this->RHS->get_type()).c_str());
+    this->RHS->_syntax_analysis();
+    if (this->variable->_get_type() != this->RHS->_get_type()) {
+      printf("Error: invalid variable assignment: type incompatibility %s != %s\n", get_data_type(this->variable->_get_type()).c_str(), get_data_type(this->RHS->_get_type()).c_str());
     }
   }
 }
 
 // Return the data type of the assigned expression
 DataType
-VariableAssignment::get_type() {
+VariableAssignment::_get_type() {
   return this->data_type;
 }
 
 
 /// BINARY EXPRESSION ///
 void
-BinaryExpr::print() {
+BinaryExpr::_print() {
   // printf("lhs: ");
   printf("[ ");
-  this->LHS->print();
+  this->LHS->_print();
   printf(" ]");
   
   printf(" %s ", this->op.literal.c_str());
   
   // printf("rhs: ");
   printf("[ ");
-  this->RHS->print();
+  this->RHS->_print();
   printf(" ]");
 }
 
@@ -795,19 +795,19 @@ BinaryExpr::print() {
 //    be operated on together, so perform casting rather than saying
 //    it is invalid.
 DataType
-BinaryExpr::get_type() {
+BinaryExpr::_get_type() {
   DataType rhs_type = TYPE_VOID, lhs_type = TYPE_VOID;
 
   if (this->LHS)
-    lhs_type = this->LHS->get_type();
+    lhs_type = this->LHS->_get_type();
 
   if (this->RHS)
-    rhs_type = this->RHS->get_type();
+    rhs_type = this->RHS->_get_type();
 
   if (rhs_type == lhs_type) {
     return rhs_type;
   } else {
-    printf("Error: BinaryExpr::get_type(): %s != %s\n", get_data_type(lhs_type).c_str(), get_data_type(rhs_type).c_str());
+    printf("Error: BinaryExpr::_get_type(): %s != %s\n", get_data_type(lhs_type).c_str(), get_data_type(rhs_type).c_str());
     return TYPE_VOID;
   }
 }
@@ -815,35 +815,35 @@ BinaryExpr::get_type() {
 // Set the parent of the expression and left/right hand sides
 // [should be CodeBlock]
 void
-BinaryExpr::set_parent(Node* p) {
+BinaryExpr::_set_parent(Node* p) {
   this->parent = p;
-  this->LHS->set_parent(p);
-  this->RHS->set_parent(p);
+  this->LHS->_set_parent(p);
+  this->RHS->_set_parent(p);
 }
 
 // Syntax check the binary expression
 // Perform checks on the left and right hand sides
 // Check that the types of the left and right hand sides are the same
 void
-BinaryExpr::syntax_analysis() {
+BinaryExpr::_syntax_analysis() {
   printf("binary expr syn\n");
 
   // bool rhs_check = false, lhs_check = false;
   if (this->LHS) {
-    this->LHS->syntax_analysis();
+    this->LHS->_syntax_analysis();
   }
 
   // RIGHT HAND SIDE
   if (this->RHS) {
-    this->RHS->syntax_analysis();
+    this->RHS->_syntax_analysis();
   } 
 
   // Check for compatible data types
   if (this->LHS && this->RHS) {
-    if (this->LHS->get_type() != this->RHS->get_type()) {
-      printf("Error: BinaryExpr::syntax_analysis() -- %s != %s\n", get_data_type(this->LHS->get_type()).c_str(), get_data_type(this->RHS->get_type()).c_str());
+    if (this->LHS->_get_type() != this->RHS->_get_type()) {
+      printf("Error: BinaryExpr::_syntax_analysis() -- %s != %s\n", get_data_type(this->LHS->_get_type()).c_str(), get_data_type(this->RHS->_get_type()).c_str());
     } else {
-      printf("typematch %s == %s\n", get_data_type(this->LHS->get_type()).c_str(), get_data_type(this->RHS->get_type()).c_str());
+      printf("typematch %s == %s\n", get_data_type(this->LHS->_get_type()).c_str(), get_data_type(this->RHS->_get_type()).c_str());
     }
   }
 }
@@ -851,10 +851,10 @@ BinaryExpr::syntax_analysis() {
 
 /// LET STATEMENT ///
 void
-LetStmt::print() {
+LetStmt::_print() {
   printf("%s ", this->token.literal.c_str());
   if (this->var_assign)
-    this->var_assign->print();
+    this->var_assign->_print();
   else 
     printf("invalid variable assignment\n");
 }
@@ -863,22 +863,22 @@ LetStmt::print() {
 // and the expression it is being assigned to
 // [should be either CodeBlock or Program]
 void
-LetStmt::set_parent(Node* p) {
-  this->variable->set_parent(p);
-  this->var_assign->set_parent(p);
+LetStmt::_set_parent(Node* p) {
+  this->variable->_set_parent(p);
+  this->var_assign->_set_parent(p);
 }
 
 
 // Perform syntax analysis on the variable declaration
 void
-LetStmt::syntax_analysis() {
+LetStmt::_syntax_analysis() {
   printf("let syn\n");
-  this->var_assign->syntax_analysis();
+  this->var_assign->_syntax_analysis();
 }
 
 // Creates and returns a symbol table entry from the values in the statement
 std::shared_ptr<SymbolTableEntry>
-LetStmt::get_st_entry() {
+LetStmt::_get_st_entry() {
   auto symbol_table_entry = std::make_shared<SymbolTableEntry>(
                               dynamic_cast<VariableExpr*>(this->variable.get())->name,
                               dynamic_cast<VariableExpr*>(this->variable.get())->data_type,
@@ -895,10 +895,10 @@ LetStmt::get_st_entry() {
 // Iterate through the AST and do syntax analysis checks
 // 1: check if identifier exists in scope or up its parent scopes symbol tables
 bool
-AST::syntax_analysis() {
+AST::_syntax_analysis() {
   std::shared_ptr<Program> root = this->program_node;
   for (unsigned i = 0; i < root->statements.size(); i++) {
-    root->statements[i]->syntax_analysis();
+    root->statements[i]->_syntax_analysis();
   }
 
   return true;
