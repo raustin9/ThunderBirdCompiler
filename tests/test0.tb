@@ -1,16 +1,13 @@
-function int main() {
-  let int y = 1 * 2 % 4;
+function int func() [
+  return 0;
+}
 
-  for (let int i = 0; i < 10; i += 1) {
-    while (true) {
-      if (1 > 2) {
-        return false;
-      } else if (2 > 3) {
-        return 1;
-      } else {
-        return 3;
-      }
-    }
+function int main(int x) {
+  let int y = 0;
+
+  for (let int z = 0; z < 10; z += 1) {
+    z = func();
   }
+
   return y;
 }

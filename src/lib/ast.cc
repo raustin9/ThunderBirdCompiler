@@ -116,6 +116,8 @@ void
 ReturnStmt::syntax_analysis() {
   printf("return syn\n");
 
+  this->ret_val->syntax_analysis();
+
   if (
     this->ret_val->get_type()
     != this->parent_func->prototype->ret_type
@@ -335,6 +337,19 @@ IdentifierExpr::print() {
   printf("%s", this->name.c_str());
 }
 
+std::shared_ptr<SymbolTableEntry>
+IdentifierExpr::get_st_entry() {
+  auto ste = std::make_shared<SymbolTableEntry>(
+    this->name,
+    this->data_type,
+    64,
+    1,
+    1
+  );
+
+  return ste;
+}
+
 DataType
 IdentifierExpr::get_type() {
   // Find the identifier in symbol table and 
@@ -355,6 +370,13 @@ IdentifierExpr::set_parent(Node* p) {
 void
 IdentifierExpr::syntax_analysis() {
   printf("ident expr syn\n");
+  // lookup identifier in symbol table to see if it is there
+  auto ident_ste = this->parent->scope_lookup(this->name);
+  if (!ident_ste) {
+    printf("Error: identifier |%s| not found in this scope\n", this->name.c_str());
+  } else {
+    printf("Found: ident |%s|\n", this->name.c_str());
+  }
 }
 
 
