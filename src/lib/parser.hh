@@ -37,6 +37,7 @@ public:
   // Parsing functions
   std::shared_ptr<Program> parse_program();                         // parse the top level program
   std::shared_ptr<Statement> parse_code_block();                    // parse a block of code
+  std::shared_ptr<Statement> parse_code_block(std::shared_ptr<CodeBlock> scope);                    // parse a block of code
   std::shared_ptr<Statement> parse_let_statement();                 // parse let statements
   std::shared_ptr<Statement> parse_return_statement();              // parse return statements
   std::shared_ptr<Statement> parse_else_statement();                // parse else clauses and else-if clauses

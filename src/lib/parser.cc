@@ -368,6 +368,7 @@ Parser::parse_function_defn() {
   printf("parse_func: should be eating '('\n");
   this->next_token(); // eat the '('
                       
+  auto func_body = std::make_shared<CodeBlock>(); // code block of the function body
   std::vector<IdentifierExpr> params;
   while(this->current_token.type != TOK_RPAREN) {
     token_t param_type = this->current_token;
@@ -397,6 +398,8 @@ Parser::parse_function_defn() {
     }
     // identifier.data_type = (param_type.type == TOK_TYPEINT) ? (TYPE_INT) : (TYPE_FLOAT);
     params.push_back(identifier);
+    auto param_ste = identifier.get_st_entry();
+    func_body->symbol_table->add(param_ste);
 
     printf("parse_func: should be eating param identifier\n");
     this->next_token(); // eat the identifier
@@ -414,7 +417,7 @@ Parser::parse_function_defn() {
   this->next_token(); // eat the ')' at end of parameter list
 
   // FUNCTION BODY //
-  auto func_body = this->parse_code_block();
+  this->parse_code_block(func_body);
   // func_body->set_parent(this->program);
   //dynamic_cast<CodeBlock*>(func_body.get())->parent_scope = this->program;
   auto proto = std::make_shared<Prototype>(proto_name, rt, params);
@@ -445,13 +448,9 @@ Parser::parse_code_block() {
       case TOK_LET:
         printf("let token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_let_statement();
-        // stmt->set_parent(code_block);
-//        dynamic_cast<LetStmt*>(stmt.get())->variable->parent = code_block;
-//        dynamic_cast<LetStmt*>(stmt.get())->var_assign->parent = code_block;
-//        dynamic_cast<VariableAssignment*>(dynamic_cast<LetStmt*>(stmt.get())->var_assign.get())->RHS->parent = code_block;
 
         // Check if variable has been declared already -- CLEAN UP -- ACTUALLY MAKE THIS ERROR
-        if (symbol_table->find(dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name) == true) {
+        if (code_block->symbol_table->find(dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name) == true) {
           std::string name = dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name;
           char buf[200];
           sprintf(buf, "parse_code_block: error: redeclaration of |%s| in this scope", name.c_str());
@@ -461,7 +460,7 @@ Parser::parse_code_block() {
 
         // Variable is being properly declared, add to ast
         symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->get_st_entry();
-        symbol_table->add(std::move(symbol_table_entry));
+        code_block->symbol_table->add(std::move(symbol_table_entry));
         body.push_back(std::move(stmt));
         break;
       case TOK_IF:
@@ -508,7 +507,7 @@ Parser::parse_code_block() {
     
   }
 
-  code_block->symbol_table = std::move(symbol_table);
+  // code_block->symbol_table = std::move(symbol_table);
   code_block->body = std::move(body);
 
   printf("parse_code_block: should be eating '}'\n");
@@ -519,6 +518,102 @@ Parser::parse_code_block() {
 //  code_block->symbol_table = std::move(symbol_table);
 
   return code_block; 
+}
+
+
+// Parse a code block
+std::shared_ptr<Statement>
+Parser::parse_code_block(std::shared_ptr<CodeBlock> scope) {
+  token_t tok = this->current_token;
+  if (tok.type != TOK_LBRACE) {
+    printf("parse_code_block: error: unexpected token '%s'. Expected '{'\n", tok.literal.c_str());
+  }
+
+  printf("parse_code_block: should be eating '{'\n");
+  this->next_token();
+
+//  auto code_block = std::make_shared<CodeBlock>();
+//  auto symbol_table = std::make_shared<SymbolTable>();
+  std::vector <std::shared_ptr<Statement> > body;
+
+  while (this->current_token.type != TOK_RBRACE) {
+    // for now: eat the body
+    std::shared_ptr<Statement> stmt;
+    std::shared_ptr<SymbolTableEntry> symbol_table_entry;
+    switch (this->current_token.type) {
+      case TOK_LET:
+        printf("let token: ||%s||\n", this->current_token.literal.c_str());
+        stmt = this->parse_let_statement();
+
+        // Check if variable has been declared already -- CLEAN UP -- ACTUALLY MAKE THIS ERROR
+        if (scope->symbol_table->find(dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name) == true) {
+          std::string name = dynamic_cast<VariableExpr*>(dynamic_cast<LetStmt*>(stmt.get())->variable.get())->name;
+          char buf[200];
+          sprintf(buf, "parse_code_block: error: redeclaration of |%s| in this scope", name.c_str());
+          this->error_handler->new_error(dynamic_cast<LetStmt*>(stmt.get())->token.line_num, buf);
+          break;
+        }
+
+        // Variable is being properly declared, add to ast
+        symbol_table_entry = dynamic_cast<LetStmt*>(stmt.get())->get_st_entry();
+        scope->symbol_table->add(std::move(symbol_table_entry));
+        body.push_back(std::move(stmt));
+        break;
+      case TOK_IF:
+        printf("if token: ||%s||\n", this->current_token.literal.c_str());
+        stmt = this->parse_if_statement();
+        // stmt->set_parent(code_block);
+//        dynamic_cast<Conditional*>(stmt.get())->condition->parent = code_block;
+//        dynamic_cast<CodeBlock*>(dynamic_cast<Conditional*>(stmt.get())->consequence.get())->parent_scope = code_block;
+        body.push_back(std::move(stmt));
+        break;
+      case TOK_WHILE:
+        printf("while token: ||%s||\n", this->current_token.literal.c_str());
+        stmt = this->parse_while_statement();
+        // stmt->set_parent(code_block);
+//        dynamic_cast<WhileLoop*>(stmt.get())->condition->parent = code_block;
+//        dynamic_cast<CodeBlock*>(dynamic_cast<WhileLoop*>(stmt.get())->loop_body.get())->parent_scope = code_block;
+        // dynamic_cast<WhileLoop*>(stmt.get())->parent = code_block;
+        body.push_back(std::move(stmt));
+        break;
+      case TOK_FOR:
+        printf("for token: ||%s||\n", this->current_token.literal.c_str());
+        stmt = this->parse_for_statement();
+        // stmt->set_parent(code_block);
+        // LATER -- SET PARENT SCOPE OF THE INITIALIZATION TO THIS CODE BLOCL. RN IT ONLY ALLOWS FOR DECLARATIONS WHICH ARE STATEMENTS
+        // dynamic_cast<CodeBlock*>(dynamic_cast<ForLoop*>(stmt.get())->loop_body.get())->parent_scope = code_block;
+        body.push_back(std::move(stmt));
+        break;
+      case TOK_RETURN:
+        // parse return statements
+        printf("return token: ||%s||\n", this->current_token.literal.c_str());
+        stmt = this->parse_return_statement();
+        // stmt->set_parent(code_block);
+//        dynamic_cast<ReturnStmt*>(stmt.get())->ret_val->parent = code_block;
+        body.push_back(std::move(stmt));
+        break;
+      default:
+        printf("default token: ||%s||\n", this->current_token.literal.c_str());
+        stmt = this->parse_expression_statement();
+        // stmt->set_parent(code_block);
+        // dynamic_cast<ExpressionStatement*>(stmt.get())->expr->parent = code_block;
+        body.push_back(std::move(stmt));
+        break;
+    }
+    
+  }
+
+  // code_block->symbol_table = std::move(symbol_table);
+  scope->body = std::move(body);
+
+  printf("parse_code_block: should be eating '}'\n");
+  this->next_token();
+
+//  auto code_block = std::make_shared<CodeBlock>(std::move(body));
+//  auto symbol_table = std::make_unique<SymbolTable>();
+//  code_block->symbol_table = std::move(symbol_table);
+
+  return scope; 
 }
 
 // Parse a for loop statement
@@ -541,7 +636,11 @@ Parser::parse_for_statement() {
     this->next_token(); // eat the '('
   }
 
+  auto loop_body = std::make_shared<CodeBlock>();
   auto initialization = this->parse_let_statement(); // FOR NOW: only parse let_stmts. in the future, use a function that can parse any low-level statements
+  auto init_ste = std::dynamic_pointer_cast<LetStmt>(initialization)->get_st_entry();
+
+  loop_body->symbol_table->add(init_ste);
   
   auto condition = this->parse_expression_interior();
   printf("for_stmt: should be eating ';'\n");
@@ -555,7 +654,8 @@ Parser::parse_for_statement() {
 
   printf("for_stmt: should be eating ')'\n");
   this->next_token();
-  auto loop_body = this->parse_code_block();
+  this->parse_code_block();
+
   auto initialization_ste = dynamic_cast<LetStmt*>(initialization.get())->get_st_entry();
   dynamic_cast<CodeBlock*>(loop_body.get())->symbol_table->add(std::move(initialization_ste));
 
@@ -594,7 +694,8 @@ Parser::parse_if_statement() {
   auto condition = this->parse_expression_interior();
 
   // PARSE IF STATEMENT BODY //
-  auto consequence = this->parse_code_block();
+  auto consequence = std::make_shared<CodeBlock>();
+  this->parse_code_block(consequence);
   
   // PARSE ELSE CLAUSE //
   if (this->current_token.type == TOK_ELSE) {

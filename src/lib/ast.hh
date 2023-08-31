@@ -234,6 +234,7 @@ class IdentifierExpr : public Expression {
     void syntax_analysis() override;
     std::shared_ptr<SymbolTableEntry> scope_lookup(std::string name) override {return nullptr;}
     void set_parent(Node* p) override;
+    std::shared_ptr<SymbolTableEntry> get_st_entry();
     DataType get_type() override;
 };
 
