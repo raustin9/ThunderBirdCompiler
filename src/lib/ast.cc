@@ -31,7 +31,7 @@ void
 Node::syntax_analysis() {}
 
 void
-Node::set_parent(std::shared_ptr<Node> p) {}
+Node::set_parent(Node* p) {}
 
 /// STATEMENT BASE CLASS ///
 void
@@ -53,6 +53,15 @@ Program::print() {
     printf("\n");
   }
 }
+
+void
+Program::assign_parents() {
+  this->parent = nullptr;
+  for (size_t i = 0; i < this->statements.size(); i++) {
+    this->statements[i]->set_parent(this);
+  }
+}
+
 void
 Program::syntax_analysis() {
   for (unsigned i = 0; i < this->statements.size(); i++) {
@@ -79,14 +88,45 @@ ReturnStmt::print() {
 }
 
 void
-ReturnStmt::set_parent(std::shared_ptr<Node> p) {
-  this->parent_func = std::dynamic_pointer_cast<FunctionDecl>(p);
+ReturnStmt::set_parent(Node* p) {
+  this->parent = p;
   this->ret_val->set_parent(p);
+
+  Node* cur = p;
+
+  // Go up the parent chain until
+  // Find the function that this belongs to
+  while (
+    dynamic_cast<Statement*>(cur)->parent != nullptr
+  ) {
+    if (dynamic_cast<FunctionDecl*>(cur)) {
+      printf("func got\n");
+      break;
+    }
+      
+    cur = dynamic_cast<Statement*>(cur)->parent;
+  }
+  this->parent_func = dynamic_cast<FunctionDecl*>(cur);
+
 }
 
+// Check that the data type of this return statement's expression
+// is the same as the function that it returns to
 void
 ReturnStmt::syntax_analysis() {
   printf("return syn\n");
+
+  if (
+    this->ret_val->get_type()
+    != this->parent_func->prototype->ret_type
+  ) {
+    printf("Error: return type '%s' does not match declared return type '%s'\n",
+            get_data_type(this->ret_val->get_type()).c_str(),
+            get_data_type(this->parent_func->prototype->ret_type).c_str());
+  } else
+    printf("Return Match: '%s' == '%s'\n",
+            get_data_type(this->ret_val->get_type()).c_str(),
+            get_data_type(this->parent_func->prototype->ret_type).c_str());
 }
 
 
@@ -101,7 +141,7 @@ ExpressionStatement::print() {
 }
 
 void
-ExpressionStatement::set_parent(std::shared_ptr<Node> p) {
+ExpressionStatement::set_parent(Node* p) {
   this->expr->set_parent(p);
   // this->parent = p;
 }
@@ -134,8 +174,10 @@ FunctionDecl::print() {
 }
 
 void
-FunctionDecl::set_parent(std::shared_ptr<Node> p) {
-  this->parent = std::dynamic_pointer_cast<Program>(p);
+FunctionDecl::set_parent(Node* p) {
+  this->parent = dynamic_cast<Program*>(p);
+  this->func_body->parent = this;
+  this->func_body->set_parent(p);
 }
 
 void
@@ -172,7 +214,7 @@ FunctionCallExpr::print() {
 }
 
 void
-FunctionCallExpr::set_parent(std::shared_ptr<Node> p) {
+FunctionCallExpr::set_parent(Node* p) {
   this->parent = p;
 }
 
@@ -215,13 +257,13 @@ IntegerExpr::get_type() {
 }
 
 void
-IntegerExpr::set_parent(std::shared_ptr<Node> p) {
+IntegerExpr::set_parent(Node* p) {
   this->parent = p;
 }
 
 void
 IntegerExpr::syntax_analysis() {
-  printf("byte expr syn\n");
+  printf("int expr syn\n");
 }
 
 /// BYTE EXPRESSION ///
@@ -254,7 +296,7 @@ ByteExpr::get_type() {
   return this->data_type;
 }
 void
-ByteExpr::set_parent(std::shared_ptr<Node> p) {
+ByteExpr::set_parent(Node* p) {
   this->parent = p;
 }
 
@@ -277,7 +319,7 @@ BooleanExpr::get_type() {
 }
 
 void
-BooleanExpr::set_parent(std::shared_ptr<Node> p) {
+BooleanExpr::set_parent(Node* p) {
   this->parent = p;
 }
 
@@ -295,11 +337,18 @@ IdentifierExpr::print() {
 
 DataType
 IdentifierExpr::get_type() {
-  return this->data_type;
+  // Find the identifier in symbol table and 
+  // return its data type
+
+  std::shared_ptr<SymbolTableEntry> ident = this->parent->scope_lookup(this->name);
+  if (ident == nullptr) {
+    return TYPE_VOID;
+  }
+  return ident->data_type;
 }
 
 void
-IdentifierExpr::set_parent(std::shared_ptr<Node> p) {
+IdentifierExpr::set_parent(Node* p) {
   this->parent = p;
 }
 
@@ -337,7 +386,7 @@ FloatExpr::get_type() {
 }
 
 void
-FloatExpr::set_parent(std::shared_ptr<Node> p) {
+FloatExpr::set_parent(Node* p) {
   this->parent = p;
 }
 
@@ -374,11 +423,19 @@ Conditional::print() {
 }
 
 void
-Conditional::set_parent(std::shared_ptr<Node> p) {
+Conditional::set_parent(Node* p) {
   Conditional *cur = this;
+  this->parent = p;
   this->condition->set_parent(p);
+  this->consequence->parent = this;
+  this->consequence->set_parent(p);
+
   while (cur->alternative) {
-    cur->parent = std::dynamic_pointer_cast<Statement>(p);
+    printf("got alt\n");
+    cur->parent = p;
+    cur->condition->set_parent(p);
+    cur->consequence->parent = this;
+    cur->consequence->set_parent(p);
     cur = dynamic_cast<Conditional*>(cur->alternative.get());
   }
 }
@@ -388,6 +445,14 @@ Conditional::syntax_analysis() {
   printf("conditional syn\n");
   this->condition->syntax_analysis();
   this->consequence->syntax_analysis();
+
+  // this->alternative->syntax_analysis();
+  Conditional* cur = this;
+  while (cur->alternative) {
+    cur->condition->syntax_analysis();
+    cur->consequence->syntax_analysis();
+    cur = dynamic_cast<Conditional*>(cur->alternative.get());
+  }
 }
 
 
@@ -411,15 +476,18 @@ WhileLoop::print() {
 }
 
 void
-WhileLoop::set_parent(std::shared_ptr<Node> p) {
+WhileLoop::set_parent(Node* p) {
+  this->parent = p;
   this->condition->set_parent(p);
+  this->loop_body->parent = this;
   this->loop_body->set_parent(p);
-  this->parent = std::dynamic_pointer_cast<Statement>(p);
 }
 
 void
 WhileLoop::syntax_analysis() {
   printf("while syn\n");
+  this->condition->syntax_analysis();
+  this->loop_body->syntax_analysis();
 }
 
 
@@ -449,16 +517,22 @@ ForLoop::print() {
 //       the conditional's parent should be the scope the for loop is in
 //       the action's parent should be ...
 void
-ForLoop::set_parent(std::shared_ptr<Node> p) {
-  this->parent = std::dynamic_pointer_cast<Statement>(p);
+ForLoop::set_parent(Node* p) {
+  this->parent = p;
   this->initialization->set_parent(p);
-  this->condition->set_parent(p);
-  this->action->set_parent(p);
+  this->condition->set_parent(dynamic_cast<Node*>(this->loop_body.get()));
+  this->action->set_parent(dynamic_cast<Node*>(this->loop_body.get()));
+  this->loop_body->parent = this;
+  this->loop_body->set_parent(p);
 }
 
 void
 ForLoop::syntax_analysis() {
   printf("for syn\n");
+  this->initialization->syntax_analysis();
+  this->condition->syntax_analysis();
+  this->action->syntax_analysis();
+  this->loop_body->syntax_analysis();
 }
 
 
@@ -472,18 +546,17 @@ CodeBlock::print() {
 }
 
 void
-CodeBlock::set_parent(std::shared_ptr<Node> p) {
-  // this->parent = p;
+CodeBlock::set_parent(Node* p) {
   this->parent_scope = p;
+  for (size_t i = 0; i < this->body.size(); i++) {
+    this->body[i]->set_parent(this);
+  }
 }
 
 void
 CodeBlock::syntax_analysis() {
   printf("code block syn\n");
   for (size_t i = 0; i < this->body.size(); i++) {
-//    if (auto let_stmt = dynamic_cast<LetStmt*>(this->body[i].get())) {
-//      let_stmt->syntax_analysis();
-//    }
     this->body[i]->syntax_analysis();
   }
 }
@@ -502,9 +575,9 @@ CodeBlock::scope_lookup(std::string name) {
       // Found the identifier
       return current_table->elements[name];
     } else {
-      if(std::dynamic_pointer_cast<Program>(this->parent_scope)) {
+      if(dynamic_cast<Program*>(this->parent_scope)) {
         // Parent scope is the Program Scope
-        auto final_scope = std::dynamic_pointer_cast<Program>(this->parent_scope);
+        auto final_scope = dynamic_cast<Program*>(this->parent_scope);
         current_table = final_scope->symbol_table;
         if (current_table->find(name)) {
           // Found identifier in program scope
@@ -516,7 +589,7 @@ CodeBlock::scope_lookup(std::string name) {
 
       } else {
         // Set the current scope to its parents scope
-        current_block = dynamic_cast<CodeBlock*>(current_block->parent_scope.get());
+        current_block = dynamic_cast<CodeBlock*>(current_block->parent_scope);
         current_table = current_block->symbol_table;
       }
     }
@@ -569,7 +642,7 @@ VariableExpr::get_type() {
 }
 
 void
-VariableExpr::set_parent(std::shared_ptr<Node> p) {
+VariableExpr::set_parent(Node* p) {
   this->parent = p;
 }
 
@@ -589,7 +662,7 @@ VariableAssignment::print() {
 }
 
 void
-VariableAssignment::set_parent(std::shared_ptr<Node> p) {
+VariableAssignment::set_parent(Node* p) {
   this->parent = p;
   this->RHS->set_parent(p);
 }
@@ -646,10 +719,10 @@ BinaryExpr::get_type() {
 }
 
 void
-BinaryExpr::set_parent(std::shared_ptr<Node> p) {
+BinaryExpr::set_parent(Node* p) {
   this->parent = p;
-  this->LHS->parent = p;
-  this->RHS->parent = p;
+  this->LHS->set_parent(p);
+  this->RHS->set_parent(p);
 }
 
 void
@@ -657,12 +730,13 @@ BinaryExpr::syntax_analysis() {
   printf("binary expr syn\n");
 
   std::shared_ptr<SymbolTable> scope = std::make_shared<SymbolTable>();
-  if (dynamic_cast<CodeBlock*>(this->parent.get())) {
-    scope = dynamic_cast<CodeBlock*>(this->parent.get())->symbol_table;
-  } else if (dynamic_cast<Program*>(this->parent.get())) {
-    scope = dynamic_cast<Program*>(this->parent.get())->symbol_table;
+  if (dynamic_cast<CodeBlock*>(this->parent)) {
+    scope = dynamic_cast<CodeBlock*>(this->parent)->symbol_table;
+  } else if (dynamic_cast<Program*>(this->parent)) {
+    scope = dynamic_cast<Program*>(this->parent)->symbol_table;
   }
 
+  printf("got here bin\n");
   std::shared_ptr<SymbolTableEntry> ident;
 
   // bool rhs_check = false, lhs_check = false;
@@ -672,6 +746,7 @@ BinaryExpr::syntax_analysis() {
 //      if (!(ident = this->parent->scope_lookup(var->name))) {
 //        // Variable name not found in this scope
 //        printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
+//        return;
 //      } else {
 //        printf("Found: var |%s|\n", var->name.c_str());
 //        this->LHS->data_type = ident->data_type;
@@ -680,6 +755,7 @@ BinaryExpr::syntax_analysis() {
 //    } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->LHS)) {
 //      if (!(ident = this->parent->scope_lookup(func_call->name))) {
 //        printf("Error: Undefined function |%s|\n", func_call->name.c_str());
+//        return;
 //      } else {
 //        printf("Found: function |%s|\n", func_call->name.c_str());
 //        this->LHS->data_type = ident->data_type;
@@ -691,24 +767,6 @@ BinaryExpr::syntax_analysis() {
   // RIGHT HAND SIDE
   if (this->RHS) {
     this->RHS->syntax_analysis();
-//    if (auto var = std::dynamic_pointer_cast<IdentifierExpr>(this->RHS)) { // VARIABLE EXPR
-//      if (!(ident = this->parent->scope_lookup(var->name))) {
-//        // Variable name not found in this scope
-//        printf("Error: unknown identifier |%s| in this scope\n", var->name.c_str());
-//      } else {
-//        printf("Found: var |%s|\n", var->name.c_str());
-//        this->RHS->data_type = ident->data_type;
-//        printf("rhs dt: %s\n", get_data_type(ident->data_type).c_str());
-//      }
-//    } else if (auto func_call = std::dynamic_pointer_cast<FunctionCallExpr>(this->RHS)) {
-//      if (!(ident = this->parent->scope_lookup(func_call->name))) {
-//        printf("Error: Undefined function |%s|\n", func_call->name.c_str());
-//      } else {
-//        printf("Found: function |%s|\n", func_call->name.c_str());
-//        this->RHS->data_type = ident->data_type;
-//        printf("rhs dt: %s\n", get_data_type(func_call->data_type).c_str());
-//      } 
-//    }
   } 
 
   // Check for compatible data types
@@ -733,7 +791,7 @@ LetStmt::print() {
 }
 
 void
-LetStmt::set_parent(std::shared_ptr<Node> p) {
+LetStmt::set_parent(Node* p) {
   this->variable->set_parent(p);
   this->var_assign->set_parent(p);
 }

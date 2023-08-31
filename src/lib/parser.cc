@@ -266,7 +266,7 @@ Parser::parse_return_statement() {
   auto return_val = this->parse_expression_interior(); // get the expression it is returning
   printf("parse_return: should be eating ';'\n");
   this->next_token(); // eat the ';'
-  return std::make_shared<ReturnStmt>(return_tok, std::move(return_val));
+  return std::make_shared<ReturnStmt>(return_tok, return_val);
 }
 
 // Parse an else clause within an if statement
@@ -415,7 +415,7 @@ Parser::parse_function_defn() {
 
   // FUNCTION BODY //
   auto func_body = this->parse_code_block();
-  func_body->set_parent(this->program);
+  // func_body->set_parent(this->program);
   //dynamic_cast<CodeBlock*>(func_body.get())->parent_scope = this->program;
   auto proto = std::make_shared<Prototype>(proto_name, rt, params);
   auto function = std::make_shared<FunctionDecl>(is_entry, std::move(func_body), std::move(proto));
@@ -445,7 +445,7 @@ Parser::parse_code_block() {
       case TOK_LET:
         printf("let token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_let_statement();
-        stmt->set_parent(code_block);
+        // stmt->set_parent(code_block);
 //        dynamic_cast<LetStmt*>(stmt.get())->variable->parent = code_block;
 //        dynamic_cast<LetStmt*>(stmt.get())->var_assign->parent = code_block;
 //        dynamic_cast<VariableAssignment*>(dynamic_cast<LetStmt*>(stmt.get())->var_assign.get())->RHS->parent = code_block;
@@ -467,7 +467,7 @@ Parser::parse_code_block() {
       case TOK_IF:
         printf("if token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_if_statement();
-        stmt->set_parent(code_block);
+        // stmt->set_parent(code_block);
 //        dynamic_cast<Conditional*>(stmt.get())->condition->parent = code_block;
 //        dynamic_cast<CodeBlock*>(dynamic_cast<Conditional*>(stmt.get())->consequence.get())->parent_scope = code_block;
         body.push_back(std::move(stmt));
@@ -475,7 +475,7 @@ Parser::parse_code_block() {
       case TOK_WHILE:
         printf("while token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_while_statement();
-        stmt->set_parent(code_block);
+        // stmt->set_parent(code_block);
 //        dynamic_cast<WhileLoop*>(stmt.get())->condition->parent = code_block;
 //        dynamic_cast<CodeBlock*>(dynamic_cast<WhileLoop*>(stmt.get())->loop_body.get())->parent_scope = code_block;
         // dynamic_cast<WhileLoop*>(stmt.get())->parent = code_block;
@@ -484,23 +484,23 @@ Parser::parse_code_block() {
       case TOK_FOR:
         printf("for token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_for_statement();
-        stmt->set_parent(code_block);
+        // stmt->set_parent(code_block);
         // LATER -- SET PARENT SCOPE OF THE INITIALIZATION TO THIS CODE BLOCL. RN IT ONLY ALLOWS FOR DECLARATIONS WHICH ARE STATEMENTS
         // dynamic_cast<CodeBlock*>(dynamic_cast<ForLoop*>(stmt.get())->loop_body.get())->parent_scope = code_block;
         body.push_back(std::move(stmt));
         break;
       case TOK_RETURN:
         // parse return statements
-        printf("retur token: ||%s||\n", this->current_token.literal.c_str());
+        printf("return token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_return_statement();
-        stmt->set_parent(code_block);
+        // stmt->set_parent(code_block);
 //        dynamic_cast<ReturnStmt*>(stmt.get())->ret_val->parent = code_block;
         body.push_back(std::move(stmt));
         break;
       default:
         printf("default token: ||%s||\n", this->current_token.literal.c_str());
         stmt = this->parse_expression_statement();
-        stmt->set_parent(code_block);
+        // stmt->set_parent(code_block);
         // dynamic_cast<ExpressionStatement*>(stmt.get())->expr->parent = code_block;
         body.push_back(std::move(stmt));
         break;
@@ -558,6 +558,9 @@ Parser::parse_for_statement() {
   auto loop_body = this->parse_code_block();
   auto initialization_ste = dynamic_cast<LetStmt*>(initialization.get())->get_st_entry();
   dynamic_cast<CodeBlock*>(loop_body.get())->symbol_table->add(std::move(initialization_ste));
+
+  auto symbol_table_entry = std::dynamic_pointer_cast<LetStmt>(initialization)->get_st_entry();
+  std::dynamic_pointer_cast<CodeBlock>(loop_body)->symbol_table->add(std::move(symbol_table_entry));
 
   auto for_stmt = std::make_shared<ForLoop>(for_token, std::move(initialization), std::move(condition), std::move(action), std::move(loop_body));
 
@@ -846,7 +849,7 @@ Parser::parse_program() {
       case TOK_LET: // Top-level variable declarations;
         printf("matched let\n");
         stmt = this->parse_let_statement();
-        stmt->set_parent(program);
+        // stmt->set_parent(program);
 //        dynamic_cast<LetStmt*>(stmt.get())->variable->parent = program;
 //        dynamic_cast<LetStmt*>(stmt.get())->var_assign->parent = program;
 
@@ -867,7 +870,7 @@ Parser::parse_program() {
       case TOK_FUNCTION: // Top-level function definitions
         printf("matched function\n");
         stmt = this->parse_function_defn();
-        stmt->set_parent(this->program);
+        // stmt->set_parent(this->program);
         // dynamic_cast<FunctionDecl*>(stmt.get())->parent = program;
         symbol_table_entry = dynamic_cast<FunctionDecl*>(stmt.get())->get_st_entry();
         program->symbol_table->add(std::move(symbol_table_entry));
@@ -883,7 +886,7 @@ Parser::parse_program() {
           // change it so that it is not considered an entry point
           printf("error: program cannot contain more than one entry point");
           stmt = this->parse_function_defn();
-          stmt->set_parent(this->program);
+          // stmt->set_parent(this->program);
           // dynamic_cast<FunctionDecl*>(stmt.get())->parent = program;
           // this->next_token();
         }
@@ -905,6 +908,9 @@ Parser::parse_program() {
   //program->statements = std::move(body->body);
   this->program->print();
   this->program->symbol_table->print_elements();
+
+  this->program->assign_parents(); // assign all the parents in the AST
+
   return this->program;
 }
 
