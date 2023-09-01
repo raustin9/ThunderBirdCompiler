@@ -3,15 +3,14 @@ function int func() [
 }
 
 entry int main(int x) {
-  let int y = 0;
-
-  while (y == 0) {
-    let int x2 = 0;
-  }
-
-  for (let int i = 0; i < 10; i += 1;) {
+  for (let int = 0; i < 10; i += 1;) {
     func();
+
+    let int k = fjslkfd;
   }
+
+
+  let int x2 = z;
 
   return y;
 }

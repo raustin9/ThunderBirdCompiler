@@ -104,12 +104,32 @@ Parser::_parse_let_statement() {
     printf("parse_let: should be eating type specifier\n");
     this->_next_token(); // eat the type specifier
 
-    ident_tok = this->current_token; // grab the identifier
-    if (ident_tok.type != TOK_IDENT) {
-      printf("error: unexpected token |%s|. Expected |TOK_IDENT|\n", ident_tok.literal.c_str());
-      return nullptr;
-    }
+    if (this->current_token.type != TOK_IDENT) {
+      if (this->current_token.type == TOK_EQUALS) {
+        // Missing identifier name, create temp one for 
+        // error recovery
+        char err[100];
+        sprintf(err, "Missing identifier name\n");
+        this->error_handler->new_error(this->current_token.line_num, err);
 
+        ident_tok.type = TOK_IDENT;
+        ident_tok.literal = "INVALID_IDENT::MISSING";
+        ident_tok.line_num = this->current_token.line_num;
+      } else {
+        // Error Recovery: eat tokens until we get an identifier
+        while (this->current_token.type != TOK_IDENT) {
+          printf("parse_let: eating invalid token\n");
+          this->_next_token();
+        }
+        ident_tok = this->current_token;
+        printf("parse_let: should be eating identifier\n");
+        this->_next_token(); // eat the identifier
+      }
+    } else {
+      ident_tok = this->current_token; // grab the identifier
+      printf("parse_let: should be eating identifier\n");
+      this->_next_token(); // eat the identifier
+    }
   } else { /// ERRORS ///
     // We got invalid data type, either mispelled type spec or forgotten type spec
     if (this->peek_token.type == TOK_EQUALS) {
@@ -139,10 +159,10 @@ Parser::_parse_let_statement() {
         return nullptr;
       }
     }
+    printf("parse_let: should be eating identifier\n");
+    this->_next_token(); // eat the identifier
   }
 
-  printf("parse_let: should be eating identifier\n");
-  this->_next_token(); // eat the identifier
 
   // Parse the expression the variable is being initialized to
   if (this->current_token.type == TOK_EQUALS) {
@@ -667,12 +687,55 @@ Parser::_parse_while_statement() {
   token_t token = this->current_token;
   printf("while_stmt: should be eating 'while\n");
   this->_next_token(); // eat the 'while'
+                    
+  if (this->current_token.type != TOK_LPAREN) {
+    // Error: missing opening parentheses
+    char err[100];
+    sprintf(err, "_parse_while: invalid token '%s'. Expected '('", this->current_token.literal.c_str());
+    this->error_handler->new_error(this->current_token.line_num, err);
+  } else {
+    printf("parse_while: should be eating '('\n");
+    this->_next_token();
+  }
 
+  // Parse loop condition
   auto condition = this->_parse_expression_interior();
+
+  if (this->current_token.type != TOK_RPAREN) {
+    // Error: missing closing parentheses
+    char err[100];
+    sprintf(err, "invalid token '%s'. Expected ')'", this->current_token.literal.c_str());
+    this->error_handler->new_error(this->current_token.line_num, err);
+
+    while (this->current_token.type != TOK_RPAREN) {
+      if (this->current_token.type == TOK_LBRACE)
+        break;
+      printf("parse_while: eating invalid token\n");
+      this->_next_token();
+    }
+
+    if (this->current_token.type == TOK_RPAREN) {
+      printf("parse_while post err: should be eating ')'\n");
+      this->_next_token();
+    }
+  } else {
+    printf("parse_while: should be eating ')'\n");
+    this->_next_token();
+  }
+
+  // Loop until we find opening brace
+  while (this->current_token.type != TOK_LBRACE) {
+    char err[100];
+    sprintf(err, "invalid token '%s'. Expected '{'\n", this->current_token.literal.c_str());
+    this->error_handler->new_error(this->current_token.line_num, err);
+    printf("parse_while: should be eating invalid token\n");
+    this->_next_token();
+  }
 
   // PARSE WHILE LOOP BODY //
   auto loop_body = std::make_shared<CodeBlock>();
   this->_parse_code_block(loop_body);
+
   
   auto while_stmt = std::make_shared<WhileLoop>(token, std::move(condition), std::move(loop_body));
   return while_stmt;
@@ -778,6 +841,7 @@ Parser::_parse_identifier() {
 // Parse parts in an expression
 std::shared_ptr<Expression>
 Parser::_parse_primary() {
+  char err[100];
   switch(this->current_token.type) {
     case TOK_INT:
       printf("primary matched %s\n", this->current_token.literal.c_str());
@@ -801,7 +865,10 @@ Parser::_parse_primary() {
       printf("primary matched %s\n", this->current_token.literal.c_str());
       return this->_parse_parentheses_expr();
     default:
-      printf("primary null\n");
+      sprintf(err, "invalid token '%s' when parsing expression", this->current_token.literal.c_str());
+      this->error_handler->new_error(this->current_token.line_num, err);
+      printf("PRIMARY NULL\n");
+      this->_next_token();
       return nullptr;
   }
 }
@@ -838,9 +905,14 @@ Parser::_parse_parentheses_expr() {
 std::shared_ptr<Expression>
 Parser::_parse_expression_interior() {
   auto LHS = this->_parse_primary();
-  if (!LHS) {
+//  if (!LHS) {
+//    printf("parse_expr_interior: LHS null\n");
+//    return nullptr;
+//  }
+
+  while (!LHS) {
     printf("parse_expr_interior: LHS null\n");
-    return nullptr;
+    LHS = this->_parse_primary();
   }
 
   LHS = this->_parse_expr(0, std::move(LHS));
@@ -895,13 +967,28 @@ Parser::_parse_expr(int precedence, std::shared_ptr<Expression> LHS) {
     token_t op = this->current_token;
     printf("op %s\n", op.literal.c_str());
 
+    if (prec < 0) {
+      printf("parse_expr: invalid operator '%s'\n", op.literal.c_str());
+      return LHS;
+    }
     printf("parse_expr: should be eating operator\n");
     this->_next_token();
+
+    // Check if there is an early end to an expression
+    if (this->current_token.type == TOK_SEMICOLON || this->current_token.type == TOK_RPAREN) {
+      char err[100];
+      sprintf(err, "premature '%s' in expression", this->current_token.literal.c_str());
+      this->error_handler->new_error(this->current_token.line_num, err);
+      return LHS;
+    }
   
     auto RHS = this->_parse_primary();
-    if (!RHS) {
-      printf("null\n");
-      return nullptr;
+    while (!RHS) {
+      printf("parse_expr: RHS null.\nShould be eating invalid token\n");
+      if (this->current_token.type == TOK_RPAREN || this->current_token.type == TOK_SEMICOLON) {
+        break;
+      }
+      RHS = this->_parse_primary();
     }
 
     if (this->current_token.type == TOK_SEMICOLON || this->current_token.type == TOK_RPAREN) {
@@ -913,6 +1000,10 @@ Parser::_parse_expr(int precedence, std::shared_ptr<Expression> LHS) {
     }
 
     int next_prec = this->_get_token_precedence();
+    if (next_prec < 1) {
+      printf("invalid operator '%s'\n", this->current_token.literal.c_str());
+      return std::make_shared<BinaryExpr>(op, std::move(LHS), std::move(RHS));
+    }
 
     printf("next prec: '%s' %d\n", this->current_token.literal.c_str(), next_prec);
     if (prec < next_prec) {
