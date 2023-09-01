@@ -686,6 +686,18 @@ Parser::_parse_while_statement() {
     char err[100];
     sprintf(err, "invalid token '%s'. Expected ')'", this->current_token.literal.c_str());
     this->error_handler->new_error(this->current_token.line_num, err);
+
+    while (this->current_token.type != TOK_RPAREN) {
+      if (this->current_token.type == TOK_LBRACE)
+        break;
+      printf("parse_while: eating invalid token\n");
+      this->_next_token();
+    }
+
+    if (this->current_token.type == TOK_RPAREN) {
+      printf("parse_while post err: should be eating ')'\n");
+      this->_next_token();
+    }
   } else {
     printf("parse_while: should be eating ')'\n");
     this->_next_token();
@@ -696,6 +708,7 @@ Parser::_parse_while_statement() {
     char err[100];
     sprintf(err, "invalid token '%s'. Expected '{'\n", this->current_token.literal.c_str());
     this->error_handler->new_error(this->current_token.line_num, err);
+    printf("parse_while: should be eating invalid token\n");
     this->_next_token();
   }
 
@@ -936,20 +949,27 @@ Parser::_parse_expr(int precedence, std::shared_ptr<Expression> LHS) {
 
     if (prec < 0) {
       printf("parse_expr: invalid operator '%s'\n", op.literal.c_str());
-      return std::make_shared<Expression>();
+      return LHS;
     }
     printf("parse_expr: should be eating operator\n");
     this->_next_token();
+
+    // Check if there is an early end to an expression
+    if (this->current_token.type == TOK_SEMICOLON || this->current_token.type == TOK_RPAREN) {
+      char err[100];
+      sprintf(err, "premature '%s' in expression", this->current_token.literal.c_str());
+      this->error_handler->new_error(this->current_token.line_num, err);
+      return LHS;
+    }
   
     auto RHS = this->_parse_primary();
     while (!RHS) {
       printf("parse_expr: RHS null.\nShould be eating invalid token\n");
+      if (this->current_token.type == TOK_RPAREN || this->current_token.type == TOK_SEMICOLON) {
+        break;
+      }
       RHS = this->_parse_primary();
     }
-//    if (!RHS) {
-//      printf("null\n");
-//      return nullptr;
-//    }
 
     if (this->current_token.type == TOK_SEMICOLON || this->current_token.type == TOK_RPAREN) {
       if (this->current_token.type == TOK_SEMICOLON) printf("semicolon 2\n");
@@ -962,7 +982,7 @@ Parser::_parse_expr(int precedence, std::shared_ptr<Expression> LHS) {
     int next_prec = this->_get_token_precedence();
     if (next_prec < 1) {
       printf("invalid operator '%s'\n", this->current_token.literal.c_str());
-      return std::make_shared<Expression>();
+      return std::make_shared<BinaryExpr>(op, std::move(LHS), std::move(RHS));
     }
 
     printf("next prec: '%s' %d\n", this->current_token.literal.c_str(), next_prec);
