@@ -3,9 +3,9 @@ function int func() [
 }
 
 entry int main(int x) {
-  let int y = 0;
+  let  int y = 0;
 
-  while (y == 0) {
+  while (y +== 0) {
     let int x2 = 0;
   }
 

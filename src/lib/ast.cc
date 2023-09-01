@@ -60,7 +60,7 @@ void
 Program::assign_parents() {
   this->parent = nullptr;
   for (size_t i = 0; i < this->statements.size(); i++) {
-    this->statements[i]->_set_parent(this);
+    if (this->statements[i]) this->statements[i]->_set_parent(this);
   }
 }
 
@@ -96,7 +96,8 @@ ReturnStmt::_print() {
 void
 ReturnStmt::_set_parent(Node* p) {
   this->parent = p;
-  this->ret_val->_set_parent(p);
+  if(this->ret_val)
+    this->ret_val->_set_parent(p);
 
 
   // Go up the parent chain until
@@ -121,19 +122,21 @@ void
 ReturnStmt::_syntax_analysis() {
   printf("return syn\n");
 
-  this->ret_val->_syntax_analysis();
+  if (this->ret_val) {
+    this->ret_val->_syntax_analysis();
 
-  if (
-    this->ret_val->_get_type()
-    != this->parent_func->prototype->ret_type
-  ) {
-    printf("Error: return type '%s' does not match declared return type '%s'\n",
-            get_data_type(this->ret_val->_get_type()).c_str(),
-            get_data_type(this->parent_func->prototype->ret_type).c_str());
-  } else
-    printf("Return Match: '%s' == '%s'\n",
-            get_data_type(this->ret_val->_get_type()).c_str(),
-            get_data_type(this->parent_func->prototype->ret_type).c_str());
+    if (
+        this->ret_val->_get_type()
+        != this->parent_func->prototype->ret_type
+       ) {
+      printf("Error: return type '%s' does not match declared return type '%s'\n",
+          get_data_type(this->ret_val->_get_type()).c_str(),
+          get_data_type(this->parent_func->prototype->ret_type).c_str());
+    } else
+      printf("Return Match: '%s' == '%s'\n",
+          get_data_type(this->ret_val->_get_type()).c_str(),
+          get_data_type(this->parent_func->prototype->ret_type).c_str());
+  }
 }
 
 
@@ -151,7 +154,8 @@ ExpressionStatement::_print() {
 // This parameter should be a CodeBlock
 void
 ExpressionStatement::_set_parent(Node* p) {
-  this->expr->_set_parent(p);
+  if(this->expr)
+    this->expr->_set_parent(p);
   // this->parent = p;
 }
 
@@ -159,7 +163,8 @@ ExpressionStatement::_set_parent(Node* p) {
 void
 ExpressionStatement::_syntax_analysis() {
   printf("expr statement syn\n");
-  this->expr->_syntax_analysis();
+  if (this->expr)
+    this->expr->_syntax_analysis();
 }
 
 
@@ -189,8 +194,10 @@ FunctionDecl::_print() {
 void
 FunctionDecl::_set_parent(Node* p) {
   this->parent = dynamic_cast<Program*>(p);
-  this->func_body->parent = this;
-  this->func_body->_set_parent(p);
+  if(this->func_body) {
+    this->func_body->parent = this;
+    this->func_body->_set_parent(p);
+  }
 }
 
 // Perform syntax analysis on the function body
@@ -198,7 +205,8 @@ FunctionDecl::_set_parent(Node* p) {
 void
 FunctionDecl::_syntax_analysis() {
   printf("func decl syn\n");
-  this->func_body->_syntax_analysis();
+  if (this->func_body)
+    this->func_body->_syntax_analysis();
 }
 
 // Create symbol table entry from fields in the FunctionDecl class
@@ -495,17 +503,23 @@ void
 Conditional::_set_parent(Node* p) {
   Conditional *cur = this;
   this->parent = p;
-  this->condition->_set_parent(p);
-  this->consequence->parent = this;
-  this->consequence->_set_parent(p);
+  if(this->condition)
+    this->condition->_set_parent(p);
+  if(this->consequence) {
+    this->consequence->parent = this;
+    this->consequence->_set_parent(p);
+  }
 
   while (cur->alternative) {
     printf("got alt\n");
     cur = dynamic_cast<Conditional*>(cur->alternative.get());
     cur->parent = p;
-    cur->condition->_set_parent(p);
-    cur->consequence->parent = this;
-    cur->consequence->_set_parent(p);
+    if(cur->condition)
+      cur->condition->_set_parent(p);
+    if (cur->consequence) {
+      cur->consequence->parent = this;
+      cur->consequence->_set_parent(p);
+    }
   }
 }
 
@@ -515,15 +529,20 @@ Conditional::_set_parent(Node* p) {
 void
 Conditional::_syntax_analysis() {
   printf("conditional syn\n");
-  this->condition->_syntax_analysis();
-  this->consequence->_syntax_analysis();
+  if (this->condition)
+    this->condition->_syntax_analysis();
+
+  if (this->consequence)
+    this->consequence->_syntax_analysis();
 
   // this->alternative->_syntax_analysis();
   Conditional* cur = this;
   while (cur->alternative) {
     cur = dynamic_cast<Conditional*>(cur->alternative.get());
-    cur->condition->_syntax_analysis();
-    cur->consequence->_syntax_analysis();
+    if (cur->condition)
+      cur->condition->_syntax_analysis();
+    if (cur->consequence)
+      cur->consequence->_syntax_analysis();
   }
 }
 
@@ -533,7 +552,9 @@ void
 WhileLoop::_print() {
   printf("%s ", this->token.literal.c_str());
   printf("(");
-  this->condition->_print();
+  if (this->condition) {
+    this->condition->_print();
+  }
   printf(") {\n");
 
   if (this->loop_body) {
@@ -550,9 +571,12 @@ WhileLoop::_print() {
 void
 WhileLoop::_set_parent(Node* p) {
   this->parent = p;
-  this->condition->_set_parent(p);
-  this->loop_body->parent = this;
-  this->loop_body->_set_parent(p);
+  if(this->condition)
+    this->condition->_set_parent(p);
+  if(this->loop_body) {
+    this->loop_body->parent = this;
+    this->loop_body->_set_parent(p);
+  }
 }
 
 // Perform syntax check on the condition
@@ -560,8 +584,11 @@ WhileLoop::_set_parent(Node* p) {
 void
 WhileLoop::_syntax_analysis() {
   printf("while syn\n");
-  this->condition->_syntax_analysis();
-  this->loop_body->_syntax_analysis();
+  if (this->condition)
+    this->condition->_syntax_analysis();
+
+  if (this->loop_body)
+    this->loop_body->_syntax_analysis();
 }
 
 
@@ -591,11 +618,16 @@ ForLoop::_print() {
 void
 ForLoop::_set_parent(Node* p) {
   this->parent = p;
-  this->initialization->_set_parent(p);
-  this->condition->_set_parent(dynamic_cast<Node*>(this->loop_body.get()));
-  this->action->_set_parent(dynamic_cast<Node*>(this->loop_body.get()));
-  this->loop_body->parent = this;
-  this->loop_body->_set_parent(p);
+  if(this->initialization)
+    this->initialization->_set_parent(p);
+  if(this->condition)
+    this->condition->_set_parent(dynamic_cast<Node*>(this->loop_body.get()));
+  if(this->action)
+    this->action->_set_parent(dynamic_cast<Node*>(this->loop_body.get()));
+  if(this->loop_body) {
+    this->loop_body->parent = this;
+    this->loop_body->_set_parent(p);
+  }
 }
 
 // Perform syntax check on the initialization,
@@ -603,10 +635,14 @@ ForLoop::_set_parent(Node* p) {
 void
 ForLoop::_syntax_analysis() {
   printf("for syn\n");
-  this->initialization->_syntax_analysis();
-  this->condition->_syntax_analysis();
-  this->action->_syntax_analysis();
-  this->loop_body->_syntax_analysis();
+  if (this->initialization)
+    this->initialization->_syntax_analysis();
+  if(this->condition)
+    this->condition->_syntax_analysis();
+  if(this->action)
+    this->action->_syntax_analysis();
+  if(this->loop_body)
+    this->loop_body->_syntax_analysis();
 }
 
 
@@ -625,7 +661,8 @@ void
 CodeBlock::_set_parent(Node* p) {
   this->parent_scope = p;
   for (size_t i = 0; i < this->body.size(); i++) {
-    this->body[i]->_set_parent(this);
+    if(this->body[i])
+      this->body[i]->_set_parent(this);
   }
 }
 
@@ -635,7 +672,8 @@ void
 CodeBlock::_syntax_analysis() {
   printf("code block syn\n");
   for (size_t i = 0; i < this->body.size(); i++) {
-    this->body[i]->_syntax_analysis();
+    if(this->body[i])
+      this->body[i]->_syntax_analysis();
   }
 }
 
@@ -747,7 +785,8 @@ VariableAssignment::_print() {
 void
 VariableAssignment::_set_parent(Node* p) {
   this->parent = p;
-  this->RHS->_set_parent(p);
+  if(this->RHS)
+    this->RHS->_set_parent(p);
 }
 
 // Perform syntax check on the assignment
@@ -758,7 +797,7 @@ VariableAssignment::_syntax_analysis() {
   printf("var assign syn\n");
   if (this->RHS) {
     this->RHS->_syntax_analysis();
-    if (this->variable->_get_type() != this->RHS->_get_type()) {
+    if (this->variable && this->variable->_get_type() != this->RHS->_get_type()) {
       printf("Error: invalid variable assignment: type incompatibility %s != %s\n", get_data_type(this->variable->_get_type()).c_str(), get_data_type(this->RHS->_get_type()).c_str());
     }
   }
@@ -817,8 +856,10 @@ BinaryExpr::_get_type() {
 void
 BinaryExpr::_set_parent(Node* p) {
   this->parent = p;
-  this->LHS->_set_parent(p);
-  this->RHS->_set_parent(p);
+  if(this->LHS)
+    this->LHS->_set_parent(p);
+  if(this->RHS)
+    this->RHS->_set_parent(p);
 }
 
 // Syntax check the binary expression
@@ -864,8 +905,10 @@ LetStmt::_print() {
 // [should be either CodeBlock or Program]
 void
 LetStmt::_set_parent(Node* p) {
-  this->variable->_set_parent(p);
-  this->var_assign->_set_parent(p);
+  if(this->variable)
+    this->variable->_set_parent(p);
+  if(this->var_assign)
+    this->var_assign->_set_parent(p);
 }
 
 
@@ -873,7 +916,8 @@ LetStmt::_set_parent(Node* p) {
 void
 LetStmt::_syntax_analysis() {
   printf("let syn\n");
-  this->var_assign->_syntax_analysis();
+  if(this->var_assign)
+    this->var_assign->_syntax_analysis();
 }
 
 // Creates and returns a symbol table entry from the values in the statement
@@ -898,7 +942,8 @@ bool
 AST::_syntax_analysis() {
   std::shared_ptr<Program> root = this->program_node;
   for (unsigned i = 0; i < root->statements.size(); i++) {
-    root->statements[i]->_syntax_analysis();
+    if(root->statements[i])
+      root->statements[i]->_syntax_analysis();
   }
 
   return true;

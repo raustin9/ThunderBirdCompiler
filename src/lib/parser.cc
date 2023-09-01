@@ -667,12 +667,42 @@ Parser::_parse_while_statement() {
   token_t token = this->current_token;
   printf("while_stmt: should be eating 'while\n");
   this->_next_token(); // eat the 'while'
+                    
+  if (this->current_token.type != TOK_LPAREN) {
+    // Error: missing opening parentheses
+    char err[100];
+    sprintf(err, "_parse_while: invalid token '%s'. Expected '('", this->current_token.literal.c_str());
+    this->error_handler->new_error(this->current_token.line_num, err);
+  } else {
+    printf("parse_while: should be eating '('\n");
+    this->_next_token();
+  }
 
+  // Parse loop condition
   auto condition = this->_parse_expression_interior();
+
+  if (this->current_token.type != TOK_RPAREN) {
+    // Error: missing closing parentheses
+    char err[100];
+    sprintf(err, "invalid token '%s'. Expected ')'", this->current_token.literal.c_str());
+    this->error_handler->new_error(this->current_token.line_num, err);
+  } else {
+    printf("parse_while: should be eating ')'\n");
+    this->_next_token();
+  }
+
+  // Loop until we find opening brace
+  while (this->current_token.type != TOK_LBRACE) {
+    char err[100];
+    sprintf(err, "invalid token '%s'. Expected '{'\n", this->current_token.literal.c_str());
+    this->error_handler->new_error(this->current_token.line_num, err);
+    this->_next_token();
+  }
 
   // PARSE WHILE LOOP BODY //
   auto loop_body = std::make_shared<CodeBlock>();
   this->_parse_code_block(loop_body);
+
   
   auto while_stmt = std::make_shared<WhileLoop>(token, std::move(condition), std::move(loop_body));
   return while_stmt;
@@ -778,6 +808,7 @@ Parser::_parse_identifier() {
 // Parse parts in an expression
 std::shared_ptr<Expression>
 Parser::_parse_primary() {
+  char err[100];
   switch(this->current_token.type) {
     case TOK_INT:
       printf("primary matched %s\n", this->current_token.literal.c_str());
@@ -801,7 +832,10 @@ Parser::_parse_primary() {
       printf("primary matched %s\n", this->current_token.literal.c_str());
       return this->_parse_parentheses_expr();
     default:
-      printf("primary null\n");
+      sprintf(err, "invalid token '%s' when parsing expression", this->current_token.literal.c_str());
+      this->error_handler->new_error(this->current_token.line_num, err);
+      printf("PRIMARY NULL\n");
+      this->_next_token();
       return nullptr;
   }
 }
@@ -838,9 +872,14 @@ Parser::_parse_parentheses_expr() {
 std::shared_ptr<Expression>
 Parser::_parse_expression_interior() {
   auto LHS = this->_parse_primary();
-  if (!LHS) {
+//  if (!LHS) {
+//    printf("parse_expr_interior: LHS null\n");
+//    return nullptr;
+//  }
+
+  while (!LHS) {
     printf("parse_expr_interior: LHS null\n");
-    return nullptr;
+    LHS = this->_parse_primary();
   }
 
   LHS = this->_parse_expr(0, std::move(LHS));
@@ -895,14 +934,22 @@ Parser::_parse_expr(int precedence, std::shared_ptr<Expression> LHS) {
     token_t op = this->current_token;
     printf("op %s\n", op.literal.c_str());
 
+    if (prec < 0) {
+      printf("parse_expr: invalid operator '%s'\n", op.literal.c_str());
+      return std::make_shared<Expression>();
+    }
     printf("parse_expr: should be eating operator\n");
     this->_next_token();
   
     auto RHS = this->_parse_primary();
-    if (!RHS) {
-      printf("null\n");
-      return nullptr;
+    while (!RHS) {
+      printf("parse_expr: RHS null.\nShould be eating invalid token\n");
+      RHS = this->_parse_primary();
     }
+//    if (!RHS) {
+//      printf("null\n");
+//      return nullptr;
+//    }
 
     if (this->current_token.type == TOK_SEMICOLON || this->current_token.type == TOK_RPAREN) {
       if (this->current_token.type == TOK_SEMICOLON) printf("semicolon 2\n");
@@ -913,6 +960,10 @@ Parser::_parse_expr(int precedence, std::shared_ptr<Expression> LHS) {
     }
 
     int next_prec = this->_get_token_precedence();
+    if (next_prec < 1) {
+      printf("invalid operator '%s'\n", this->current_token.literal.c_str());
+      return std::make_shared<Expression>();
+    }
 
     printf("next prec: '%s' %d\n", this->current_token.literal.c_str(), next_prec);
     if (prec < next_prec) {
