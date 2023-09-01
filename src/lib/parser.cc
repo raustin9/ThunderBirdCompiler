@@ -104,12 +104,32 @@ Parser::_parse_let_statement() {
     printf("parse_let: should be eating type specifier\n");
     this->_next_token(); // eat the type specifier
 
-    ident_tok = this->current_token; // grab the identifier
-    if (ident_tok.type != TOK_IDENT) {
-      printf("error: unexpected token |%s|. Expected |TOK_IDENT|\n", ident_tok.literal.c_str());
-      return nullptr;
-    }
+    if (this->current_token.type != TOK_IDENT) {
+      if (this->current_token.type == TOK_EQUALS) {
+        // Missing identifier name, create temp one for 
+        // error recovery
+        char err[100];
+        sprintf(err, "Missing identifier name\n");
+        this->error_handler->new_error(this->current_token.line_num, err);
 
+        ident_tok.type = TOK_IDENT;
+        ident_tok.literal = "INVALID_IDENT::MISSING";
+        ident_tok.line_num = this->current_token.line_num;
+      } else {
+        // Error Recovery: eat tokens until we get an identifier
+        while (this->current_token.type != TOK_IDENT) {
+          printf("parse_let: eating invalid token\n");
+          this->_next_token();
+        }
+        ident_tok = this->current_token;
+        printf("parse_let: should be eating identifier\n");
+        this->_next_token(); // eat the identifier
+      }
+    } else {
+      ident_tok = this->current_token; // grab the identifier
+      printf("parse_let: should be eating identifier\n");
+      this->_next_token(); // eat the identifier
+    }
   } else { /// ERRORS ///
     // We got invalid data type, either mispelled type spec or forgotten type spec
     if (this->peek_token.type == TOK_EQUALS) {
@@ -139,10 +159,10 @@ Parser::_parse_let_statement() {
         return nullptr;
       }
     }
+    printf("parse_let: should be eating identifier\n");
+    this->_next_token(); // eat the identifier
   }
 
-  printf("parse_let: should be eating identifier\n");
-  this->_next_token(); // eat the identifier
 
   // Parse the expression the variable is being initialized to
   if (this->current_token.type == TOK_EQUALS) {

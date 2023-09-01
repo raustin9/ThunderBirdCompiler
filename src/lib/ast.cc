@@ -503,23 +503,17 @@ void
 Conditional::_set_parent(Node* p) {
   Conditional *cur = this;
   this->parent = p;
-  if(this->condition)
-    this->condition->_set_parent(p);
-  if(this->consequence) {
-    this->consequence->parent = this;
-    this->consequence->_set_parent(p);
-  }
+  this->condition->_set_parent(p);
+  this->consequence->parent = this;
+  this->consequence->_set_parent(p);
 
   while (cur->alternative) {
     printf("got alt\n");
     cur = dynamic_cast<Conditional*>(cur->alternative.get());
     cur->parent = p;
-    if(cur->condition)
-      cur->condition->_set_parent(p);
-    if (cur->consequence) {
-      cur->consequence->parent = this;
-      cur->consequence->_set_parent(p);
-    }
+    cur->condition->_set_parent(p);
+    cur->consequence->parent = this;
+    cur->consequence->_set_parent(p);
   }
 }
 
@@ -617,17 +611,17 @@ ForLoop::_print() {
 // Continue _set_parent chain through the body
 void
 ForLoop::_set_parent(Node* p) {
-  this->parent = p;
-  if(this->initialization)
-    this->initialization->_set_parent(p);
-  if(this->condition)
-    this->condition->_set_parent(dynamic_cast<Node*>(this->loop_body.get()));
-  if(this->action)
-    this->action->_set_parent(dynamic_cast<Node*>(this->loop_body.get()));
+  this->parent = dynamic_cast<CodeBlock*>(this);
   if(this->loop_body) {
     this->loop_body->parent = this;
     this->loop_body->_set_parent(p);
   }
+  if(this->initialization)
+    this->initialization->_set_parent(p);
+  if(this->condition)
+    this->condition->_set_parent(dynamic_cast<CodeBlock*>(this->loop_body.get()));
+  if(this->action)
+    this->action->_set_parent(dynamic_cast<CodeBlock*>(this->loop_body.get()));
 }
 
 // Perform syntax check on the initialization,
@@ -659,9 +653,13 @@ CodeBlock::_print() {
 // Perform _set_parent chain on all contained statements
 void
 CodeBlock::_set_parent(Node* p) {
+//  if (dynamic_cast<Program*>(p))
+//    this->parent_scope = dynamic_cast<Program*>(p);
+//  else
+//    this->parent_scope = dynamic_cast<CodeBlock*>(p);
   this->parent_scope = p;
   for (size_t i = 0; i < this->body.size(); i++) {
-    if(this->body[i])
+    if (this->body[i])
       this->body[i]->_set_parent(this);
   }
 }
@@ -691,19 +689,13 @@ CodeBlock::_scope_lookup(std::string name) {
       // Found the identifier
       return current_table->elements[name];
     } else {
-      if(dynamic_cast<Program*>(this->parent_scope)) {
+      if(dynamic_cast<Program*>(current_block->parent_scope)) {
+        printf("CodeBlock::_scope_lookup() -- Program Parent switch\n");
         // Parent scope is the Program Scope
-        auto final_scope = dynamic_cast<Program*>(this->parent_scope);
-        current_table = final_scope->symbol_table;
-        if (current_table->find(name)) {
-          // Found identifier in program scope
-          return current_table->elements[name];
-        } else {
-          // Identifier is not in any scopes or program scope
-          return nullptr;
-        }
-
+        auto final_scope = dynamic_cast<Program*>(current_block->parent_scope);
+        return final_scope->_scope_lookup(name);
       } else {
+        printf("CodeBlock::_scope_lookup() -- CB Parent switch\n");
         // Set the current scope to its parents scope
         current_block = dynamic_cast<CodeBlock*>(current_block->parent_scope);
         current_table = current_block->symbol_table;
