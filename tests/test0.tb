@@ -1,16 +1,16 @@
-function int func() [
-  return 0;
+define int func() {
+    return 0;
 }
 
 entry int main(int x) {
-  for (let int = 0; i < 10; i += 1;) {
-    func();
+    for (let int i = 0; i < 10; i += 1;) [
+        func();
 
-    let int k = fjslkfd;
-  }
+        let k = func();
+    }
 
 
-  let int x2 = z;
+    let int x2 = z;
 
-  return y;
+    return x2;
 }

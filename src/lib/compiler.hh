@@ -12,22 +12,22 @@
 #include "preprocessor.hh"
 
 class Compiler {
-  public:
-    // Member Variables
-    std::string input; // this will eventually change to list of files or whatever module system is
-    SymbolTable *symbol_table;
-    ErrorHandler *error_handler;
+    public:
+        // Member Variables
+        std::string input; // this will eventually change to list of files or whatever module system is
+        SymbolTable *symbol_table;
+        ErrorHandler *error_handler;
 
-    Preprocessor *preprocessor;
-    Lexer *lexer;
-    Parser *parser;
-  
-    // Member Functions
-    Compiler(std::string source_code);
-    ~Compiler();
+        Preprocessor *preprocessor;
+        Lexer *lexer;
+        Parser *parser;
+    
+        // Member Functions
+        Compiler(std::string source_code);
+        ~Compiler();
 
-    void test_lexer();
-    void test_parser(); 
+        void test_lexer();
+        void test_parser(); 
 };
 
 #endif /* COMPILER */
