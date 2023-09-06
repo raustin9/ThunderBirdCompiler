@@ -204,6 +204,10 @@ Parser::_parse_let_statement() {
     }
 }
 
+//////////////////////////////////////////////////////
+//                   Literals                       //
+//////////////////////////////////////////////////////
+
 // Parse an integer expression -- really just an integer literal
 // "3" "700";
 std::shared_ptr<Expression>
@@ -287,6 +291,10 @@ Parser::_parse_boolean() {
     return std::make_shared<BooleanExpr>(val);
 }
 
+///////////////////////////////////////////////
+//                FUNCTIONS                  //
+///////////////////////////////////////////////
+
 // Parse return statements from a function body
 // "return 0;"
 std::shared_ptr<Statement>
@@ -326,6 +334,9 @@ Parser::_parse_function_defn() {
             this->current_token.type != TOK_FUNCTION) {
         printf("parse_func_defn: error: Unexpected token '%s'. Expected 'define' or 'entry'\n", this->current_token.literal.c_str());
     }
+
+    if (this->current_token.type == TOK_ENTRY)
+        is_entry = true;
 
     printf("parse_func: should be eating 'function' or 'define' or 'entry'\n");
     this->_next_token(); // eat the "function" or "define" or "entry" keyword
@@ -465,6 +476,10 @@ Parser::_parse_function_defn() {
 
     return function;
 }
+
+/////////////////////////////////////////////////////////
+//                    CODE BLOCKS                      //
+/////////////////////////////////////////////////////////
 
 // Parse a code block
 std::shared_ptr<Statement>
@@ -639,6 +654,11 @@ Parser::_parse_code_block(std::shared_ptr<CodeBlock> scope) {
     return scope; 
 }
 
+
+/////////////////////////////////////////////////////////
+//                       LOOPS                         //
+/////////////////////////////////////////////////////////
+
 // Parse a for loop statement
 std::shared_ptr<Statement>
 Parser::_parse_for_statement() {
@@ -803,6 +823,10 @@ Parser::_parse_if_statement() {
     auto if_stmt = std::make_shared<Conditional>(token, std::move(consequence), std::move(condition), nullptr);
     return if_stmt;
 }
+
+/////////////////////////////////////////////////////////
+//                   IDENTS & EXPRS                    //
+/////////////////////////////////////////////////////////
 
 // Parse an identifier in an expression
 std::shared_ptr<Expression>
@@ -1074,6 +1098,8 @@ Parser::_parse_program() {
             case TOK_ENTRY: // Top-level function definition, but entry point to the program
                 printf("matched entry\n");
                 stmt = this->_parse_function_defn();
+                symbol_table_entry = dynamic_cast<FunctionDecl*>(stmt.get())->_get_st_entry();
+                program->symbol_table->add(std::move(symbol_table_entry));
                 this->program->statements.push_back(std::move(stmt));
                 break;
             

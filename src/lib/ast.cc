@@ -71,6 +71,10 @@ Program::_syntax_analysis() {
     for (unsigned i = 0; i < this->statements.size(); i++) {
         if (this->statements[i]) this->statements[i]->_syntax_analysis();
     }
+
+    if (this->entry_point == nullptr) {
+        printf("Error: no entry point defined\n");
+    }
 }
 
 // Search for the identifier in the program's symbol table
@@ -80,6 +84,21 @@ Program::_scope_lookup(std::string name) {
         return nullptr;
 
     return this->symbol_table->elements[name];
+}
+
+// Set the entry point of the program to the desired function
+// If there is already an entry point defined, then more than one 
+// entry point is defined in the source code, and we should flag 
+// an error
+void
+Program::_set_entry(FunctionDecl* entry_point) {
+    if (this->entry_point != nullptr) {
+        printf("Error: multiple entry points defined: |%s|\n", entry_point->prototype->name.c_str());
+        return;
+    }
+
+    this->entry_point = entry_point;
+    return;
 }
 
 
@@ -198,6 +217,10 @@ FunctionDecl::_set_parent(Node* p) {
         this->func_body->parent = this;
         this->func_body->_set_parent(p);
     }
+
+    if (this->is_entry) {
+        this->parent->_set_entry(this);
+    }
 }
 
 // Perform syntax analysis on the function body
@@ -246,7 +269,11 @@ FunctionCallExpr::_set_parent(Node* p) {
 // [THIS MIGHT NEED TO BE SYMBOL TABLE LOOKUP -- TEST]
 DataType
 FunctionCallExpr::_get_type() {
-    return this->data_type;
+    std::shared_ptr<SymbolTableEntry> func_ident = this->parent->_scope_lookup(this->name);
+    if (func_ident == nullptr)
+        return TYPE_VOID;
+
+    return func_ident->data_type;
 }
 
 // [FUTURE: PERFORM SYNTAX CHECK ON FUNCTION CALL]
@@ -933,10 +960,12 @@ LetStmt::_get_st_entry() {
 bool
 AST::_syntax_analysis() {
     std::shared_ptr<Program> root = this->program_node;
-    for (unsigned i = 0; i < root->statements.size(); i++) {
-        if(root->statements[i])
-            root->statements[i]->_syntax_analysis();
-    }
+    if (root)
+        root->_syntax_analysis();
+//    for (unsigned i = 0; i < root->statements.size(); i++) {
+//        if(root->statements[i])
+//            root->statements[i]->_syntax_analysis();
+//    }
 
     return true;
 }

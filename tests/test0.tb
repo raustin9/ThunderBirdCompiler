@@ -3,14 +3,14 @@ define int func() {
 }
 
 entry int main(int x) {
-    for (let int i = 0; i < 10; i += 1;) [
+    for (let int i = 0; i < 10; i += 1;) {
         func();
 
-        let k = func();
+        let int k = func();
     }
 
 
-    let int x2 = z;
+    let int x2 = 0;
 
     return x2;
 }
