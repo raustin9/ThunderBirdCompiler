@@ -204,6 +204,10 @@ Parser::_parse_let_statement() {
     }
 }
 
+//////////////////////////////////////////////////////
+//                   Literals                       //
+//////////////////////////////////////////////////////
+
 // Parse an integer expression -- really just an integer literal
 // "3" "700";
 std::shared_ptr<Expression>
@@ -286,6 +290,10 @@ Parser::_parse_boolean() {
     bool val = (tok.type == TOK_TRUE) ? true : false;
     return std::make_shared<BooleanExpr>(val);
 }
+
+///////////////////////////////////////////////
+//                FUNCTIONS                  //
+///////////////////////////////////////////////
 
 // Parse return statements from a function body
 // "return 0;"
@@ -466,6 +474,10 @@ Parser::_parse_function_defn() {
     return function;
 }
 
+/////////////////////////////////////////////////////////
+//                    CODE BLOCKS                      //
+/////////////////////////////////////////////////////////
+
 // Parse a code block
 std::shared_ptr<Statement>
 Parser::_parse_code_block() {
@@ -639,6 +651,11 @@ Parser::_parse_code_block(std::shared_ptr<CodeBlock> scope) {
     return scope; 
 }
 
+
+/////////////////////////////////////////////////////////
+//                       LOOPS                         //
+/////////////////////////////////////////////////////////
+
 // Parse a for loop statement
 std::shared_ptr<Statement>
 Parser::_parse_for_statement() {
@@ -803,6 +820,10 @@ Parser::_parse_if_statement() {
     auto if_stmt = std::make_shared<Conditional>(token, std::move(consequence), std::move(condition), nullptr);
     return if_stmt;
 }
+
+/////////////////////////////////////////////////////////
+//                   IDENTS & EXPRS                    //
+/////////////////////////////////////////////////////////
 
 // Parse an identifier in an expression
 std::shared_ptr<Expression>

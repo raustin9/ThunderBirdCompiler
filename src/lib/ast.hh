@@ -425,16 +425,18 @@ class Program : public Node {
     public:
         void assign_parents(); // top down function that cascades through all nodes and assigns parents
         std::shared_ptr<Node> parent;
-        std::shared_ptr<Statement> entry_point; // Potentially use to define entry point of program
+        FunctionDecl* entry_point; // Potentially use to define entry point of program
         std::vector<std::shared_ptr<Statement> > statements; // top level of the program is a list of statements
         std::shared_ptr<SymbolTable> symbol_table;                     // the symbol table for the global scope
         void _print() override;
         void _syntax_analysis() override;
         std::shared_ptr<SymbolTableEntry> _scope_lookup(std::string name) override; // lookup the name in the scope
         void _set_parent(Node* p) override {}
+        void _set_entry(FunctionDecl* entry_point); // set the entry point of the program
 
         Program() {
             this->symbol_table = std::make_shared<SymbolTable>();
+            this->entry_point = nullptr;
         }
 };
 
