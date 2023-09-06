@@ -2,7 +2,7 @@ define int func() {
     return 0;
 }
 
-define int main(int x) {
+entry int main(int x) {
     for (let int i = 0; i < 10; i += 1;) {
         func();
 

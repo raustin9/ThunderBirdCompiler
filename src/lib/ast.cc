@@ -98,6 +98,7 @@ Program::_set_entry(FunctionDecl* entry_point) {
     }
 
     this->entry_point = entry_point;
+    return;
 }
 
 
@@ -959,10 +960,12 @@ LetStmt::_get_st_entry() {
 bool
 AST::_syntax_analysis() {
     std::shared_ptr<Program> root = this->program_node;
-    for (unsigned i = 0; i < root->statements.size(); i++) {
-        if(root->statements[i])
-            root->statements[i]->_syntax_analysis();
-    }
+    if (root)
+        root->_syntax_analysis();
+//    for (unsigned i = 0; i < root->statements.size(); i++) {
+//        if(root->statements[i])
+//            root->statements[i]->_syntax_analysis();
+//    }
 
     return true;
 }

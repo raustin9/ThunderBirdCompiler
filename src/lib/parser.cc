@@ -335,6 +335,9 @@ Parser::_parse_function_defn() {
         printf("parse_func_defn: error: Unexpected token '%s'. Expected 'define' or 'entry'\n", this->current_token.literal.c_str());
     }
 
+    if (this->current_token.type == TOK_ENTRY)
+        is_entry = true;
+
     printf("parse_func: should be eating 'function' or 'define' or 'entry'\n");
     this->_next_token(); // eat the "function" or "define" or "entry" keyword
 
@@ -1095,6 +1098,8 @@ Parser::_parse_program() {
             case TOK_ENTRY: // Top-level function definition, but entry point to the program
                 printf("matched entry\n");
                 stmt = this->_parse_function_defn();
+                symbol_table_entry = dynamic_cast<FunctionDecl*>(stmt.get())->_get_st_entry();
+                program->symbol_table->add(std::move(symbol_table_entry));
                 this->program->statements.push_back(std::move(stmt));
                 break;
             
