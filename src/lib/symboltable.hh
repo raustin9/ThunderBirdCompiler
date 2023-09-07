@@ -18,6 +18,7 @@ class SymbolTableEntry {
         uint32_t decl_line;    // line of declaration of the element
         uint32_t usage_line; // line of usage of the element
         uint64_t mem_addr;     // location in memory of the element
+        uint64_t num_args;     // number of arguments of a function 
 
         // Member functions
         SymbolTableEntry(
