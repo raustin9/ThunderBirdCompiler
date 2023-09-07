@@ -15,6 +15,7 @@
 #include <string>
 #include <memory>
 
+
 // The Abstract Syntax Tree itself
 class AST {
     public:
@@ -441,4 +442,4 @@ class Program : public Node {
         }
 };
 
-#endif
+#endif /* AST_ */

@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-g -Wall -Isrc/lib
 EXECS=bin/thunder
-LIB=lib/compiler.a lib/preprocessor.a lib/lexer.a lib/parser.a lib/ast.a lib/errorhandler.a lib/symboltable.a 
+LIB=lib/compiler.a lib/preprocessor.a lib/ast.a lib/errorhandler.a lib/symboltable.a lib/lexer.a lib/parser.a  
 
 all: $(EXECS)
 

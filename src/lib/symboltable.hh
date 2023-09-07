@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SYMBOL_TABLE
 #define SYMBOL_TABLE
 
@@ -6,6 +7,7 @@
 #include <string>
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 // Entry member of a symbol table
 // Contains information about an identifier stored in a scope's symbol table
@@ -19,6 +21,8 @@ class SymbolTableEntry {
         uint32_t usage_line; // line of usage of the element
         uint64_t mem_addr;     // location in memory of the element
         uint64_t num_args;     // number of arguments of a function 
+        std::vector <DataType> arg_data_types; // list of argument data types
+
 
         // Member functions
         SymbolTableEntry(
