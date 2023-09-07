@@ -197,6 +197,7 @@ Parser::_parse_let_statement() {
 
         printf("parse_let: should be eating ';'\n");
         this->_next_token();
+
         return std::make_shared<LetStmt>(let_tok, variable, std::move(assignment_expr));
     } else {
         printf("error: unexpected token |%s|. Expected |=|\n", this->current_token.literal.c_str());
@@ -214,8 +215,10 @@ std::shared_ptr<Expression>
 Parser::_parse_integer() {
     token_t tok = this->current_token;
     if (tok.type != TOK_INT) {
-        printf("error: unexpected token |%s|\n", tok.literal.c_str());
-        return nullptr;
+        char err[100];
+        sprintf(err, "Error: expected |int|. Got |%s|\n", tok.literal.c_str());
+        this->error_handler->new_error(tok.line_num, err);
+        return std::make_shared<IntegerExpr>(-1);
     }
 
     long long val = atoi(tok.literal.c_str());
@@ -235,8 +238,10 @@ std::shared_ptr<Expression>
 Parser::_parse_byte() {
     token_t tok = this->current_token;
     if (tok.type != TOK_INT) {
-        printf("error: unexpected token |%s|\n", tok.literal.c_str());
-        return nullptr;
+        char err[100];
+        sprintf(err, "Error: expected |byte|. Got |%s|\n", tok.literal.c_str());
+        this->error_handler->new_error(tok.line_num, err);
+        return std::make_shared<ByteExpr>(-1);
     }
 
     long long val = atoi(tok.literal.c_str());
@@ -257,8 +262,10 @@ std::shared_ptr<Expression>
 Parser::_parse_float() {
     token_t tok = this->current_token;
     if (tok.type != TOK_FLOAT) {
-        printf("error: unexpected token |%s|. Expected TOK_FLOAT\n", tok.literal.c_str());
-        return nullptr;
+        char err[100];
+        sprintf(err, "Error: expected |float|. Got |%s|\n", tok.literal.c_str());
+        this->error_handler->new_error(tok.line_num, err);
+        return std::make_shared<FloatExpr>(-1);
     }
 
     double val = atof(tok.literal.c_str());
@@ -280,8 +287,10 @@ Parser::_parse_boolean() {
     token_t tok = this->current_token;
 
     if (tok.type != TOK_TRUE && tok.type != TOK_FALSE) {
-        printf("_parse_boolean: error: unexepected token '%s'. Expected 'true' or 'false'\n", tok.literal.c_str());
-        return nullptr;
+        char err[100];
+        sprintf(err, "Error: expected |true| or |false|. Got |%s|\n", tok.literal.c_str());
+        this->error_handler->new_error(tok.line_num, err);
+        return std::make_shared<BooleanExpr>(false);
     }
 
     printf("_parse_boolean: should be eating 'true' or 'false'\n");
@@ -312,13 +321,6 @@ Parser::_parse_return_statement() {
     return std::make_shared<ReturnStmt>(return_tok, return_val);
 }
 
-// Parse an else clause within an if statement
-// checks to see if there is an else followed by an if to chain them together
-std::shared_ptr<Statement>
-Parser::_parse_else_statement() {
-    return nullptr;
-}
-
 // Parse a function definition
 // functions are required to be defined where they are declared,
 // so when we parse the prototype, the rest of the definition must follow
@@ -331,15 +333,21 @@ Parser::_parse_function_defn() {
     // this function should only be called when the 'define' or 'entry' tokens are read,
     // so this ideally should not happen but it is nice to check for debugging
     if (this->current_token.type != TOK_ENTRY && 
-            this->current_token.type != TOK_FUNCTION) {
-        printf("parse_func_defn: error: Unexpected token '%s'. Expected 'define' or 'entry'\n", this->current_token.literal.c_str());
+        this->current_token.type != TOK_FUNCTION
+    ) {
+        // Missing 'define' keyword to declare a function
+        char err[100];
+        sprintf(err, "Error: When parsing function: unexpected token |%s|. Expected |define| or |entry|\n", this->current_token.literal.c_str());
+        this->error_handler->new_error(this->current_token.line_num, err);
+    } else {
+        // Correct Syntax
+        if (this->current_token.type == TOK_ENTRY)
+            is_entry = true;
+
+        printf("parse_func: should be eating 'function' or 'define' or 'entry'\n");
+        this->_next_token(); // eat the "function" or "define" or "entry" keyword
     }
 
-    if (this->current_token.type == TOK_ENTRY)
-        is_entry = true;
-
-    printf("parse_func: should be eating 'function' or 'define' or 'entry'\n");
-    this->_next_token(); // eat the "function" or "define" or "entry" keyword
 
     // GET TYPE SPECIFIER //
     token_t tok = this->current_token;
@@ -356,7 +364,9 @@ Parser::_parse_function_defn() {
         // Assume they either mispelled the type spec or they forgot it
         rt = TYPE_VOID;
     } else {
-        printf("error: unexpected token '%s'\n. Expected 'int' or 'float'", tok.literal.c_str());
+        char err[100];
+        sprintf(err, "Error: When parsing function: unexpected token |%s|\n. Expected type declaration", tok.literal.c_str());
+        this->error_handler->new_error(tok.line_num, err);
         rt = TYPE_VOID;
     }
 
@@ -370,8 +380,14 @@ Parser::_parse_function_defn() {
 
         ident = this->current_token;
         if (ident.type != TOK_IDENT) {
-            printf("error: unexpected token '%s'. Expected IDENT\n", ident.literal.c_str());
-            return nullptr;
+            // Missing function name identifier
+            char err[100];
+            sprintf(err, "error: unexpected token '%s'. Expected IDENT\n", ident.literal.c_str());
+            this->error_handler->new_error(ident.line_num, err);
+            ident.literal = "_VOID_FUNC_NAME_";
+        } else {
+            printf("parse_func: should be eating identifier\n");
+            this->_next_token(); // eat the identifier
         }
 
         proto_name = ident.literal;
@@ -384,14 +400,21 @@ Parser::_parse_function_defn() {
             printf("parse_func: should be eating type spec\n");
             this->_next_token(); // eat the type specifer
 
-            printf("parse_func_defn: error on line %d: mispelled return type specifier '%s'\n", tok.line_num, tok.literal.c_str());
+            char err[100];
+            sprintf(err, "parse_func_defn: error on line %d: mispelled return type specifier '%s'\n", tok.line_num, tok.literal.c_str());
+            this->error_handler->new_error(this->current_token.line_num, err);
             ident = this->current_token;
+
             if (ident.type != TOK_IDENT) {
-                printf("parse_func_defn: error on line %d: unexpected token '%s'. Expected 'IDENT'\n", tok.line_num, ident.literal.c_str());
-                return nullptr;
+                char err[100];
+                sprintf(err, "Error: unexpected token '%s'. Expected 'IDENT'\n", ident.literal.c_str());
+                this->error_handler->new_error(ident.line_num, err);
+                // return std::make_shared<FunctionDecl>();
+                proto_name = "_VOID_FUNC_NAME_";
+            } else {
+                proto_name = ident.literal;
             }
 
-            proto_name = ident.literal;
         } else if (this->peek_token.type == TOK_LPAREN) {
             // next token is opening parentheses
             // assume they forgot the return type specifier
@@ -399,10 +422,19 @@ Parser::_parse_function_defn() {
             proto_name = tok.literal;
             ident = tok;
         }
+
+        if (ident.type != TOK_IDENT) {
+            // Missing function name identifier
+            char err[100];
+            sprintf(err, "error: unexpected token '%s'. Expected IDENT\n", ident.literal.c_str());
+            this->error_handler->new_error(ident.line_num, err);
+            ident.literal = "_VOID_FUNC_NAME_";
+        } else {
+            printf("parse_func: should be eating identifier\n");
+            this->_next_token(); // eat the identifier
+        }
     }
 
-    printf("parse_func: should be eating identifier\n");
-    this->_next_token(); // eat the identifier
                                             
     // PARSE FUNCTION PARAMETERS //
     if (this->current_token.type != TOK_LPAREN) {
