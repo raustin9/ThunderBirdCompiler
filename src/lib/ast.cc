@@ -243,6 +243,7 @@ FunctionDecl::_get_st_entry() {
                                                             1     // decl line -- change when we read this when parsing
                                                         );
 
+    symbol_table_entry->num_args = this->prototype->params.size();
     return symbol_table_entry;
 }
 
@@ -279,6 +280,16 @@ FunctionCallExpr::_get_type() {
 // [FUTURE: PERFORM SYNTAX CHECK ON FUNCTION CALL]
 void
 FunctionCallExpr::_syntax_analysis() {
+    std::shared_ptr<SymbolTableEntry> ste = this->parent->_scope_lookup(this->name);
+    if (!ste) {
+        printf("FUNC CALL SYN NULL STE\n");
+        return;
+    }
+    if (ste->num_args != this->args.size()) {
+        printf("Error: incorrect number of arguments in function call. Expected %lu got %lu\n", ste->num_args, this->args.size());
+    } else {
+        printf("ARG MATCH %lu == %lu\n", ste->num_args, this->args.size());
+    }
     printf("func call syn\n");
 }
 
