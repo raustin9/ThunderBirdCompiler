@@ -286,9 +286,9 @@ FunctionCallExpr::_syntax_analysis() {
         return;
     }
     if (ste->num_args != this->args.size()) {
-        printf("Error: incorrect number of arguments in function call. Expected %lu\n", ste->num_args);
+        printf("Error: incorrect number of arguments in function call. Expected %lu got %lu\n", ste->num_args, this->args.size());
     } else {
-        printf("ARG MATCH\n");
+        printf("ARG MATCH %lu == %lu\n", ste->num_args, this->args.size());
     }
     printf("func call syn\n");
 }

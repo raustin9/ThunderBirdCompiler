@@ -1,12 +1,12 @@
-define int func() {
+define int func(int z) {
     return 0;
 }
 
 entry int main(int x) {
     for (let int i = 0; i < 10; i += 1;) {
-        func();
+        func(i);
 
-        let int k = func();
+        let int k = func(i+1);
     }
 
 
