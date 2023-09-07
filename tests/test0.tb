@@ -4,7 +4,6 @@ define int func(int z, float x) {
 
 entry int main(int x) {
     for (let int i = 0; i < 10; i += 1;) {
-//        func(i);
 
         let int k = func(i+1, 1.0);
     }
