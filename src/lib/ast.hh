@@ -10,6 +10,7 @@
 
 #include "token.hh"
 #include "symboltable.hh"
+#include "errorhandler.hh"
 #include <vector>
 #include <string>
 #include <memory>

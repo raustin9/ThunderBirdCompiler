@@ -42,7 +42,6 @@ public:
     std::shared_ptr<Statement> _parse_code_block();                                        // parse a block of code
     std::shared_ptr<Statement> _parse_let_statement();                                 // parse let statements
     std::shared_ptr<Statement> _parse_return_statement();                            // parse return statements
-    std::shared_ptr<Statement> _parse_else_statement();                                // parse else clauses and else-if clauses
     std::shared_ptr<Statement> _parse_if_statement();                                    // parse if statements
     std::shared_ptr<Statement> _parse_while_statement();                             // parse while loop statements
     std::shared_ptr<Statement> _parse_for_statement();                                 // parse for loop statements
