@@ -243,7 +243,13 @@ FunctionDecl::_get_st_entry() {
                                                             1     // decl line -- change when we read this when parsing
                                                         );
 
+    std::vector<DataType> arg_data_types;
+    for (size_t i = 0; i < this->prototype->params.size(); i++) {
+        arg_data_types.push_back(this->prototype->params[i].data_type);
+    }
+
     symbol_table_entry->num_args = this->prototype->params.size();
+    symbol_table_entry->arg_data_types = arg_data_types;
     return symbol_table_entry;
 }
 
@@ -264,6 +270,9 @@ FunctionCallExpr::_print() {
 void
 FunctionCallExpr::_set_parent(Node* p) {
     this->parent = p;
+    for (size_t i = 0; i < this->args.size(); i++) {
+        this->args[i]->_set_parent(p);
+    }
 }
 
 // Get the data type of the function call
@@ -285,10 +294,27 @@ FunctionCallExpr::_syntax_analysis() {
         printf("FUNC CALL SYN NULL STE\n");
         return;
     }
+
     if (ste->num_args != this->args.size()) {
         printf("Error: incorrect number of arguments in function call. Expected %lu got %lu\n", ste->num_args, this->args.size());
     } else {
         printf("ARG MATCH %lu == %lu\n", ste->num_args, this->args.size());
+    }
+
+//    printf("DT %s\n", get_data_type(ste->arg_data_types[0]).c_str());
+//    printf("DT %s\n", get_data_type(this->args[0]->_get_type()).c_str());
+    for (size_t i = 0; i < this->args.size(); i++) {
+        if (this->args[i]->_get_type() != ste->arg_data_types[i]) {
+            printf("Error: function '%s' argument %lu incorrect data type. Expected |%s| got |%s|\n",
+                    this->name.c_str(),
+                    i,
+                    get_data_type(ste->arg_data_types[i]).c_str(),
+                    get_data_type(this->args[i]->_get_type()).c_str());
+        } else {
+            printf("ARG TYPE MATCH %s == %s\n", 
+                    get_data_type(ste->arg_data_types[i]).c_str(),
+                    get_data_type(this->args[i]->_get_type()).c_str());
+        }
     }
     printf("func call syn\n");
 }
