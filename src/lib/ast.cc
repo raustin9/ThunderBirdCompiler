@@ -295,25 +295,34 @@ FunctionCallExpr::_syntax_analysis() {
         return;
     }
 
+    // Check that there are the same amount of arguments as declared parameters
     if (ste->num_args != this->args.size()) {
         printf("Error: incorrect number of arguments in function call. Expected %lu got %lu\n", ste->num_args, this->args.size());
     } else {
         printf("ARG MATCH %lu == %lu\n", ste->num_args, this->args.size());
     }
 
-//    printf("DT %s\n", get_data_type(ste->arg_data_types[0]).c_str());
-//    printf("DT %s\n", get_data_type(this->args[0]->_get_type()).c_str());
+    // Check that the argument data types match the parameter data types
     for (size_t i = 0; i < this->args.size(); i++) {
-        if (this->args[i]->_get_type() != ste->arg_data_types[i]) {
-            printf("Error: function '%s' argument %lu incorrect data type. Expected |%s| got |%s|\n",
-                    this->name.c_str(),
-                    i,
-                    get_data_type(ste->arg_data_types[i]).c_str(),
-                    get_data_type(this->args[i]->_get_type()).c_str());
+        if (ste->arg_data_types[i]) {
+            if (this->args[i]->_get_type() != ste->arg_data_types[i]) {
+                printf("Error: function '%s' argument %lu incorrect data type. Expected |%s| got |%s|\n",
+                        this->name.c_str(),
+                        i,
+                        get_data_type(ste->arg_data_types[i]).c_str(),
+                        get_data_type(this->args[i]->_get_type()).c_str());
+            } else {
+                printf("ARG TYPE MATCH %s == %s\n", 
+                        get_data_type(ste->arg_data_types[i]).c_str(),
+                        get_data_type(this->args[i]->_get_type()).c_str());
+            }
         } else {
-            printf("ARG TYPE MATCH %s == %s\n", 
-                    get_data_type(ste->arg_data_types[i]).c_str(),
-                    get_data_type(this->args[i]->_get_type()).c_str());
+            printf("Error: too many function arguments for |%s|. Expected %lu got %lu\n",
+                    this->name.c_str(),
+                    ste->num_args,
+                    this->args.size()
+                  );
+            break;
         }
     }
     printf("func call syn\n");
@@ -589,9 +598,15 @@ Conditional::_syntax_analysis() {
     printf("conditional syn\n");
     if (this->condition)
         this->condition->_syntax_analysis();
+    else {
+        printf("Error: no condition in if statement\n");
+    }
 
     if (this->consequence)
         this->consequence->_syntax_analysis();
+    else {
+        printf("Error: missing code block from if-statement\n");
+    }
 
     // this->alternative->_syntax_analysis();
     Conditional* cur = this;
@@ -599,8 +614,12 @@ Conditional::_syntax_analysis() {
         cur = dynamic_cast<Conditional*>(cur->alternative.get());
         if (cur->condition)
             cur->condition->_syntax_analysis();
+        else 
+            printf("Error: no condition on if-else statement\n");
         if (cur->consequence)
             cur->consequence->_syntax_analysis();
+        else
+            printf("Error: missing code block on if-else statement\n");
     }
 }
 

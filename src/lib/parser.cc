@@ -577,13 +577,16 @@ Parser::_parse_code_block() {
                 break;
 
             default:
-                printf("default token: ||%s||\n", this->current_token.literal.c_str());
+                printf("default token: ||%s|| -- |%d|\n", this->current_token.literal.c_str(), this->current_token.type);
+                if (this->current_token.literal == "")
+                    goto cb_endloop;
                 stmt = this->_parse_expression_statement();
                 body.push_back(std::move(stmt));
                 break;
         }
         
     }
+    cb_endloop:
 
     code_block->body = std::move(body);
 
@@ -666,12 +669,15 @@ Parser::_parse_code_block(std::shared_ptr<CodeBlock> scope) {
 
             default:
                 printf("default token: ||%s||\n", this->current_token.literal.c_str());
+                if (this->current_token.literal == "")
+                    goto cbp_endloop;
                 stmt = this->_parse_expression_statement();
                 body.push_back(std::move(stmt));
                 break;
         }
         
     }
+    cbp_endloop:
 
     scope->body = std::move(body);
 
@@ -733,7 +739,12 @@ Parser::_parse_for_statement() {
 
     printf("for_stmt: should be eating ')'\n");
     this->_next_token();
-    this->_parse_code_block(loop_body);
+
+    if (this->current_token.type == TOK_LBRACE) {
+        this->_parse_code_block(loop_body);
+    } else {
+        this->error_handler->new_error(this->current_token.line_num, "Missing |{| when parsing for-loop");
+    }
 
     auto initialization_ste = dynamic_cast<LetStmt*>(initialization.get())->_get_st_entry();
     dynamic_cast<CodeBlock*>(loop_body.get())->symbol_table->add(std::move(initialization_ste));
@@ -818,7 +829,12 @@ Parser::_parse_if_statement() {
 
     // PARSE IF STATEMENT BODY //
     auto consequence = std::make_shared<CodeBlock>();
-    this->_parse_code_block(consequence);
+    if (this->current_token.type == TOK_LBRACE) {
+        this->_parse_code_block(consequence);
+    } else {
+        this->error_handler->new_error(this->current_token.line_num, "Missing |{| when parsing if-statement body");
+    }
+
     
     // PARSE ELSE CLAUSE //
     if (this->current_token.type == TOK_ELSE) {
@@ -1146,6 +1162,7 @@ Parser::_parse_program() {
                 break;
         }
     }
+    // endloop:
 
     printf(" -- Program --\n");
 
