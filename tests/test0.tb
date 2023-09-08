@@ -3,9 +3,9 @@ define int func(int z, float x) {
 }
 
 entry int main(int x) {
-    for (let int i = 0; i < 10; i += 1;) {
 
-        let int k = func(i+1, 1.0);
+    if (x > 2) 
+        let int i = func(0, 0.0);
     }
 
 
