@@ -800,18 +800,23 @@ Parser::_parse_while_statement() {
         this->_next_token();
     }
 
+
     // Loop until we find opening brace
-    while (this->current_token.type != TOK_LBRACE) {
-        char err[100];
-        sprintf(err, "invalid token '%s'. Expected '{'\n", this->current_token.literal.c_str());
-        this->error_handler->new_error(this->current_token.line_num, err);
-        printf("parse_while: should be eating invalid token\n");
-        this->_next_token();
-    }
+//    while (this->current_token.type != TOK_LBRACE) {
+//        char err[100];
+//        sprintf(err, "invalid token '%s'. Expected '{'\n", this->current_token.literal.c_str());
+//        this->error_handler->new_error(this->current_token.line_num, err);
+//        printf("parse_while: should be eating invalid token\n");
+//        this->_next_token();
+//    }
 
     // PARSE WHILE LOOP BODY //
     auto loop_body = std::make_shared<CodeBlock>();
-    this->_parse_code_block(loop_body);
+    if (this->current_token.type == TOK_LBRACE) {
+        this->_parse_code_block(loop_body);
+    } else {
+        this->error_handler->new_error(this->current_token.line_num, "Missing '{' when parsing while loop");
+    }
 
     
     auto while_stmt = std::make_shared<WhileLoop>(token, std::move(condition), std::move(loop_body));

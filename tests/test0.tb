@@ -4,7 +4,9 @@ define int func(int z, float x) {
 
 entry int main(int x) {
 
-    for (let int i = 0; i < 10; i += 1) 
+    if (x > 2) 
+        let int i = func(0, 0.0);
+    }
 
 
     let int x2 = 0;
