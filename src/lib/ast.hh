@@ -31,6 +31,7 @@ class Node {
         virtual void _syntax_analysis();
         virtual void _set_parent(Node* p);
         virtual std::shared_ptr<SymbolTableEntry> _scope_lookup(std::string name) {return nullptr;}
+        virtual 
 };
 
 // Statement Node
